@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Mind Alchemy - الواجهة الرسمية والتداول 3D</title>
+    <title>Mind Alchemy - خريطة المراحل والتداول 3D</title>
     
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -56,6 +56,10 @@
             box-shadow: 0 0 25px rgba(251, 191, 36, 0.25);
         }
 
+        .emerald-glow {
+            box-shadow: 0 0 25px rgba(16, 185, 129, 0.25);
+        }
+
         .glass-panel {
             background: rgba(15, 23, 42, 0.85);
             backdrop-filter: blur(14px);
@@ -95,6 +99,15 @@
         .toast-animate {
             animation: toastIn 0.3s ease forwards;
         }
+
+        /* Pulse Animation for Current Stage */
+        @keyframes stagePulse {
+            0%, 100% { transform: scale(1); border-color: rgba(16, 185, 129, 0.6); }
+            50% { transform: scale(1.05); border-color: rgba(251, 191, 36, 1); box-shadow: 0 0 20px rgba(251, 191, 36, 0.4); }
+        }
+        .active-stage-card {
+            animation: stagePulse 2s infinite ease-in-out;
+        }
     </style>
 </head>
 <body class="min-h-screen pb-12">
@@ -104,9 +117,9 @@
 
 <!-- Top Sticky Header Navigation -->
 <header class="sticky top-0 z-40 glass-panel border-b border-slate-800 px-4 py-3">
-    <div class="max-w-7xl mx-auto flex items-center justify-between">
+    <div class="max-w-7xl mx-auto flex items-center justify-between flex-wrap gap-2">
         <div class="flex items-center gap-3">
-            <div onclick="navigateTo('hub')" class="w-10 h-10 rounded-xl bg-gradient-to-tr from-amber-500 to-amber-300 flex items-center justify-center font-black text-slate-950 font-cairo text-2xl shadow-lg shadow-amber-500/20 cursor-pointer">
+            <div onclick="navigateTo('stages')" class="w-10 h-10 rounded-xl bg-gradient-to-tr from-amber-500 to-amber-300 flex items-center justify-center font-black text-slate-950 font-cairo text-2xl shadow-lg shadow-amber-500/20 cursor-pointer">
                 ϐ
             </div>
             <div>
@@ -119,14 +132,19 @@
         </div>
 
         <!-- Wallet Balance & Navigation Controls -->
-        <div class="flex items-center gap-2 sm:gap-3">
-            <!-- Navigation Tab Buttons -->
-            <button onclick="navigateTo('stages')" class="bg-slate-800/90 hover:bg-slate-700 text-emerald-300 border border-emerald-500/40 px-2.5 py-1.5 rounded-xl text-xs font-cairo font-bold transition flex items-center gap-1.5">
+        <div class="flex items-center gap-2 sm:gap-3 flex-wrap">
+            <!-- Navigation Buttons -->
+            <button id="nav-btn-stages" onclick="navigateTo('stages')" class="bg-emerald-600/30 hover:bg-emerald-600/50 text-emerald-300 border border-emerald-500/50 px-3 py-1.5 rounded-xl text-xs font-cairo font-bold transition flex items-center gap-1.5 shadow-lg shadow-emerald-500/10">
                 <i class="fa-solid fa-map-location-dot text-xs"></i>
-                <span class="hidden sm:inline" id="btn-stages-nav">المراحل</span>
+                <span id="btn-stages-nav">خريطة المراحل</span>
             </button>
 
-            <button onclick="navigateTo('auction')" class="bg-slate-800/90 hover:bg-slate-700 text-amber-300 border border-amber-500/40 px-2.5 py-1.5 rounded-xl text-xs font-cairo font-bold transition flex items-center gap-1.5">
+            <button id="nav-btn-solver" onclick="navigateTo('solver')" class="bg-slate-800/90 hover:bg-slate-700 text-cyan-300 border border-cyan-500/40 px-2.5 py-1.5 rounded-xl text-xs font-cairo font-bold transition flex items-center gap-1.5">
+                <i class="fa-solid fa-brain text-xs"></i>
+                <span id="btn-solver-nav">غرفة الألغاز 3D</span>
+            </button>
+
+            <button id="nav-btn-auction" onclick="navigateTo('auction')" class="bg-slate-800/90 hover:bg-slate-700 text-amber-300 border border-amber-500/40 px-2.5 py-1.5 rounded-xl text-xs font-cairo font-bold transition flex items-center gap-1.5">
                 <i class="fa-solid fa-gavel text-xs"></i>
                 <span class="hidden sm:inline" id="btn-auction-nav">المزاد</span>
             </button>
@@ -154,6 +172,15 @@
                 </div>
             </div>
 
+            <!-- IQ Rank Balance -->
+            <div class="flex items-center gap-2 bg-slate-900/90 border border-cyan-500/40 px-2.5 py-1.5 rounded-xl">
+                <i class="fa-solid fa-brain text-cyan-400 text-xs"></i>
+                <div class="text-right ltr:text-left">
+                    <div class="text-[9px] text-slate-400 font-medium leading-none" id="label-iq">مستوى الذكاء</div>
+                    <div id="header-iq-score" class="font-mono font-bold text-cyan-300 text-xs sm:text-sm leading-tight">1200 IQ</div>
+                </div>
+            </div>
+
             <!-- User Auth Status Button -->
             <button id="auth-btn-top" onclick="navigateTo('auth')" class="bg-indigo-600/30 hover:bg-indigo-600/50 text-indigo-300 border border-indigo-500/40 px-2.5 py-1.5 rounded-xl text-xs font-cairo font-bold transition flex items-center gap-1.5">
                 <i class="fa-solid fa-user text-xs"></i>
@@ -169,60 +196,317 @@
     </div>
 </header>
 
-<!-- SCREEN 1: GOOGLE AUTHENTICATION SCREEN -->
-<section id="view-auth" class="max-w-md mx-auto px-4 mt-12 hidden">
-    <div class="bg-cardBg border border-cardBorder rounded-3xl p-6 sm:p-8 shadow-2xl text-center space-y-6 relative overflow-hidden">
-        <div class="w-20 h-20 mx-auto rounded-3xl bg-gradient-to-tr from-amber-500 to-amber-300 flex items-center justify-center font-black text-slate-950 font-cairo text-4xl shadow-xl shadow-amber-500/30">
-            ϐ
-        </div>
-
-        <div>
-            <h2 class="font-cairo font-black text-2xl text-white mb-2" id="auth-title">تسجيل الدخول إلى Mind Alchemy</h2>
-            <p class="text-xs text-slate-400 leading-relaxed" id="auth-desc">احفظ تقدمك السحابي، رصيد عملة بُون (ϐ)، ومقتنياتك الفريدة عبر ربط حساب Google الخاص بك.</p>
-        </div>
-
-        <div class="space-y-3 pt-2">
-            <button onclick="signInWithGoogle()" class="w-full py-3 px-4 rounded-xl bg-white hover:bg-slate-100 text-slate-900 font-cairo font-extrabold text-sm shadow-lg transition flex items-center justify-center gap-3">
-                <i class="fa-brands fa-google text-red-500 text-lg"></i>
-                <span id="btn-google-login">المتابعة باستخدام Google</span>
-            </button>
-
-            <button onclick="loginAsGuest()" class="w-full py-3 px-4 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-700 text-slate-300 font-cairo font-bold text-xs transition flex items-center justify-center gap-2">
-                <i class="fa-solid fa-user-ninja text-amber-400"></i>
-                <span id="btn-guest-login">الدخول كـ "لاعب ضيف" (تجربة سريعة)</span>
-            </button>
-        </div>
-
-        <div class="text-[10px] text-slate-500 border-t border-slate-800/80 pt-4" id="auth-footer-text">
-            متوافق مع محرك Google Cloud Platform و Firebase Firestore
-        </div>
-    </div>
-</section>
-
-<!-- SCREEN 2: STAGE SELECTION MAP SCREEN -->
-<section id="view-stages" class="max-w-5xl mx-auto px-4 mt-6 hidden">
-    <div class="bg-cardBg border border-cardBorder rounded-2xl p-5 sm:p-6 shadow-2xl space-y-5">
-        <div class="flex items-center justify-between border-b border-slate-800 pb-4">
-            <div>
-                <h2 class="font-cairo font-bold text-white text-lg sm:text-xl flex items-center gap-2">
-                    <i class="fa-solid fa-map-location-dot text-emerald-400"></i>
-                    <span id="title-stage-map">خريطة المراحل وتحديات IQ</span>
-                </h2>
-                <p class="text-xs text-slate-400" id="sub-stage-map">اكتشف 100+ مرحلة كيميائية مولدة بالذكاء الاصطناعي</p>
+<!-- PRIMARY SECTION 1: STAGE MAP (FEATURED AT TOP OF PAGE) -->
+<section id="view-stages" class="max-w-7xl mx-auto px-3 sm:px-4 mt-6">
+    <div class="bg-cardBg border border-cardBorder rounded-3xl p-5 sm:p-7 shadow-2xl space-y-6 relative overflow-hidden">
+        
+        <!-- Header Banner for Stage Map -->
+        <div class="flex flex-col md:flex-row items-start md:items-center justify-between border-b border-slate-800 pb-5 gap-4">
+            <div class="flex items-center gap-4">
+                <div class="w-14 h-14 rounded-2xl bg-gradient-to-tr from-emerald-500 to-teal-400 p-0.5 shadow-xl shadow-emerald-500/20">
+                    <div class="w-full h-full bg-slate-950 rounded-[14px] flex items-center justify-center text-emerald-400 text-2xl">
+                        <i class="fa-solid fa-map-location-dot"></i>
+                    </div>
+                </div>
+                <div>
+                    <h2 class="font-cairo font-black text-white text-xl sm:text-2xl flex items-center gap-2">
+                        <span id="title-stage-map">خريطة المراحل وتحديات الذكاء الكيميائي</span>
+                        <span class="text-xs font-mono font-bold px-2.5 py-1 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/40" id="badge-stage-count">20 مرحلة متاحة</span>
+                    </h2>
+                    <p class="text-xs sm:text-sm text-slate-400 mt-0.5" id="sub-stage-map">انقر على أي مرحلة مفتوحة للبدء بالحل ودخول غرفة المحاكاة الـ 3D مباشرة!</p>
+                </div>
             </div>
-            <button onclick="navigateTo('hub')" class="px-3 py-1.5 bg-slate-800 text-slate-300 rounded-xl text-xs font-cairo font-bold hover:bg-slate-700">
-                <i class="fa-solid fa-arrow-right ltr:rotate-180 ml-1"></i> <span id="btn-back-hub">الرئيسية</span>
+
+            <!-- Player Progress Metrics Badge -->
+            <div class="flex items-center gap-3 bg-slate-950 p-3 rounded-2xl border border-slate-800/80 w-full md:w-auto justify-around">
+                <div class="text-center px-3 border-l ltr:border-r ltr:border-l-0 border-slate-800">
+                    <div class="text-[10px] text-slate-400 font-bold" id="label-completed-stages">المراحل المكتملة</div>
+                    <div id="stat-completed-count" class="font-mono font-black text-emerald-400 text-base">0 / 20</div>
+                </div>
+                <div class="text-center px-3">
+                    <div class="text-[10px] text-slate-400 font-bold" id="label-earned-stars">إجمالي النجوم</div>
+                    <div id="stat-stars-count" class="font-mono font-black text-amber-400 text-base">0 ⭐</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Filter / Quick Action Bar -->
+        <div class="flex items-center justify-between bg-slate-950/80 p-3 rounded-2xl border border-slate-800/80 text-xs font-cairo font-bold">
+            <div class="flex items-center gap-2">
+                <i class="fa-solid fa-filter text-emerald-400"></i>
+                <span class="text-slate-300" id="label-map-mode">اختر مرحلة للتحدي الفكري:</span>
+            </div>
+            <button onclick="playNextUnlockedStage()" class="px-4 py-2 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-slate-950 font-cairo font-black text-xs transition shadow-lg shadow-emerald-500/20 flex items-center gap-2">
+                <i class="fa-solid fa-play"></i>
+                <span id="btn-play-current">لعب المرحلة الحالية المفتوحة</span>
             </button>
         </div>
 
-        <!-- Stages Grid -->
-        <div id="stages-grid-container" class="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-5 gap-3.5 pt-2">
-            <!-- Dynamically populated via JS -->
+        <!-- Interactive Dynamic Stages Grid Container -->
+        <div id="stages-grid-container" class="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-5 gap-4 pt-1">
+            <!-- Populated dynamically via JavaScript logic -->
         </div>
     </div>
 </section>
 
-<!-- SCREEN 3: FRIDAY AUCTION HOUSE SCREEN -->
+<!-- SECTION 2: MAIN PUZZLE SOLVER & 3D INSPECTOR ROOM -->
+<section id="view-solver" class="max-w-7xl mx-auto px-3 sm:px-4 mt-6 hidden">
+    <div class="grid grid-cols-1 lg:col-span-12 lg:grid-cols-12 gap-5 sm:gap-6">
+
+        <!-- LEFT COLUMN: 3D Inspector Canvas (7 Cols) -->
+        <div class="lg:col-span-7 space-y-5 sm:space-y-6">
+            
+            <!-- 3D Interactive Viewer Card -->
+            <div class="bg-cardBg border border-cardBorder rounded-2xl overflow-hidden shadow-2xl relative">
+                
+                <!-- Card Header Badge & Mode Select -->
+                <div class="p-3.5 border-b border-cardBorder flex items-center justify-between bg-slate-950/60">
+                    <div class="flex items-center gap-2">
+                        <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold font-cairo bg-amber-500/10 text-amber-400 border border-amber-500/30" id="tag-vr-sim">
+                            <i class="fa-solid fa-vr-cardboard text-xs"></i>
+                            محاكاة VR تفاعلية 360°
+                        </span>
+                        <h2 class="font-cairo font-bold text-slate-200 text-xs sm:text-sm" id="item-title-vr">خوذة العبقري #001</h2>
+                    </div>
+                    
+                    <div class="flex items-center gap-1.5">
+                        <button onclick="resetCamera()" class="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs transition" title="Reset Camera">
+                            <i class="fa-solid fa-rotate-right"></i>
+                        </button>
+                        <button id="toggle-aura-btn" onclick="toggleAuraEffect()" class="px-2.5 py-1 rounded-lg bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40 text-xs font-cairo font-bold transition">
+                            <i class="fa-solid fa-wand-magic-sparkles text-xs ml-1"></i> <span id="btn-aura-text">الهالة</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 3D Canvas Container Wrapper -->
+                <div id="canvas-wrapper" class="relative bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950">
+                    <div id="canvas-container"></div>
+                    
+                    <!-- Simulated TikTok Live Chat Overlay (Streamer Mode) -->
+                    <div id="streamer-live-chat" class="hidden absolute left-3 bottom-12 z-20 w-64 max-h-44 overflow-y-auto space-y-1.5 pointer-events-none font-cairo text-xs">
+                        <div class="bg-slate-950/80 backdrop-blur-md p-2 rounded-lg border border-purple-500/30 text-slate-200 animate-pulse">
+                            <span class="text-amber-400 font-bold">أبو فهد 👑:</span> لّف الخوذة للجهة الذهبية! 🔥
+                        </div>
+                        <div class="bg-slate-950/80 backdrop-blur-md p-2 rounded-lg border border-cyan-500/30 text-slate-200">
+                            <span class="text-cyan-400 font-bold">User_99:</span> أرسل لك 50 ϐ Boon هدية بث! 🎁
+                        </div>
+                    </div>
+
+                    <!-- Touch Instructions Overlay -->
+                    <div class="absolute bottom-3 right-3 bg-slate-950/85 backdrop-blur border border-slate-800 px-3 py-1.5 rounded-xl text-[11px] text-slate-300 flex items-center gap-2 pointer-events-none z-10">
+                        <i class="fa-solid fa-hand-pointer text-amber-400 animate-bounce"></i>
+                        <span id="label-touch-hint">مس الشاشة ولّف المجسم 360 درجة</span>
+                    </div>
+
+                    <!-- Live Item Rarity Tag Overlay -->
+                    <div class="absolute top-3 right-3 bg-gradient-to-r from-amber-600/90 to-amber-500/90 text-slate-950 font-cairo font-extrabold text-xs px-3 py-1 rounded-lg shadow-lg flex items-center gap-1.5 z-10" id="tag-rarity">
+                        <i class="fa-solid fa-crown text-xs"></i>
+                        <span>قطعة فريدة (UNIQUE #001)</span>
+                    </div>
+                </div>
+
+                <!-- 3D Object Selector Bar & Material Change Controls -->
+                <div class="p-3 bg-slate-950/90 border-t border-cardBorder space-y-2 text-xs font-cairo font-bold">
+                    <div class="flex items-center justify-between gap-1.5 overflow-x-auto pb-1">
+                        <span class="text-slate-400 text-[11px] whitespace-nowrap" id="label-select-object">المجسم المعاين:</span>
+                        <div class="flex items-center gap-1.5">
+                            <button onclick="switch3DObject('helmet')" id="obj-btn-helmet" class="px-2.5 py-1 rounded-lg bg-amber-500/20 text-amber-300 border border-amber-500/40 transition whitespace-nowrap">
+                                <i class="fa-solid fa-vr-cardboard ml-1"></i> <span id="btn-obj-helmet">الخوذة</span>
+                            </button>
+                            <button onclick="switch3DObject('cube')" id="obj-btn-cube" class="px-2.5 py-1 rounded-lg bg-slate-900 text-slate-400 border border-slate-800 transition whitespace-nowrap">
+                                <i class="fa-solid fa-cube ml-1"></i> <span id="btn-obj-cube">مكعب الشفرة</span>
+                            </button>
+                            <button onclick="switch3DObject('prism')" id="obj-btn-prism" class="px-2.5 py-1 rounded-lg bg-slate-900 text-slate-400 border border-slate-800 transition whitespace-nowrap">
+                                <i class="fa-solid fa-gem ml-1"></i> <span id="btn-obj-prism">المنشور الأثيري</span>
+                            </button>
+                            <button onclick="switch3DObject('coin')" id="obj-btn-coin" class="px-2.5 py-1 rounded-lg bg-slate-900 text-slate-400 border border-slate-800 transition whitespace-nowrap">
+                                <i class="fa-solid fa-coins ml-1"></i> <span id="btn-obj-coin">عملة بُون</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Material Controls -->
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                        <button onclick="setMaterialStyle('gold')" class="p-2 rounded-xl bg-slate-900 hover:bg-slate-800 border border-amber-500/30 text-amber-300 transition flex items-center justify-center gap-1.5">
+                            <span class="w-2.5 h-2.5 rounded-full bg-amber-400 inline-block"></span>
+                            <span id="btn-mat-gold">ذهب وأوبسيديان</span>
+                        </button>
+                        <button onclick="setMaterialStyle('cyber')" class="p-2 rounded-xl bg-slate-900 hover:bg-slate-800 border border-cyan-500/30 text-cyan-300 transition flex items-center justify-center gap-1.5">
+                            <span class="w-2.5 h-2.5 rounded-full bg-cyan-400 inline-block"></span>
+                            <span id="btn-mat-cyber">سايبر نيون</span>
+                        </button>
+                        <button onclick="setMaterialStyle('obsidian')" class="p-2 rounded-xl bg-slate-900 hover:bg-slate-800 border border-purple-500/30 text-purple-300 transition flex items-center justify-center gap-1.5">
+                            <span class="w-2.5 h-2.5 rounded-full bg-purple-400 inline-block"></span>
+                            <span id="btn-mat-obsidian">أسود غامض</span>
+                        </button>
+                        <button onclick="toggleWireframe()" class="p-2 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-700 text-slate-300 transition flex items-center justify-center gap-1.5">
+                            <i class="fa-solid fa-draw-polygon text-xs"></i>
+                            <span id="btn-mat-wireframe">شبكة الـ 3D</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- RIGHT COLUMN: AI Companion "Atheer" & Hybrid Puzzle System (5 Cols) -->
+        <div class="lg:col-span-5 space-y-5 sm:space-y-6">
+
+            <!-- AI Companion Avatar Card (المرشد الذكي أثير) -->
+            <div class="bg-cardBg border border-cardBorder rounded-2xl p-4 sm:p-5 shadow-xl relative">
+                <div class="flex items-center gap-3 border-b border-slate-800 pb-3 mb-4">
+                    <div class="relative">
+                        <div class="w-12 h-12 rounded-full bg-gradient-to-tr from-cyan-500 to-indigo-500 p-0.5">
+                            <div class="w-full h-full bg-slate-950 rounded-full flex items-center justify-center overflow-hidden">
+                                <i class="fa-solid fa-robot text-cyan-400 text-xl"></i>
+                            </div>
+                        </div>
+                        <span class="w-3.5 h-3.5 bg-emerald-500 border-2 border-slate-950 rounded-full absolute bottom-0 right-0 animate-pulse"></span>
+                    </div>
+                    <div>
+                        <h3 class="font-cairo font-bold text-white text-base flex items-center gap-2">
+                            <span id="title-atheer-name">المرشد الذكي 3D ("أثير")</span>
+                            <span class="text-[9px] bg-cyan-500/10 text-cyan-400 border border-cyan-500/30 px-2 py-0.5 rounded-full font-mono">GEMINI AI INTEGRATED</span>
+                        </h3>
+                        <p class="text-xs text-slate-400" id="sub-atheer-desc">توليد حوارات وتلميحات ذكية تلقائياً</p>
+                    </div>
+                </div>
+
+                <!-- Dialogue Box from Atheer -->
+                <div class="bg-slate-950 p-3.5 rounded-xl border border-cyan-500/30 relative mb-4">
+                    <div class="text-xs text-cyan-400 font-cairo font-bold mb-1 flex items-center justify-between">
+                        <span><i class="fa-solid fa-comment-dots ml-1"></i> <span id="label-atheer-speaking">أثير يتحدث إليك:</span></span>
+                        <span class="text-[10px] text-slate-500" id="badge-model-status">Gemini API Active</span>
+                    </div>
+                    <p id="atheer-dialogue-text" class="text-xs sm:text-sm text-slate-200 leading-relaxed font-tajawal">
+                        "مرحباً بك يا صديقي العبقري! ادر الحلقات الميكانيكية للوصول إلى رمز القفل الخاص بهذه المرحلة!"
+                    </p>
+                </div>
+
+                <!-- Interactive AI Hint Request Button -->
+                <button onclick="requestAiHint()" class="w-full py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 border border-cyan-500/40 text-cyan-300 font-cairo font-bold text-xs transition flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-lightbulb text-amber-400"></i>
+                    <span id="btn-request-hint">طلب تلميح ذكي من "أثير" (تكلفة: 5 ϐ Boon)</span>
+                </button>
+            </div>
+
+            <!-- Hybrid Puzzle Generator Simulation (خوارزمية الألغاز) -->
+            <div class="bg-cardBg border border-cardBorder rounded-2xl p-4 sm:p-5 shadow-xl">
+                <div class="flex items-center justify-between border-b border-slate-800 pb-3 mb-4">
+                    <div class="flex items-center gap-2.5">
+                        <div class="w-9 h-9 rounded-lg bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400 text-sm">
+                            <i class="fa-solid fa-brain"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-cairo font-bold text-white text-sm sm:text-base" id="title-puzzle-gen">مولد الألغاز الهجين (AI Puzzle)</h3>
+                            <p class="text-[10px] text-slate-400" id="sub-puzzle-gen">توليد عكسي + CSP Solvability Engine</p>
+                        </div>
+                    </div>
+
+                    <button onclick="navigateTo('stages')" class="px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 text-xs font-cairo font-bold transition flex items-center gap-1.5">
+                        <i class="fa-solid fa-map-location-dot text-xs"></i>
+                        <span id="btn-back-map">العودة للخريطة</span>
+                    </button>
+                </div>
+
+                <!-- Current Active Puzzle Box -->
+                <div class="space-y-3">
+                    <div class="bg-slate-950 p-3.5 rounded-xl border border-slate-800">
+                        <div id="puzzle-title-text" class="font-cairo font-bold text-emerald-400 text-xs sm:text-sm mb-1">
+                            اللغز #1: سر قفل الخزينة الأثيرية
+                        </div>
+                        <p id="puzzle-desc-text" class="text-xs text-slate-300 leading-relaxed">
+                            تقف أمام قفل كيميائي ميكانيكي ثلاثي الحلقات، ادر الحلقات الأثيرية لضبط الرمز السرّي المشتق من زوايا المجسم!
+                        </p>
+                    </div>
+
+                    <!-- Combination Dial Lock Minigame UI -->
+                    <div class="bg-slate-900 p-4 rounded-xl border border-emerald-500/30 flex flex-col items-center justify-center gap-3">
+                        <div class="text-[11px] text-emerald-300 font-cairo font-bold" id="label-dial-lock-title">قفل الشفرة الميكانيكي الأثيري:</div>
+                        
+                        <div class="flex items-center justify-center gap-4">
+                            <!-- Ring 1 -->
+                            <div class="flex flex-col items-center gap-1">
+                                <button onclick="rotateDial(0, 1)" class="w-8 h-8 rounded-lg bg-slate-800 hover:bg-emerald-500/30 text-emerald-400 flex items-center justify-center transition">
+                                    <i class="fa-solid fa-chevron-up text-xs"></i>
+                                </button>
+                                <div id="dial-val-0" class="w-12 h-14 bg-slate-950 border-2 border-emerald-500/60 rounded-xl flex items-center justify-center font-mono font-black text-emerald-400 text-2xl shadow-lg shadow-emerald-500/20">
+                                    0
+                                </div>
+                                <button onclick="rotateDial(0, -1)" class="w-8 h-8 rounded-lg bg-slate-800 hover:bg-emerald-500/30 text-emerald-400 flex items-center justify-center transition">
+                                    <i class="fa-solid fa-chevron-down text-xs"></i>
+                                </button>
+                            </div>
+
+                            <span class="text-slate-600 font-black text-xl">-</span>
+
+                            <!-- Ring 2 -->
+                            <div class="flex flex-col items-center gap-1">
+                                <button onclick="rotateDial(1, 1)" class="w-8 h-8 rounded-lg bg-slate-800 hover:bg-emerald-500/30 text-emerald-400 flex items-center justify-center transition">
+                                    <i class="fa-solid fa-chevron-up text-xs"></i>
+                                </button>
+                                <div id="dial-val-1" class="w-12 h-14 bg-slate-950 border-2 border-emerald-500/60 rounded-xl flex items-center justify-center font-mono font-black text-emerald-400 text-2xl shadow-lg shadow-emerald-500/20">
+                                    0
+                                </div>
+                                <button onclick="rotateDial(1, -1)" class="w-8 h-8 rounded-lg bg-slate-800 hover:bg-emerald-500/30 text-emerald-400 flex items-center justify-center transition">
+                                    <i class="fa-solid fa-chevron-down text-xs"></i>
+                                </button>
+                            </div>
+
+                            <span class="text-slate-600 font-black text-xl">-</span>
+
+                            <!-- Ring 3 -->
+                            <div class="flex flex-col items-center gap-1">
+                                <button onclick="rotateDial(2, 1)" class="w-8 h-8 rounded-lg bg-slate-800 hover:bg-emerald-500/30 text-emerald-400 flex items-center justify-center transition">
+                                    <i class="fa-solid fa-chevron-up text-xs"></i>
+                                </button>
+                                <div id="dial-val-2" class="w-12 h-14 bg-slate-950 border-2 border-emerald-500/60 rounded-xl flex items-center justify-center font-mono font-black text-emerald-400 text-2xl shadow-lg shadow-emerald-500/20">
+                                    0
+                                </div>
+                                <button onclick="rotateDial(2, -1)" class="w-8 h-8 rounded-lg bg-slate-800 hover:bg-emerald-500/30 text-emerald-400 flex items-center justify-center transition">
+                                    <i class="fa-solid fa-chevron-down text-xs"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <button onclick="verifyPuzzleSolution()" class="w-full mt-1 py-2.5 rounded-xl bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-400 hover:to-emerald-500 text-slate-950 font-cairo font-extrabold text-xs shadow-lg shadow-emerald-500/20 transition flex items-center justify-center gap-2">
+                            <i class="fa-solid fa-unlock-keyhole"></i>
+                            <span id="btn-submit-answer">فتح القفل الأثيري ورصد المكافأة</span>
+                        </button>
+                    </div>
+
+                    <!-- Live JSON Schema Toggle View -->
+                    <details class="group bg-slate-950 rounded-xl border border-slate-800/80">
+                        <summary class="p-2.5 text-xs font-mono text-slate-400 cursor-pointer flex items-center justify-between select-none">
+                            <span><i class="fa-solid fa-code text-cyan-400 ml-1"></i> <span id="label-json-response">استجابة السيرفر (Backend JSON Prompt)</span></span>
+                            <i class="fa-solid fa-chevron-down text-xs group-open:rotate-180 transition"></i>
+                        </summary>
+                        <pre class="p-3 pt-0 text-[10px] font-mono text-slate-300 overflow-x-auto text-left" dir="ltr"><code id="json-schema-code">{
+  "stage_id": 1,
+  "solver_validated": true,
+  "difficulty_iq": 1200,
+  "logic": { "key_code": "379", "node_depth": 3 },
+  "boon_reward": 25
+}</code></pre>
+                    </details>
+                </div>
+            </div>
+
+            <!-- Firebase Status Card -->
+            <div class="bg-slate-950/90 border border-slate-800 rounded-xl p-3 flex items-center justify-between text-xs">
+                <div class="flex items-center gap-2">
+                    <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping"></span>
+                    <span class="text-slate-300 font-mono text-[11px]">Firestore Cloud Status: Connected</span>
+                </div>
+                <span class="text-slate-500 text-[10px]">Project: Mind-Alchemy-Core</span>
+            </div>
+
+        </div>
+
+    </div>
+</section>
+
+<!-- SECTION 3: FRIDAY AUCTION HOUSE SCREEN -->
 <section id="view-auction" class="max-w-4xl mx-auto px-4 mt-6 hidden">
     <div class="bg-cardBg border border-cardBorder rounded-2xl p-4 sm:p-6 shadow-xl relative overflow-hidden space-y-5">
         <div class="flex items-center justify-between border-b border-slate-800 pb-3">
@@ -294,260 +578,70 @@
     </div>
 </section>
 
-<!-- MAIN HUB / PUZZLE SOLVER VIEW -->
-<main id="main-content-layout" class="max-w-7xl mx-auto px-3 sm:px-4 mt-4 sm:mt-6 grid grid-cols-1 lg:grid-cols-12 gap-5 sm:gap-6">
-
-    <!-- LEFT COLUMN: 3D Inspector Canvas (7 Cols) -->
-    <div class="lg:col-span-7 space-y-5 sm:space-y-6">
-        
-        <!-- 3D Interactive Viewer Card -->
-        <div class="bg-cardBg border border-cardBorder rounded-2xl overflow-hidden shadow-2xl relative">
-            
-            <!-- Card Header Badge & Mode Select -->
-            <div class="p-3.5 border-b border-cardBorder flex items-center justify-between bg-slate-950/60">
-                <div class="flex items-center gap-2">
-                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold font-cairo bg-amber-500/10 text-amber-400 border border-amber-500/30" id="tag-vr-sim">
-                        <i class="fa-solid fa-vr-cardboard text-xs"></i>
-                        محاكاة VR تفاعلية 360°
-                    </span>
-                    <h2 class="font-cairo font-bold text-slate-200 text-xs sm:text-sm" id="item-title-vr">خوذة العبقري #001</h2>
-                </div>
-                
-                <div class="flex items-center gap-1.5">
-                    <button onclick="resetCamera()" class="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs transition" title="Reset Camera">
-                        <i class="fa-solid fa-rotate-right"></i>
-                    </button>
-                    <button id="toggle-aura-btn" onclick="toggleAuraEffect()" class="px-2.5 py-1 rounded-lg bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40 text-xs font-cairo font-bold transition">
-                        <i class="fa-solid fa-wand-magic-sparkles text-xs ml-1"></i> <span id="btn-aura-text">الهالة</span>
-                    </button>
-                </div>
-            </div>
-
-            <!-- 3D Canvas Container Wrapper -->
-            <div id="canvas-wrapper" class="relative bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950">
-                <div id="canvas-container"></div>
-                
-                <!-- Simulated TikTok Live Chat Overlay (Streamer Mode) -->
-                <div id="streamer-live-chat" class="hidden absolute left-3 bottom-12 z-20 w-64 max-h-44 overflow-y-auto space-y-1.5 pointer-events-none font-cairo text-xs">
-                    <div class="bg-slate-950/80 backdrop-blur-md p-2 rounded-lg border border-purple-500/30 text-slate-200 animate-pulse">
-                        <span class="text-amber-400 font-bold">أبو فهد 👑:</span> لّف الخوذة للجهة الذهبية! 🔥
-                    </div>
-                    <div class="bg-slate-950/80 backdrop-blur-md p-2 rounded-lg border border-cyan-500/30 text-slate-200">
-                        <span class="text-cyan-400 font-bold">User_99:</span> أرسل لك 50 ϐ Boon هدية بث! 🎁
-                    </div>
-                </div>
-
-                <!-- Touch Instructions Overlay -->
-                <div class="absolute bottom-3 right-3 bg-slate-950/85 backdrop-blur border border-slate-800 px-3 py-1.5 rounded-xl text-[11px] text-slate-300 flex items-center gap-2 pointer-events-none z-10">
-                    <i class="fa-solid fa-hand-pointer text-amber-400 animate-bounce"></i>
-                    <span id="label-touch-hint">مس الشاشة ولّف المجسم 360 درجة</span>
-                </div>
-
-                <!-- Live Item Rarity Tag Overlay -->
-                <div class="absolute top-3 right-3 bg-gradient-to-r from-amber-600/90 to-amber-500/90 text-slate-950 font-cairo font-extrabold text-xs px-3 py-1 rounded-lg shadow-lg flex items-center gap-1.5 z-10" id="tag-rarity">
-                    <i class="fa-solid fa-crown text-xs"></i>
-                    <span>قطعة فريدة (UNIQUE #001)</span>
-                </div>
-            </div>
-
-            <!-- 3D Object Selector Bar & Material Change Controls -->
-            <div class="p-3 bg-slate-950/90 border-t border-cardBorder space-y-2 text-xs font-cairo font-bold">
-                <div class="flex items-center justify-between gap-1.5 overflow-x-auto pb-1">
-                    <span class="text-slate-400 text-[11px] whitespace-nowrap" id="label-select-object">المجسم المعاين:</span>
-                    <div class="flex items-center gap-1.5">
-                        <button onclick="switch3DObject('helmet')" id="obj-btn-helmet" class="px-2.5 py-1 rounded-lg bg-amber-500/20 text-amber-300 border border-amber-500/40 transition whitespace-nowrap">
-                            <i class="fa-solid fa-vr-cardboard ml-1"></i> <span id="btn-obj-helmet">الخوذة</span>
-                        </button>
-                        <button onclick="switch3DObject('cube')" id="obj-btn-cube" class="px-2.5 py-1 rounded-lg bg-slate-900 text-slate-400 border border-slate-800 transition whitespace-nowrap">
-                            <i class="fa-solid fa-cube ml-1"></i> <span id="btn-obj-cube">مكعب الشفرة</span>
-                        </button>
-                        <button onclick="switch3DObject('prism')" id="obj-btn-prism" class="px-2.5 py-1 rounded-lg bg-slate-900 text-slate-400 border border-slate-800 transition whitespace-nowrap">
-                            <i class="fa-solid fa-gem ml-1"></i> <span id="btn-obj-prism">المنشور الأثيري</span>
-                        </button>
-                        <button onclick="switch3DObject('coin')" id="obj-btn-coin" class="px-2.5 py-1 rounded-lg bg-slate-900 text-slate-400 border border-slate-800 transition whitespace-nowrap">
-                            <i class="fa-solid fa-coins ml-1"></i> <span id="btn-obj-coin">عملة بُون</span>
-                        </button>
-                    </div>
-                </div>
-
-                <!-- Material Controls -->
-                <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                    <button onclick="setMaterialStyle('gold')" class="p-2 rounded-xl bg-slate-900 hover:bg-slate-800 border border-amber-500/30 text-amber-300 transition flex items-center justify-center gap-1.5">
-                        <span class="w-2.5 h-2.5 rounded-full bg-amber-400 inline-block"></span>
-                        <span id="btn-mat-gold">ذهب وأوبسيديان</span>
-                    </button>
-                    <button onclick="setMaterialStyle('cyber')" class="p-2 rounded-xl bg-slate-900 hover:bg-slate-800 border border-cyan-500/30 text-cyan-300 transition flex items-center justify-center gap-1.5">
-                        <span class="w-2.5 h-2.5 rounded-full bg-cyan-400 inline-block"></span>
-                        <span id="btn-mat-cyber">سايبر نيون</span>
-                    </button>
-                    <button onclick="setMaterialStyle('obsidian')" class="p-2 rounded-xl bg-slate-900 hover:bg-slate-800 border border-purple-500/30 text-purple-300 transition flex items-center justify-center gap-1.5">
-                        <span class="w-2.5 h-2.5 rounded-full bg-purple-400 inline-block"></span>
-                        <span id="btn-mat-obsidian">أسود غامض</span>
-                    </button>
-                    <button onclick="toggleWireframe()" class="p-2 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-700 text-slate-300 transition flex items-center justify-center gap-1.5">
-                        <i class="fa-solid fa-draw-polygon text-xs"></i>
-                        <span id="btn-mat-wireframe">شبكة الـ 3D</span>
-                    </button>
-                </div>
-            </div>
+<!-- SECTION 4: GOOGLE AUTHENTICATION SCREEN -->
+<section id="view-auth" class="max-w-md mx-auto px-4 mt-12 hidden">
+    <div class="bg-cardBg border border-cardBorder rounded-3xl p-6 sm:p-8 shadow-2xl text-center space-y-6 relative overflow-hidden">
+        <div class="w-20 h-20 mx-auto rounded-3xl bg-gradient-to-tr from-amber-500 to-amber-300 flex items-center justify-center font-black text-slate-950 font-cairo text-4xl shadow-xl shadow-amber-500/30">
+            ϐ
         </div>
-    </div>
 
-    <!-- RIGHT COLUMN: AI Companion "Atheer" & Hybrid Puzzle System (5 Cols) -->
-    <div class="lg:col-span-5 space-y-5 sm:space-y-6">
+        <div>
+            <h2 class="font-cairo font-black text-2xl text-white mb-2" id="auth-title">تسجيل الدخول إلى Mind Alchemy</h2>
+            <p class="text-xs text-slate-400 leading-relaxed" id="auth-desc">احفظ تقدمك السحابي، رصيد عملة بُون (ϐ)، ومقتنياتك الفريدة عبر ربط حساب Google الخاص بك.</p>
+        </div>
 
-        <!-- AI Companion Avatar Card (المرشد الذكي أثير) -->
-        <div class="bg-cardBg border border-cardBorder rounded-2xl p-4 sm:p-5 shadow-xl relative">
-            <div class="flex items-center gap-3 border-b border-slate-800 pb-3 mb-4">
-                <div class="relative">
-                    <div class="w-12 h-12 rounded-full bg-gradient-to-tr from-cyan-500 to-indigo-500 p-0.5">
-                        <div class="w-full h-full bg-slate-950 rounded-full flex items-center justify-center overflow-hidden">
-                            <i class="fa-solid fa-robot text-cyan-400 text-xl"></i>
-                        </div>
-                    </div>
-                    <span class="w-3.5 h-3.5 bg-emerald-500 border-2 border-slate-950 rounded-full absolute bottom-0 right-0 animate-pulse"></span>
-                </div>
-                <div>
-                    <h3 class="font-cairo font-bold text-white text-base flex items-center gap-2">
-                        <span id="title-atheer-name">المرشد الذكي 3D ("أثير")</span>
-                        <span class="text-[9px] bg-cyan-500/10 text-cyan-400 border border-cyan-500/30 px-2 py-0.5 rounded-full font-mono">GEMINI AI INTEGRATED</span>
-                    </h3>
-                    <p class="text-xs text-slate-400" id="sub-atheer-desc">توليد حوارات وتلميحات ذكية تلقائياً</p>
-                </div>
-            </div>
+        <div class="space-y-3 pt-2">
+            <button onclick="signInWithGoogle()" class="w-full py-3 px-4 rounded-xl bg-white hover:bg-slate-100 text-slate-900 font-cairo font-extrabold text-sm shadow-lg transition flex items-center justify-center gap-3">
+                <i class="fa-brands fa-google text-red-500 text-lg"></i>
+                <span id="btn-google-login">المتابعة باستخدام Google</span>
+            </button>
 
-            <!-- Dialogue Box from Atheer -->
-            <div class="bg-slate-950 p-3.5 rounded-xl border border-cyan-500/30 relative mb-4">
-                <div class="text-xs text-cyan-400 font-cairo font-bold mb-1 flex items-center justify-between">
-                    <span><i class="fa-solid fa-comment-dots ml-1"></i> <span id="label-atheer-speaking">أثير يتحدث إليك:</span></span>
-                    <span class="text-[10px] text-slate-500" id="badge-model-status">Gemini API Active</span>
-                </div>
-                <p id="atheer-dialogue-text" class="text-xs sm:text-sm text-slate-200 leading-relaxed font-tajawal">
-                    "مرحباً بك يا صديقي العبقري! لقد قمتُ بتأكيد رصيدك السحابي من عملة **بُون (ϐ)** ورأيت خوذتك الفريدة. هل أنت مستعد لتحدي اليوم الفكري؟"
-                </p>
-            </div>
-
-            <!-- Interactive AI Hint Request Button -->
-            <button onclick="requestAiHint()" class="w-full py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 border border-cyan-500/40 text-cyan-300 font-cairo font-bold text-xs transition flex items-center justify-center gap-2">
-                <i class="fa-solid fa-lightbulb text-amber-400"></i>
-                <span id="btn-request-hint">طلب تلميح ذكي من "أثير" (تكلفة: 5 ϐ Boon)</span>
+            <button onclick="loginAsGuest()" class="w-full py-3 px-4 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-700 text-slate-300 font-cairo font-bold text-xs transition flex items-center justify-center gap-2">
+                <i class="fa-solid fa-user-ninja text-amber-400"></i>
+                <span id="btn-guest-login">الدخول كـ "لاعب ضيف" (تجربة سريعة)</span>
             </button>
         </div>
 
-        <!-- Hybrid Puzzle Generator Simulation (خوارزمية الألغاز) -->
-        <div class="bg-cardBg border border-cardBorder rounded-2xl p-4 sm:p-5 shadow-xl">
-            <div class="flex items-center justify-between border-b border-slate-800 pb-3 mb-4">
-                <div class="flex items-center gap-2.5">
-                    <div class="w-9 h-9 rounded-lg bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400 text-sm">
-                        <i class="fa-solid fa-brain"></i>
-                    </div>
-                    <div>
-                        <h3 class="font-cairo font-bold text-white text-sm sm:text-base" id="title-puzzle-gen">مولد الألغاز الهجين (AI Puzzle)</h3>
-                        <p class="text-[10px] text-slate-400" id="sub-puzzle-gen">توليد عكسي + CSP Solvability Engine</p>
-                    </div>
-                </div>
-
-                <button onclick="generateNewPuzzle()" class="px-2.5 py-1.5 rounded-lg bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/40 text-xs font-cairo font-bold transition flex items-center gap-1.5">
-                    <i class="fa-solid fa-arrows-rotate text-xs"></i>
-                    <span id="btn-generate-puzzle">توليد لغز جديد</span>
-                </button>
-            </div>
-
-            <!-- Current Active Puzzle Box -->
-            <div class="space-y-3">
-                <div class="bg-slate-950 p-3.5 rounded-xl border border-slate-800">
-                    <div id="puzzle-title-text" class="font-cairo font-bold text-emerald-400 text-xs sm:text-sm mb-1">
-                        اللغز #1024: سر قفل الخزينة الأثيرية
-                    </div>
-                    <p id="puzzle-desc-text" class="text-xs text-slate-300 leading-relaxed">
-                        تقف أمام قفل كيميائي ميكانيكي ثلاثي الحلقات، ادر الحلقات الأثيرية لضبط الرمز السرّي المشتق من زوايا المجسم!
-                    </p>
-                </div>
-
-                <!-- Combination Dial Lock Minigame UI -->
-                <div class="bg-slate-900 p-4 rounded-xl border border-emerald-500/30 flex flex-col items-center justify-center gap-3">
-                    <div class="text-[11px] text-emerald-300 font-cairo font-bold" id="label-dial-lock-title">قفل الشفرة الميكانيكي الأثيري:</div>
-                    
-                    <div class="flex items-center justify-center gap-4">
-                        <!-- Ring 1 -->
-                        <div class="flex flex-col items-center gap-1">
-                            <button onclick="rotateDial(0, 1)" class="w-8 h-8 rounded-lg bg-slate-800 hover:bg-emerald-500/30 text-emerald-400 flex items-center justify-center transition">
-                                <i class="fa-solid fa-chevron-up text-xs"></i>
-                            </button>
-                            <div id="dial-val-0" class="w-12 h-14 bg-slate-950 border-2 border-emerald-500/60 rounded-xl flex items-center justify-center font-mono font-black text-emerald-400 text-2xl shadow-lg shadow-emerald-500/20">
-                                7
-                            </div>
-                            <button onclick="rotateDial(0, -1)" class="w-8 h-8 rounded-lg bg-slate-800 hover:bg-emerald-500/30 text-emerald-400 flex items-center justify-center transition">
-                                <i class="fa-solid fa-chevron-down text-xs"></i>
-                            </button>
-                        </div>
-
-                        <span class="text-slate-600 font-black text-xl">-</span>
-
-                        <!-- Ring 2 -->
-                        <div class="flex flex-col items-center gap-1">
-                            <button onclick="rotateDial(1, 1)" class="w-8 h-8 rounded-lg bg-slate-800 hover:bg-emerald-500/30 text-emerald-400 flex items-center justify-center transition">
-                                <i class="fa-solid fa-chevron-up text-xs"></i>
-                            </button>
-                            <div id="dial-val-1" class="w-12 h-14 bg-slate-950 border-2 border-emerald-500/60 rounded-xl flex items-center justify-center font-mono font-black text-emerald-400 text-2xl shadow-lg shadow-emerald-500/20">
-                                3
-                            </div>
-                            <button onclick="rotateDial(1, -1)" class="w-8 h-8 rounded-lg bg-slate-800 hover:bg-emerald-500/30 text-emerald-400 flex items-center justify-center transition">
-                                <i class="fa-solid fa-chevron-down text-xs"></i>
-                            </button>
-                        </div>
-
-                        <span class="text-slate-600 font-black text-xl">-</span>
-
-                        <!-- Ring 3 -->
-                        <div class="flex flex-col items-center gap-1">
-                            <button onclick="rotateDial(2, 1)" class="w-8 h-8 rounded-lg bg-slate-800 hover:bg-emerald-500/30 text-emerald-400 flex items-center justify-center transition">
-                                <i class="fa-solid fa-chevron-up text-xs"></i>
-                            </button>
-                            <div id="dial-val-2" class="w-12 h-14 bg-slate-950 border-2 border-emerald-500/60 rounded-xl flex items-center justify-center font-mono font-black text-emerald-400 text-2xl shadow-lg shadow-emerald-500/20">
-                                9
-                            </div>
-                            <button onclick="rotateDial(2, -1)" class="w-8 h-8 rounded-lg bg-slate-800 hover:bg-emerald-500/30 text-emerald-400 flex items-center justify-center transition">
-                                <i class="fa-solid fa-chevron-down text-xs"></i>
-                            </button>
-                        </div>
-                    </div>
-
-                    <button onclick="verifyPuzzleSolution()" class="w-full mt-1 py-2 rounded-xl bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-400 hover:to-emerald-500 text-slate-950 font-cairo font-extrabold text-xs shadow-lg shadow-emerald-500/20 transition flex items-center justify-center gap-2">
-                        <i class="fa-solid fa-unlock-keyhole"></i>
-                        <span id="btn-submit-answer">فتح القفل الأثيري ورصد المكافأة</span>
-                    </button>
-                </div>
-
-                <!-- Live JSON Schema Toggle View -->
-                <details class="group bg-slate-950 rounded-xl border border-slate-800/80">
-                    <summary class="p-2.5 text-xs font-mono text-slate-400 cursor-pointer flex items-center justify-between select-none">
-                        <span><i class="fa-solid fa-code text-cyan-400 ml-1"></i> <span id="label-json-response">استجابة السيرفر (Backend JSON Prompt)</span></span>
-                        <i class="fa-solid fa-chevron-down text-xs group-open:rotate-180 transition"></i>
-                    </summary>
-                    <pre class="p-3 pt-0 text-[10px] font-mono text-slate-300 overflow-x-auto text-left" dir="ltr"><code id="json-schema-code">{
-  "stage_id": 1024,
-  "solver_validated": true,
-  "difficulty_iq": 1200,
-  "logic": { "key_code": "739", "node_depth": 3 },
-  "boon_reward": 25
-}</code></pre>
-                </details>
-            </div>
+        <div class="text-[10px] text-slate-500 border-t border-slate-800/80 pt-4" id="auth-footer-text">
+            متوافق مع محرك Google Cloud Platform و Firebase Firestore
         </div>
-
-        <!-- Firebase Status Card -->
-        <div class="bg-slate-950/90 border border-slate-800 rounded-xl p-3 flex items-center justify-between text-xs">
-            <div class="flex items-center gap-2">
-                <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping"></span>
-                <span class="text-slate-300 font-mono text-[11px]">Firestore Cloud Status: Connected</span>
-            </div>
-            <span class="text-slate-500 text-[10px]">Project: Mind-Alchemy-Core</span>
-        </div>
-
     </div>
+</section>
 
-</main>
+<!-- LEVEL VICTORY POPUP MODAL -->
+<div id="victory-modal" class="fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-md flex items-center justify-center p-4 hidden">
+    <div class="bg-cardBg border border-emerald-500/50 rounded-3xl w-full max-w-md p-6 shadow-2xl space-y-5 text-center relative overflow-hidden emerald-glow">
+        <div class="w-20 h-20 mx-auto rounded-full bg-emerald-500/20 border-2 border-emerald-400 flex items-center justify-center text-emerald-400 text-3xl animate-bounce">
+            <i class="fa-solid fa-trophy"></i>
+        </div>
+
+        <div>
+            <h3 class="font-cairo font-black text-2xl text-white mb-1" id="modal-victory-title">مبروك! تم فك القفل الأثيري!</h3>
+            <p class="text-xs text-slate-300" id="modal-victory-desc">أنجزت المرحلة بنجاح وحصلت على المكافآت التالية:</p>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3 py-2">
+            <div class="bg-slate-950 p-3 rounded-2xl border border-amber-500/40">
+                <div class="text-[10px] text-slate-400 font-bold" id="label-reward-boon">مكافأة بُون</div>
+                <div class="font-mono font-black text-amber-400 text-lg">+25 ϐ</div>
+            </div>
+
+            <div class="bg-slate-950 p-3 rounded-2xl border border-cyan-500/40">
+                <div class="text-[10px] text-slate-400 font-bold" id="label-reward-iq">ارتفاع الذكاء</div>
+                <div class="font-mono font-black text-cyan-300 text-lg">+15 IQ</div>
+            </div>
+        </div>
+
+        <div class="flex gap-2">
+            <button onclick="closeVictoryModal(); navigateTo('stages');" class="flex-1 py-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-cairo font-bold text-xs transition">
+                <span id="btn-modal-map">خريطة المراحل</span>
+            </button>
+            <button onclick="closeVictoryModal(); playNextUnlockedStage();" class="flex-1 py-3 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 text-slate-950 font-cairo font-black text-xs transition shadow-lg shadow-emerald-500/20">
+                <span id="btn-modal-next">المرحلة التالية</span>
+            </button>
+        </div>
+    </div>
+</div>
 
 <!-- Interactive 3D Inventory Locker Modal -->
 <div id="inventory-modal" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4 hidden">
@@ -582,13 +676,39 @@
 
 <script>
 
-// Global State
+// --- Global State Variables ---
 let currentLang = 'ar';
 let userBoonBalance = 500;
 let userIqScore = 1200;
 let currentBid = 300;
-let currentDialValues = [7, 3, 9];
-let puzzleSolution = "739";
+let unlockedStageCount = 1;
+let currentPlayingStage = 1;
+
+// Level Definitions Database
+const stagesList = [
+    { id: 1, titleAr: "سر القفل الأثيري", titleEn: "Secret of the Aether Vault", code: "379", obj: "helmet", stars: 0, iqReq: 1200 },
+    { id: 2, titleAr: "متاهة البلورة الذهبية", titleEn: "Golden Crystal Labyrinth", code: "512", obj: "prism", stars: 0, iqReq: 1215 },
+    { id: 3, titleAr: "شفرة مكعب الأوبسيديان", titleEn: "Obsidian Cube Cipher", code: "884", obj: "cube", stars: 0, iqReq: 1230 },
+    { id: 4, titleAr: "معادلة عملة بُون", titleEn: "Boon Token Equation", code: "920", obj: "coin", stars: 0, iqReq: 1245 },
+    { id: 5, titleAr: "مفتاح البوابة الكمومية", titleEn: "Quantum Gate Key", code: "147", obj: "helmet", stars: 0, iqReq: 1260 },
+    { id: 6, titleAr: "لغز محرك الطاقة الأثيرية", titleEn: "Aether Engine Puzzle", code: "631", obj: "prism", stars: 0, iqReq: 1275 },
+    { id: 7, titleAr: "حسابات زوايا العبقري", titleEn: "Genius Geometry Logic", code: "428", obj: "cube", stars: 0, iqReq: 1290 },
+    { id: 8, titleAr: "شفرة الهالة المزدوجة", titleEn: "Dual Aura Code", code: "753", obj: "coin", stars: 0, iqReq: 1305 },
+    { id: 9, titleAr: "قفل الخزينة الأثرية", titleEn: "Ancient Relic Lock", code: "296", obj: "helmet", stars: 0, iqReq: 1320 },
+    { id: 10, titleAr: "تحدي الأومني المتقدم", titleEn: "Advanced Omni Challenge", code: "814", obj: "prism", stars: 0, iqReq: 1335 },
+    { id: 11, titleAr: "رمز العقدة الكيميائية", titleEn: "Alchemy Node Symbol", code: "592", obj: "cube", stars: 0, iqReq: 1350 },
+    { id: 12, titleAr: "لغز بلورة النيون", titleEn: "Neon Crystal Puzzle", code: "348", obj: "coin", stars: 0, iqReq: 1365 },
+    { id: 13, titleAr: "سر المحك السايبراني", titleEn: "Cyber Crucible Secret", code: "175", obj: "helmet", stars: 0, iqReq: 1380 },
+    { id: 14, titleAr: "مصفوفة النظائر الثنائية", titleEn: "Binary Isotope Matrix", code: "963", obj: "prism", stars: 0, iqReq: 1395 },
+    { id: 15, titleAr: "معادلة الأفق المظلم", titleEn: "Dark Horizon Formula", code: "284", obj: "cube", stars: 0, iqReq: 1410 },
+    { id: 16, titleAr: "شفرة البرج الأثيري", titleEn: "Aether Citadel Code", code: "719", obj: "coin", stars: 0, iqReq: 1425 },
+    { id: 17, titleAr: "قفل الخوذة الملكية", titleEn: "Royal Visor Vault", code: "452", obj: "helmet", stars: 0, iqReq: 1440 },
+    { id: 18, titleAr: "متاهة الأوتار الثلاثية", titleEn: "Triple String Helix", code: "836", obj: "prism", stars: 0, iqReq: 1455 },
+    { id: 19, titleAr: "لغز النواة الذهبية", titleEn: "Golden Core Mystery", code: "197", obj: "cube", stars: 0, iqReq: 1470 },
+    { id: 20, titleAr: "تحدي الكيميائي الأكبر", titleEn: "Grand Alchemist Masterwork", code: "999", obj: "coin", stars: 0, iqReq: 1500 }
+];
+
+let currentDialValues = [0, 0, 0];
 let currentActiveObject = 'helmet';
 let currentUser = { name: 'لاعب ضيف', email: 'guest@mindalchemy.io', isGuest: true };
 
@@ -603,12 +723,20 @@ let wireframeActive = false;
 const i18n = {
     ar: {
         badgeLivePreview: "المعاينة الحية",
-        btnStagesNav: "المراحل",
+        btnStagesNav: "خريطة المراحل",
+        btnSolverNav: "غرفة الألغاز 3D",
         btnAuctionNav: "المزاد",
         btnInventoryText: "الخزانة",
         labelBoon: "بُون (BOON)",
         labelIq: "مستوى الذكاء",
         btnStreamerMode: "وضع البث (TikTok)",
+        titleStageMap: "خريطة المراحل وتحديات الذكاء الكيميائي",
+        badgeStageCount: "20 مرحلة متاحة",
+        subStageMap: "انقر على أي مرحلة مفتوحة للبدء بالحل ودخول غرفة المحاكاة الـ 3D مباشرة!",
+        labelCompletedStages: "المراحل المكتملة",
+        labelEarnedStars: "إجمالي النجوم",
+        labelMapMode: "اختر مرحلة للتحدي الفكري:",
+        btnPlayCurrent: "لعب المرحلة الحالية المفتوحة",
         tagVrSim: "محاكاة VR تفاعلية 360°",
         itemTitleVr: "خوذة العبقري #001",
         btnAuraText: "الهالة",
@@ -629,16 +757,13 @@ const i18n = {
         btnRequestHint: "طلب تلميح ذكي من \"أثير\" (تكلفة: 5 ϐ Boon)",
         titlePuzzleGen: "مولد الألغاز الهجين (AI Puzzle)",
         subPuzzleGen: "توليد عكسي + CSP Solvability Engine",
-        btnGeneratePuzzle: "توليد لغز جديد",
+        btnBackMap: "العودة للخريطة",
         labelDialLockTitle: "قفل الشفرة الميكانيكي الأثيري:",
         btnSubmitAnswer: "فتح القفل الأثيري ورصد المكافأة",
         labelJsonResponse: "استجابة السيرفر (Backend JSON Prompt)",
         modalTitleInv: "خزانة المقتنيات النادرة (3D Inventory)",
         btnGoogleLogin: "المتابعة باستخدام Google",
         btnGuestLogin: "الدخول كـ \"لاعب ضيف\" (تجربة سريعة)",
-        titleStageMap: "خريطة المراحل وتحديات IQ",
-        subStageMap: "اكتشف 100+ مرحلة كيميائية مولدة بالذكاء الاصطناعي",
-        btnBackHub: "الرئيسية",
         titleAuctionFull: "سوق المزادات الأسبوعي (سوق الجمعة)",
         subAuctionFull: "التداول بالعملة الممتازة \"بُون\" (ϐ)",
         labelAuctionEnds: "ينتهي المزاد خلال",
@@ -648,16 +773,30 @@ const i18n = {
         labelTaxNote: "شاملة رسم الحرق 5% لحماية اقتصاد اللعبة من التضخم",
         labelBidAmount: "مزايدتك بالعملة (ϐ Boon):",
         btnSubmitBid: "تقديم المزايدة الآن",
-        labelBidHistory: "سجل المزايدات الحية (Firestore Sync):"
+        labelBidHistory: "سجل المزايدات الحية (Firestore Sync):",
+        modalVictoryTitle: "مبروك! تم فك القفل الأثيري!",
+        modalVictoryDesc: "أنجزت المرحلة بنجاح وحصلت على المكافآت التالية:",
+        labelRewardBoon: "مكافأة بُون",
+        labelRewardIq: "ارتفاع الذكاء",
+        btnModalMap: "خريطة المراحل",
+        btnModalNext: "المرحلة التالية"
     },
     en: {
         badgeLivePreview: "Live Preview",
-        btnStagesNav: "Stages",
+        btnStagesNav: "Stage Map",
+        btnSolverNav: "3D Puzzle Room",
         btnAuctionNav: "Auction",
         btnInventoryText: "Locker",
         labelBoon: "BOON Token",
         labelIq: "IQ Rank",
         btnStreamerMode: "Streamer Mode (TikTok)",
+        titleStageMap: "Stage Progression & Alchemy IQ Map",
+        badgeStageCount: "20 Stages Available",
+        subStageMap: "Click on any unlocked stage to start solving in the 3D Alchemy Simulator!",
+        labelCompletedStages: "Completed Stages",
+        labelEarnedStars: "Earned Stars",
+        labelMapMode: "Select a level to play:",
+        btnPlayCurrent: "Play Current Unlocked Stage",
         tagVrSim: "Interactive 360° VR Simulation",
         itemTitleVr: "Genius Helmet #001",
         btnAuraText: "Aura",
@@ -678,16 +817,13 @@ const i18n = {
         btnRequestHint: "Request Smart Hint from \"Atheer\" (Cost: 5 ϐ Boon)",
         titlePuzzleGen: "Hybrid AI Puzzle Engine",
         subPuzzleGen: "Reverse Logic + CSP Solvability Engine",
-        btnGeneratePuzzle: "Generate New Puzzle",
+        btnBackMap: "Back to Map",
         labelDialLockTitle: "Aetherial Mechanical Combination Lock:",
-        btnSubmitAnswer: "Unlock Aether Vault & Collect Reward",
+        btnSubmitAnswer: "Unlock Vault & Claim Reward",
         labelJsonResponse: "Backend Server Response (JSON Prompt)",
         modalTitleInv: "3D Rare Items Inventory Locker",
         btnGoogleLogin: "Continue with Google",
         btnGuestLogin: "Play as Guest (Quick Start)",
-        titleStageMap: "Stage Progression & IQ Map",
-        subStageMap: "Explore 100+ AI Generated Alchemy Levels",
-        btnBackHub: "Main Hub",
         titleAuctionFull: "Weekly Auction Marketplace (Friday House)",
         subAuctionFull: "Trading Premium Currency BOON (ϐ)",
         labelAuctionEnds: "Auction ends in",
@@ -697,7 +833,13 @@ const i18n = {
         labelTaxNote: "Includes 5% Sink Burn Tax to protect economy from inflation",
         labelBidAmount: "Your Bid Amount (ϐ Boon):",
         btnSubmitBid: "Place Bid Now",
-        labelBidHistory: "Live Bid Stream (Firestore Sync):"
+        labelBidHistory: "Live Bid Stream (Firestore Sync):",
+        modalVictoryTitle: "Victory! Aether Vault Unlocked!",
+        modalVictoryDesc: "You completed the stage successfully and earned rewards:",
+        labelRewardBoon: "Boon Reward",
+        labelRewardIq: "IQ Increase",
+        btnModalMap: "Stage Map",
+        btnModalNext: "Next Stage"
     }
 };
 
@@ -754,26 +896,107 @@ function showToast(message, type = 'amber') {
     setTimeout(() => { if (toast.parentNode) toast.remove(); }, 3500);
 }
 
-// Single Page View Router
+// Single Page Navigation Router
 function navigateTo(viewId) {
     playSound('click');
-    const views = ['main-content-layout', 'view-auth', 'view-stages', 'view-auction'];
+    const views = ['view-stages', 'view-solver', 'view-auth', 'view-auction'];
     views.forEach(v => {
         const el = document.getElementById(v);
         if (el) el.classList.add('hidden');
     });
 
-    if (viewId === 'hub') {
-        document.getElementById('main-content-layout').classList.remove('hidden');
-    } else if (viewId === 'auth') {
-        document.getElementById('view-auth').classList.remove('hidden');
-    } else if (viewId === 'stages') {
+    if (viewId === 'stages') {
         document.getElementById('view-stages').classList.remove('hidden');
         renderStagesMap();
+    } else if (viewId === 'solver') {
+        document.getElementById('view-solver').classList.remove('hidden');
+    } else if (viewId === 'auth') {
+        document.getElementById('view-auth').classList.remove('hidden');
     } else if (viewId === 'auction') {
         document.getElementById('view-auction').classList.remove('hidden');
     }
     onWindowResize();
+}
+
+// Render Stage Map
+function renderStagesMap() {
+    const container = document.getElementById('stages-grid-container');
+    container.innerHTML = '';
+
+    let completedCount = 0;
+    let totalStars = 0;
+
+    stagesList.forEach((stage) => {
+        const isUnlocked = stage.id <= unlockedStageCount;
+        const isCompleted = stage.stars > 0;
+        const isCurrentActive = stage.id === unlockedStageCount;
+
+        if (isCompleted) {
+            completedCount++;
+            totalStars += stage.stars;
+        }
+
+        const card = document.createElement('div');
+        const activeClass = isCurrentActive ? 'active-stage-card border-amber-400 bg-slate-900' : (isUnlocked ? 'bg-slate-900/80 border-emerald-500/30 hover:bg-slate-800' : 'bg-slate-950/60 border-slate-800/80 opacity-60');
+        
+        card.className = `p-4 rounded-2xl border ${activeClass} flex flex-col items-center justify-between gap-2.5 cursor-pointer transition text-center relative overflow-hidden shadow-lg`;
+        
+        const titleText = currentLang === 'ar' ? stage.titleAr : stage.titleEn;
+        
+        card.innerHTML = `
+            ${isCurrentActive ? '<span class="absolute top-1 right-1 w-2.5 h-2.5 rounded-full bg-amber-400 animate-ping"></span>' : ''}
+            <div class="w-10 h-10 rounded-xl ${isUnlocked ? (isCurrentActive ? 'bg-amber-500/20 text-amber-400 border border-amber-400' : 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30') : 'bg-slate-800 text-slate-600'} flex items-center justify-center font-mono font-black text-sm">
+                ${stage.id}
+            </div>
+            <div>
+                <div class="text-xs font-bold font-cairo text-white leading-snug">${titleText}</div>
+                <div class="text-[10px] text-slate-400 font-mono mt-0.5">${stage.iqReq} IQ</div>
+            </div>
+            <div class="text-xs text-amber-400">
+                ${isCompleted ? '<i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>' : (isUnlocked ? '<span class="text-[10px] font-bold text-emerald-400 font-cairo">' + (currentLang === 'ar' ? 'متاحة للعب' : 'Unlocked') + '</span>' : '<i class="fa-solid fa-lock text-slate-600"></i>')}
+            </div>
+        `;
+
+        if (isUnlocked) {
+            card.onclick = () => { loadStageAndPlay(stage.id); };
+        }
+
+        container.appendChild(card);
+    });
+
+    document.getElementById('stat-completed-count').innerText = `${completedCount} / 20`;
+    document.getElementById('stat-stars-count').innerText = `${totalStars} ⭐`;
+}
+
+function playNextUnlockedStage() {
+    loadStageAndPlay(unlockedStageCount);
+}
+
+function loadStageAndPlay(stageId) {
+    currentPlayingStage = stageId;
+    const stage = stagesList.find(s => s.id === stageId);
+    if (!stage) return;
+
+    switch3DObject(stage.obj);
+    currentDialValues = [0, 0, 0];
+    document.getElementById('dial-val-0').innerText = '0';
+    document.getElementById('dial-val-1').innerText = '0';
+    document.getElementById('dial-val-2').innerText = '0';
+
+    const stageTitle = currentLang === 'ar' ? stage.titleAr : stage.titleEn;
+    document.getElementById('puzzle-title-text').innerText = (currentLang === 'ar' ? `المرحلة #${stage.id}: ${stageTitle}` : `Stage #${stage.id}: ${stageTitle}`);
+    document.getElementById('puzzle-desc-text').innerText = (currentLang === 'ar' ? `اضبط حلقات القفل الميكانيكي الثلاثية للوصول للرمز السرّي بذكاء!` : `Adjust the 3 mechanical dial rings to input the secret stage code!`);
+
+    document.getElementById('json-schema-code').innerText = JSON.stringify({
+        stage_id: stage.id,
+        solver_validated: true,
+        difficulty_iq: stage.iqReq,
+        logic: { key_code: stage.code, node_depth: 3 },
+        boon_reward: 25
+    }, null, 2);
+
+    navigateTo('solver');
+    showToast((currentLang === 'ar' ? `بدأت المرحلة #${stage.id}!` : `Started Stage #${stage.id}!`), 'emerald');
 }
 
 async function callGeminiAiCompanion(promptText) {
@@ -794,11 +1017,11 @@ async function callGeminiAiCompanion(promptText) {
         const text = result.candidates?.[0]?.content?.parts?.[0]?.text;
         return text || (currentLang === 'ar' ? "تأمل الشفرة الرقمية وقارن أبعاد المجسم!" : "Observe the code numbers and balance the geometry!");
     } catch (e) {
-        return currentLang === 'ar' ? "تلميح أثير: الشفرة الميكانيكية تبدأ برقم فردي أكبر من 5!" : "Atheer Hint: The combination code starts with an odd number greater than 5!";
+        const stage = stagesList.find(s => s.id === currentPlayingStage);
+        return currentLang === 'ar' ? `تلميح أثير: الرمز السرّي لهذه المرحلة يتكون من 3 أرقام تبدأ برقم قريب من ${stage?.code?.[0] || '3'}!` : `Atheer Hint: The secret code starts near ${stage?.code?.[0] || '3'}!`;
     }
 }
 
-// Request Smart Hint via Gemini API
 async function requestAiHint() {
     if (userBoonBalance < 5) {
         showToast(currentLang === 'ar' ? "رصيدك غير كافٍ من عملة بُون!" : "Insufficient Boon token balance!", 'amber');
@@ -812,57 +1035,11 @@ async function requestAiHint() {
     const dialogueBox = document.getElementById('atheer-dialogue-text');
     dialogueBox.innerText = currentLang === 'ar' ? "أثير يفكر بذكاء..." : "Atheer is thinking...";
 
-    const hintText = await callGeminiAiCompanion("Give a helpful smart hint to solve dial code puzzle " + puzzleSolution);
+    const stage = stagesList.find(s => s.id === currentPlayingStage);
+    const hintText = await callGeminiAiCompanion(`Give a helpful smart hint to solve stage ${currentPlayingStage} with secret code ${stage?.code}`);
     dialogueBox.innerText = hintText;
 }
 
-// Generate New Puzzle
-async function generateNewPuzzle() {
-    playSound('click');
-    const randomId = Math.floor(Math.random() * 9000) + 1000;
-    const codes = ["379", "512", "884", "920", "147"];
-    puzzleSolution = codes[Math.floor(Math.random() * codes.length)];
-
-    document.getElementById('puzzle-title-text').innerText = (currentLang === 'ar' ? `اللغز #${randomId}: سر القفل الأثيري` : `Puzzle #${randomId}: Aetherial Cipher`);
-    document.getElementById('puzzle-desc-text').innerText = (currentLang === 'ar' ? `مولد الألغاز الذكي أنشأ شفرة مكونة من 3 أرقام تناسب مستوى IQ الخاص بك (${userIqScore}).` : `AI Puzzle Engine generated a 3-digit code tailored to your IQ level (${userIqScore}).`);
-
-    document.getElementById('json-schema-code').innerText = JSON.stringify({
-        stage_id: randomId,
-        solver_validated: true,
-        difficulty_iq: userIqScore,
-        logic: { key_code: puzzleSolution, node_depth: 3 },
-        boon_reward: 25
-    }, null, 2);
-
-    showToast(currentLang === 'ar' ? "تم توليد لغز جديد تلقائياً!" : "Generated new AI Puzzle!", 'emerald');
-}
-
-// Render Interactive Stages Map
-function renderStagesMap() {
-    const container = document.getElementById('stages-grid-container');
-    container.innerHTML = '';
-
-    for (let i = 1; i <= 20; i++) {
-        const isUnlocked = i <= 3;
-        const card = document.createElement('div');
-        card.className = `p-3 rounded-xl border flex flex-col items-center justify-center gap-1.5 cursor-pointer transition ${isUnlocked ? 'bg-slate-900 border-emerald-500/40 hover:bg-slate-800' : 'bg-slate-950/60 border-slate-800 opacity-60'}`;
-        card.innerHTML = `
-            <div class="w-8 h-8 rounded-full ${isUnlocked ? 'bg-emerald-500/20 text-emerald-400' : 'bg-slate-800 text-slate-500'} flex items-center justify-center font-mono font-bold text-xs">
-                ${i}
-            </div>
-            <div class="text-[11px] font-bold font-cairo text-white">${currentLang === 'ar' ? 'المرحلة' : 'Stage'} ${i}</div>
-            <div class="text-[9px] text-amber-400">
-                ${isUnlocked ? '<i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star-half-stroke"></i>' : '<i class="fa-solid fa-lock text-slate-600"></i>'}
-            </div>
-        `;
-        if (isUnlocked) {
-            card.onclick = () => { navigateTo('hub'); generateNewPuzzle(); };
-        }
-        container.appendChild(card);
-    }
-}
-
-// Dial Lock Minigame
 function rotateDial(ringIndex, delta) {
     playSound('dial');
     currentDialValues[ringIndex] = (currentDialValues[ringIndex] + delta + 10) % 10;
@@ -871,16 +1048,27 @@ function rotateDial(ringIndex, delta) {
 
 function verifyPuzzleSolution() {
     const playerAttempt = currentDialValues.join('');
-    if (playerAttempt === puzzleSolution) {
+    const stage = stagesList.find(s => s.id === currentPlayingStage);
+
+    if (playerAttempt === stage.code) {
         playSound('success');
         userBoonBalance += 25;
         userIqScore += 15;
+        stage.stars = 3;
+
+        if (currentPlayingStage === unlockedStageCount && unlockedStageCount < 20) {
+            unlockedStageCount++;
+        }
+
         updateBalanceUI();
-        showToast(currentLang === 'ar' ? "إجابة صحيحة! حصلت على +25 ϐ Boon!" : "Correct! Earned +25 ϐ Boon!", 'emerald');
-        generateNewPuzzle();
+        document.getElementById('victory-modal').classList.remove('hidden');
     } else {
         showToast(currentLang === 'ar' ? "رمز الشفرة غير صحيح! حاول مرة أخرى." : "Incorrect combination! Try again.", 'amber');
     }
+}
+
+function closeVictoryModal() {
+    document.getElementById('victory-modal').classList.add('hidden');
 }
 
 // Bidding System
@@ -919,19 +1107,20 @@ function signInWithGoogle() {
     currentUser = { name: 'أبو إياد (Google)', email: 'isehaq@gmail.com', isGuest: false };
     document.getElementById('top-user-name').innerText = currentUser.name;
     showToast(currentLang === 'ar' ? "تم الدخول بحساب Google بنجاح!" : "Signed in with Google successfully!", 'emerald');
-    navigateTo('hub');
+    navigateTo('stages');
 }
 
 function loginAsGuest() {
     currentUser = { name: 'لاعب ضيف', email: 'guest@mindalchemy.io', isGuest: true };
     document.getElementById('top-user-name').innerText = currentUser.name;
     showToast(currentLang === 'ar' ? "تم الدخول كـ لاعب ضيف" : "Logged in as Guest", 'amber');
-    navigateTo('hub');
+    navigateTo('stages');
 }
 
 // UI Balance Updates
 function updateBalanceUI() {
     document.getElementById('header-boon-balance').innerText = `${userBoonBalance} ϐ`;
+    document.getElementById('header-iq-score').innerText = `${userIqScore} IQ`;
 }
 
 // Language Switcher
@@ -946,6 +1135,7 @@ function toggleLanguage() {
         const el = document.getElementById(key);
         if (el) el.innerText = dict[key];
     }
+    renderStagesMap();
 }
 
 function toggleInventoryModal() {
@@ -955,16 +1145,13 @@ function toggleInventoryModal() {
 
 function toggleStreamerMode() {
     playSound('click');
-    const main = document.getElementById('main-content-layout');
+    const main = document.getElementById('view-solver');
     const chat = document.getElementById('streamer-live-chat');
-    if (main.classList.contains('max-w-md')) {
-        main.classList.remove('max-w-md');
-        main.classList.add('max-w-7xl');
-        if (chat) chat.classList.add('hidden');
+    if (chat.classList.contains('hidden')) {
+        chat.classList.remove('hidden');
+        showToast(currentLang === 'ar' ? "تم تفعيل وضع البث العمودي!" : "Activated TikTok Streamer Mode!", 'emerald');
     } else {
-        main.classList.remove('max-w-7xl');
-        main.classList.add('max-w-md');
-        if (chat) chat.classList.remove('hidden');
+        chat.classList.add('hidden');
     }
     onWindowResize();
 }
@@ -973,6 +1160,7 @@ window.onload = function() {
     init3DScene();
     animate3D();
     setupTouchAndMouseInteractions();
+    renderStagesMap();
 };
 
 function init3DScene() {
@@ -1045,6 +1233,8 @@ function buildAuraParticles() {
 function switch3DObject(type) {
     if (!scene) return;
     if (helmetMesh) scene.remove(helmetMesh);
+
+    currentActiveObject = type;
 
     if (type === 'helmet') buildProceduralVRHelmet();
     else if (type === 'cube') {
