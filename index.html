@@ -5,11 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mind Alchemy Fighters - Realistic 3D</title>
     
-    <!-- استدعاء مكتبات Three.js المتوافقة مع الهواتف والمتصفحات الحديثة -->
-    <script src="https://cloudflare.com"></script>
-    <script src="https://jsdelivr.net"></script>
-    <script src="https://jsdelivr.net"></script>
-
     <style>
         :root {
             --neon-cyan: #00f3ff;
@@ -32,12 +27,11 @@
         }
 
         .logo { font-size: 20px; font-weight: bold; color: var(--neon-cyan); text-shadow: 0 0 10px var(--neon-cyan); }
-        
         .container { max-width: 1200px; margin: 20px auto; padding: 0 15px; }
 
         .fighter-3d-container {
             display: flex;
-            flex-direction: column; /* متوافق مع شاشات الهواتف الطولية */
+            flex-direction: column;
             gap: 20px;
             background: var(--card-bg);
             border-radius: 15px;
@@ -47,7 +41,7 @@
 
         #canvas-3d-viewport {
             width: 100%;
-            height: 350px; /* حجم مناسب للمعاينة على الموبايل */
+            height: 350px;
             background: #000;
             border-radius: 10px;
             position: relative;
@@ -69,11 +63,7 @@
             transition: opacity 0.5s;
         }
 
-        .fighter-details {
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-        }
+        .fighter-details { display: flex; flex-direction: column; justify-content: center; }
 
         .btn-action {
             background: var(--neon-cyan);
@@ -85,16 +75,21 @@
             cursor: pointer;
             margin-top: 15px;
             width: 100%;
-            -webkit-tap-highlight-color: transparent; /* تحسين استجابة اللمس للهواتف */
+            -webkit-tap-highlight-color: transparent;
         }
 
-        .hint-text {
-            font-size: 12px;
-            color: #888;
-            margin-top: 10px;
-            text-align: center;
-        }
+        .hint-text { font-size: 12px; color: #888; margin-top: 10px; text-align: center; }
     </style>
+
+    <!-- إعداد خريطة الاستيراد (Import Map) لحل مشكلة الروابط والتوافق مع الهواتف تماماً -->
+    <script type="importmap">
+      {
+        "imports": {
+          "three": "https://unpkg.com",
+          "three/addons/": "https://unpkg.com"
+        }
+      }
+    </script>
 </head>
 <body>
 
@@ -116,13 +111,18 @@
             <div class="fighter-details">
                 <h3 style="font-size: 24px; margin-bottom: 5px;">خوذة السايبر (مستودع حي)</h3>
                 <p style="color: var(--neon-magenta); font-weight: bold; margin-bottom: 10px;">المستوى: Max 4</p>
-                <p style="color: #aaa; font-size: 14px;">تم تحميل هذا المجسم الحقيقي من خوادم اختبارات الويب لضمان عمل الرندرة ثلاثية الأبعاد بنجاح على متصفح هاتفك.</p>
-                <button class="btn-action" onclick="triggerAttackAnimation()">حركة تفاعلية</button>
+                <p style="color: #aaa; font-size: 14px;">تم تحديث بروتوكول الرندرة ليصبح متوافقاً تماماً مع متصفح الموبايل وعرض الأشكال عبر خادم الجيت هب.</p>
+                <button class="btn-action" id="anim-btn">حركة تفاعلية</button>
             </div>
         </div>
     </div>
 
-    <script>
+    <!-- كود التشغيل بصيغة موديول لحل مشكلة التوقف واختفاء المجسم -->
+    <script type="module">
+        import * as THREE from 'three';
+        import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+        import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+
         let scene, camera, renderer, controls, characterMesh;
 
         function init3D() {
@@ -137,14 +137,13 @@
             renderer = new THREE.WebGLRenderer({ antialias: true });
             renderer.setSize(viewport.clientWidth, viewport.clientHeight);
             renderer.shadowMap.enabled = true;
-            renderer.outputEncoding = THREE.sRGBEncoding;
             viewport.appendChild(renderer.domElement);
 
-            controls = new THREE.OrbitControls(camera, renderer.domElement);
+            controls = new OrbitControls(camera, renderer.domElement);
             controls.enableDamping = true;
             controls.dampingFactor = 0.05;
 
-            // إضاءة سينمائية قوية لتعكس لمعان الدروع
+            // إضاءة سينمائية قوية لتعكس لمعان الدروع الواقعي
             const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
             scene.add(ambientLight);
 
@@ -156,14 +155,14 @@
             pinkLight.position.set(-2, 2, -2);
             scene.add(pinkLight);
 
-            // استدعاء ملف ثلاثي أبعاد حقيقي من السيرفر العام لضمان الظهور الفوري عند الاختبار
-            const loader = new THREE.GLTFLoader();
+            // استدعاء ملف نموذج ثلاثي أبعاد عالي الجودة للويب
+            const loader = new GLTFLoader();
             const modelUrl = 'https://githubusercontent.com';
 
             loader.load(modelUrl, function (gltf) {
                 characterMesh = gltf.scene;
                 characterMesh.position.y = 0;
-                characterMesh.scale.set(0.6, 0.6, 0.6); // حجم مناسب للموبايل
+                characterMesh.scale.set(0.6, 0.6, 0.6);
                 scene.add(characterMesh);
 
                 // إخفاء شاشة التحميل
@@ -172,7 +171,7 @@
 
             }, undefined, function (error) {
                 console.error(error);
-                document.getElementById('loading-overlay').innerText = "⚠️ خطأ في الاتصال بالسيرفر لتنزيل المجسم.";
+                document.getElementById('loading-overlay').innerText = "⚠️ خطأ في توافق ملف الـ 3D مع المتصفح.";
             });
 
             animate();
@@ -181,19 +180,19 @@
         function animate() {
             requestAnimationFrame(animate);
             if (characterMesh) {
-                characterMesh.rotation.y += 0.005; // دوران تلقائي ممتع للمشاهدة
+                characterMesh.rotation.y += 0.005; 
             }
             controls.update();
             renderer.render(scene, camera);
         }
 
-        function triggerAttackAnimation() {
+        document.getElementById('anim-btn').addEventListener('click', () => {
             if(characterMesh) {
                 let initialScale = characterMesh.scale.x;
                 characterMesh.scale.set(initialScale * 1.2, initialScale * 1.2, initialScale * 1.2);
                 setTimeout(() => { characterMesh.scale.set(initialScale, initialScale, initialScale); }, 150);
             }
-        }
+        });
 
         window.onload = init3D;
 
