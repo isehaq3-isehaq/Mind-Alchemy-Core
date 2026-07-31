@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Mind Alchemy Fighters - حلبة القتال والتداول 3D</title>
+    <title>Nexus Cyber Fighter - 3D Character Creator & Arena</title>
     
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -24,8 +24,8 @@
             theme: {
                 extend: {
                     colors: {
-                        darkBg: '#05070e',
-                        cardBg: '#0c1222',
+                        darkBg: '#030712',
+                        cardBg: '#0b1120',
                         cardBorder: '#1e293b',
                         boonGold: '#fbbf24',
                         accentRed: '#ef4444',
@@ -46,7 +46,7 @@
 
     <style>
         body {
-            background-color: #05070e;
+            background-color: #030712;
             color: #f8fafc;
             font-family: 'Tajawal', 'Inter', sans-serif;
             overflow-x: hidden;
@@ -66,7 +66,7 @@
         }
 
         .glass-panel {
-            background: rgba(12, 18, 34, 0.88);
+            background: rgba(11, 17, 32, 0.92);
             backdrop-filter: blur(14px);
             border: 1px solid rgba(255, 255, 255, 0.08);
         }
@@ -77,7 +77,7 @@
             height: 5px;
         }
         ::-webkit-scrollbar-track {
-            background: #05070e;
+            background: #030712;
         }
         ::-webkit-scrollbar-thumb {
             background: #1e293b;
@@ -90,7 +90,7 @@
         /* 3D Canvas Viewport Container */
         #canvas-container {
             width: 100%;
-            height: 380px;
+            height: 420px;
             position: relative;
             touch-action: none;
             overflow: hidden;
@@ -104,16 +104,6 @@
         .toast-animate {
             animation: toastIn 0.3s ease forwards;
         }
-
-        /* Health Bar Shake on Damage */
-        @keyframes damageShake {
-            0%, 100% { transform: translateX(0); }
-            20%, 60% { transform: translateX(-6px); }
-            40%, 80% { transform: translateX(6px); }
-        }
-        .shake-effect {
-            animation: damageShake 0.3s ease;
-        }
     </style>
 </head>
 <body class="min-h-screen pb-12">
@@ -121,100 +111,83 @@
 <!-- Toast Notification Container -->
 <div id="toast-container" class="fixed top-5 left-1/2 -translate-x-1/2 z-50 flex flex-col gap-2 w-11/12 max-w-md pointer-events-none"></div>
 
-<!-- Top Sticky Navigation Bar -->
+<!-- Top Navigation Bar -->
 <header class="sticky top-0 z-40 glass-panel border-b border-slate-800 px-4 py-3">
     <div class="max-w-7xl mx-auto flex items-center justify-between flex-wrap gap-2">
         <div class="flex items-center gap-3">
-            <div onclick="navigateTo('arena')" class="w-10 h-10 rounded-xl bg-gradient-to-tr from-red-600 via-amber-500 to-amber-300 flex items-center justify-center font-black text-slate-950 font-cairo text-2xl shadow-lg shadow-red-500/20 cursor-pointer">
-                ⚔️
+            <div onclick="navigateTo('creator')" class="w-10 h-10 rounded-xl bg-gradient-to-tr from-cyan-500 via-amber-500 to-red-500 flex items-center justify-center font-black text-slate-950 font-cairo text-xl shadow-lg shadow-cyan-500/20 cursor-pointer">
+                👤
             </div>
             <div>
                 <h1 class="font-cairo font-extrabold text-base sm:text-lg text-white leading-tight flex items-center gap-2">
-                    Mind Alchemy <span class="text-amber-400">Fighters</span>
-                    <span class="text-boonGold text-[10px] font-semibold px-2 py-0.5 rounded-full bg-amber-500/10 border border-amber-500/30" id="badge-version">حلبة القتال 3D</span>
+                    Nexus <span class="text-amber-400">Cyber Fighter</span>
+                    <span class="text-boonGold text-[10px] font-semibold px-2 py-0.5 rounded-full bg-amber-500/10 border border-amber-500/30" id="badge-version">مصمم الشخصيات 3D</span>
                 </h1>
-                <p class="text-[11px] text-slate-400 hidden sm:block" id="header-sub-text">مقاتلو الذكاء الاصطناعي والتداول المباشر</p>
+                <p class="text-[11px] text-slate-400 hidden sm:block" id="header-sub-text">ابتكار المقاتلين، المعارك، وتداول الأسلحة بـ (ϐ)</p>
             </div>
         </div>
 
-        <!-- Wallet Balances & Navigation Controls -->
-        <div class="flex items-center gap-2 sm:gap-3 flex-wrap">
-            <!-- Navigation Buttons -->
-            <button id="nav-btn-arena" onclick="navigateTo('arena')" class="bg-red-600/30 hover:bg-red-600/50 text-red-300 border border-red-500/50 px-3 py-1.5 rounded-xl text-xs font-cairo font-bold transition flex items-center gap-1.5 shadow-lg shadow-red-500/10">
+        <!-- Navigation & Wallet Balances -->
+        <div class="flex items-center gap-2 sm:gap-2.5 flex-wrap">
+            <button id="nav-btn-creator" onclick="navigateTo('creator')" class="bg-cyan-600/30 hover:bg-cyan-600/50 text-cyan-300 border border-cyan-500/50 px-3 py-1.5 rounded-xl text-xs font-cairo font-bold transition flex items-center gap-1.5">
+                <i class="fa-solid fa-user-gear text-xs"></i>
+                <span id="btn-nav-creator">تخصيص الشخصية</span>
+            </button>
+
+            <button id="nav-btn-arena" onclick="navigateTo('arena')" class="bg-slate-800 hover:bg-slate-700 text-red-300 border border-red-500/40 px-2.5 py-1.5 rounded-xl text-xs font-cairo font-bold transition flex items-center gap-1.5">
                 <i class="fa-solid fa-hand-fist text-xs"></i>
                 <span id="btn-nav-arena">حلبة القتال</span>
             </button>
 
-            <button id="nav-btn-market" onclick="navigateTo('market')" class="bg-slate-800/90 hover:bg-slate-700 text-amber-300 border border-amber-500/40 px-2.5 py-1.5 rounded-xl text-xs font-cairo font-bold transition flex items-center gap-1.5">
+            <button id="nav-btn-market" onclick="navigateTo('market')" class="bg-slate-800 hover:bg-slate-700 text-amber-300 border border-amber-500/40 px-2.5 py-1.5 rounded-xl text-xs font-cairo font-bold transition flex items-center gap-1.5">
                 <i class="fa-solid fa-store text-xs"></i>
                 <span id="btn-nav-market">سوق التداول</span>
             </button>
 
-            <button id="nav-btn-duels" onclick="navigateTo('duels')" class="bg-slate-800/90 hover:bg-slate-700 text-purple-300 border border-purple-500/40 px-2.5 py-1.5 rounded-xl text-xs font-cairo font-bold transition flex items-center gap-1.5">
+            <button id="nav-btn-duels" onclick="navigateTo('duels')" class="bg-slate-800 hover:bg-slate-700 text-purple-300 border border-purple-500/40 px-2.5 py-1.5 rounded-xl text-xs font-cairo font-bold transition flex items-center gap-1.5">
                 <i class="fa-solid fa-skull text-xs"></i>
                 <span id="btn-nav-duels">تحدي الرهان</span>
             </button>
 
-            <button id="nav-btn-store" onclick="navigateTo('store')" class="bg-slate-800/90 hover:bg-slate-700 text-cyan-300 border border-cyan-500/40 px-2.5 py-1.5 rounded-xl text-xs font-cairo font-bold transition flex items-center gap-1.5">
-                <i class="fa-solid fa-cart-shopping text-xs"></i>
-                <span id="btn-nav-store">المتجر</span>
-            </button>
-
-            <!-- Language Selector Toggle Button -->
-            <button onclick="toggleLanguage()" class="bg-slate-800/90 hover:bg-slate-700 text-amber-400 border border-amber-500/40 px-2.5 py-1.5 rounded-xl text-xs font-cairo font-bold transition flex items-center gap-1.5">
+            <!-- Language Switcher -->
+            <button onclick="toggleLanguage()" class="bg-slate-800 hover:bg-slate-700 text-amber-400 border border-amber-500/40 px-2.5 py-1.5 rounded-xl text-xs font-cairo font-bold transition flex items-center gap-1.5">
                 <i class="fa-solid fa-globe text-xs"></i>
                 <span id="lang-btn-text">English</span>
             </button>
 
-            <!-- Boon Token Balance -->
+            <!-- Boon Wallet Balance -->
             <div class="flex items-center gap-2 bg-slate-900/90 border border-amber-500/40 px-3 py-1.5 rounded-xl gold-glow">
-                <div class="w-6 h-6 rounded-full bg-amber-500/20 border border-amber-400 flex items-center justify-center text-amber-400 font-bold text-xs">
-                    ϐ
-                </div>
+                <div class="w-5 h-5 rounded-full bg-amber-500/20 border border-amber-400 flex items-center justify-center text-amber-400 font-bold text-xs">ϐ</div>
                 <div class="text-right ltr:text-left">
-                    <div class="text-[9px] text-slate-400 font-medium leading-none" id="label-boon">عملة بُون (BOON)</div>
+                    <div class="text-[8px] text-slate-400 font-medium leading-none" id="label-boon">رصيد بُون</div>
                     <div id="header-boon-balance" class="font-mono font-bold text-amber-400 text-xs sm:text-sm leading-tight">500 ϐ</div>
-                </div>
-            </div>
-
-            <!-- Player Power Rank -->
-            <div class="flex items-center gap-2 bg-slate-900/90 border border-cyan-500/40 px-2.5 py-1.5 rounded-xl">
-                <i class="fa-solid fa-bolt text-cyan-400 text-xs"></i>
-                <div class="text-right ltr:text-left">
-                    <div class="text-[9px] text-slate-400 font-medium leading-none" id="label-power">القوة القتالية</div>
-                    <div id="header-power-level" class="font-mono font-bold text-cyan-300 text-xs sm:text-sm leading-tight">1450 PWR</div>
                 </div>
             </div>
         </div>
     </div>
 </header>
 
-<!-- VIEW 1: COMBAT & TRAINING ARENA (حلبة القتال والتدريب) -->
-<section id="view-arena" class="max-w-7xl mx-auto px-3 sm:px-4 mt-6">
+<!-- VIEW 1: 3D CHARACTER CREATOR & CUSTOMIZER (إنشاء وتخصيص الشخصية القتالية) -->
+<section id="view-creator" class="max-w-7xl mx-auto px-3 sm:px-4 mt-5">
     <div class="grid grid-cols-1 lg:grid-cols-12 gap-5 sm:gap-6">
         
-        <!-- LEFT COLUMN: 3D Fighter & Weapon Canvas (7 Cols) -->
-        <div class="lg:col-span-7 space-y-5 sm:space-y-6">
+        <!-- LEFT COLUMN: 3D CHARACTER VIEWPORT (7 Cols) -->
+        <div class="lg:col-span-7 space-y-4">
             <div class="bg-cardBg border border-cardBorder rounded-2xl overflow-hidden shadow-2xl relative">
                 
                 <!-- Card Header Banner -->
-                <div class="p-3.5 border-b border-cardBorder flex items-center justify-between bg-slate-950/70">
+                <div class="p-3.5 border-b border-cardBorder flex items-center justify-between bg-slate-950/80">
                     <div class="flex items-center gap-2">
-                        <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold font-cairo bg-red-500/10 text-red-400 border border-red-500/30" id="badge-arena-status">
-                            <i class="fa-solid fa-crosshairs text-xs"></i>
-                            حلبة قتال ثلاثية الأبعاد 360°
+                        <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold font-cairo bg-cyan-500/10 text-cyan-400 border border-cyan-500/30" id="badge-creator-3d">
+                            <i class="fa-solid fa-cube text-xs"></i>
+                            معاينة الشخصية البشرية 3D
                         </span>
-                        <h2 class="font-cairo font-bold text-slate-200 text-xs sm:text-sm" id="fighter-name-display">المقاتل: صقر الأثير (AI Cyber Samurai)</h2>
+                        <h2 class="font-cairo font-bold text-slate-200 text-xs sm:text-sm" id="character-title-display">المقاتل: صقر الأثير</h2>
                     </div>
 
-                    <div class="flex items-center gap-1.5">
-                        <button onclick="resetCamera()" class="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs transition" title="Reset 3D View">
-                            <i class="fa-solid fa-rotate-right"></i>
-                        </button>
-                        <button onclick="toggleAuraEffect()" class="px-2.5 py-1 rounded-lg bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40 text-xs font-cairo font-bold transition">
-                            <i class="fa-solid fa-wand-magic-sparkles text-xs ml-1"></i> <span id="btn-aura-toggle">هالة الطاقة</span>
-                        </button>
-                    </div>
+                    <button onclick="reset3DCamera()" class="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs transition" title="Reset View">
+                        <i class="fa-solid fa-arrows-rotate ml-1"></i> <span id="btn-reset-view">ضبط الكاميرا</span>
+                    </button>
                 </div>
 
                 <!-- 3D Canvas Container -->
@@ -224,77 +197,217 @@
                     <!-- Touch Controls Hint -->
                     <div class="absolute bottom-3 right-3 bg-slate-950/85 backdrop-blur border border-slate-800 px-3 py-1.5 rounded-xl text-[11px] text-slate-300 flex items-center gap-2 pointer-events-none">
                         <i class="fa-solid fa-hand-pointer text-amber-400 animate-bounce"></i>
-                        <span id="label-touch-arena">اسحب لتدوير المقاتل والسلاح 360 درجة</span>
+                        <span id="label-touch-hint">اسحب لتدوير الشخصية 360 درجة وفحص الملامح</span>
                     </div>
 
-                    <!-- Fighter Class Tag -->
-                    <div class="absolute top-3 right-3 bg-gradient-to-r from-red-600 to-amber-600 text-slate-950 font-cairo font-extrabold text-xs px-3 py-1 rounded-lg shadow-lg flex items-center gap-1.5">
-                        <i class="fa-solid fa-shield-halved text-xs"></i>
-                        <span id="label-fighter-class">فئة: الأسطوري (LEGENDARY)</span>
+                    <div class="absolute top-3 right-3 bg-gradient-to-r from-cyan-600 to-indigo-600 text-white font-cairo font-bold text-xs px-3 py-1 rounded-lg shadow-lg">
+                        <span id="fighter-pwr-tag">القوة المبدئية: 1200 PWR</span>
                     </div>
                 </div>
 
-                <!-- 3D Fighter & Equipment Selector -->
-                <div class="p-3 bg-slate-950/90 border-t border-cardBorder space-y-2 text-xs font-cairo font-bold">
-                    <div class="flex items-center justify-between gap-1.5 overflow-x-auto pb-1">
-                        <span class="text-slate-400 text-[11px] whitespace-nowrap" id="label-equipped-gear">المعدات المجهزة:</span>
-                        <div class="flex items-center gap-1.5">
-                            <button onclick="switch3DObject('helmet')" class="px-2.5 py-1 rounded-lg bg-amber-500/20 text-amber-300 border border-amber-500/40 transition whitespace-nowrap">
-                                <i class="fa-solid fa-helmet-safety ml-1"></i> <span id="btn-gear-helmet">خوذة الساموراي</span>
-                            </button>
-                            <button onclick="switch3DObject('sword')" class="px-2.5 py-1 rounded-lg bg-slate-900 text-slate-400 border border-slate-800 transition whitespace-nowrap">
-                                <i class="fa-solid fa-wand-sparkles ml-1"></i> <span id="btn-gear-sword">سيف الأثير</span>
-                            </button>
-                            <button onclick="switch3DObject('shield')" class="px-2.5 py-1 rounded-lg bg-slate-900 text-slate-400 border border-slate-800 transition whitespace-nowrap">
-                                <i class="fa-solid fa-shield-cat ml-1"></i> <span id="btn-gear-shield">درع النيون</span>
-                            </button>
-                        </div>
-                    </div>
-
-                    <!-- Material & Elemental Skins Controls -->
-                    <div class="grid grid-cols-2 sm:grid-cols-3 gap-2">
-                        <button onclick="setMaterialStyle('gold')" class="p-2 rounded-xl bg-slate-900 hover:bg-slate-800 border border-amber-500/30 text-amber-300 transition flex items-center justify-center gap-1.5">
-                            <span class="w-2.5 h-2.5 rounded-full bg-amber-400 inline-block"></span>
-                            <span id="btn-skin-gold">عنصر الذهب الحارق</span>
+                <!-- Quick Preset Outfit & Gear Bar -->
+                <div class="p-3 bg-slate-950/90 border-t border-cardBorder flex items-center justify-between gap-2 overflow-x-auto text-xs font-cairo">
+                    <span class="text-slate-400 whitespace-nowrap" id="label-quick-outfit">تجهيز سريع:</span>
+                    <div class="flex items-center gap-2">
+                        <button onclick="applyOutfitPreset('cyber_samurai')" class="px-3 py-1.5 rounded-xl bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 hover:bg-cyan-500/30 transition whitespace-nowrap">
+                            <i class="fa-solid fa-shield-halved ml-1"></i> <span id="preset-samurai">بدلة الساموراي</span>
                         </button>
-                        <button onclick="setMaterialStyle('cyber')" class="p-2 rounded-xl bg-slate-900 hover:bg-slate-800 border border-cyan-500/30 text-cyan-300 transition flex items-center justify-center gap-1.5">
-                            <span class="w-2.5 h-2.5 rounded-full bg-cyan-400 inline-block"></span>
-                            <span id="btn-skin-cyber">طاقة السايبر نيون</span>
+                        <button onclick="applyOutfitPreset('tactical_armored')" class="px-3 py-1.5 rounded-xl bg-amber-500/20 text-amber-300 border border-amber-500/40 hover:bg-amber-500/30 transition whitespace-nowrap">
+                            <i class="fa-solid fa-vest ml-1"></i> <span id="preset-tactical">درع التكتيك الفولاذي</span>
                         </button>
-                        <button onclick="setMaterialStyle('obsidian')" class="p-2 rounded-xl bg-slate-900 hover:bg-slate-800 border border-purple-500/30 text-purple-300 transition flex items-center justify-center gap-1.5">
-                            <span class="w-2.5 h-2.5 rounded-full bg-purple-400 inline-block"></span>
-                            <span id="btn-skin-dark">درع الأوبسيديان</span>
+                        <button onclick="applyOutfitPreset('assassin_stealth')" class="px-3 py-1.5 rounded-xl bg-purple-500/20 text-purple-300 border border-purple-500/40 hover:bg-purple-500/30 transition whitespace-nowrap">
+                            <i class="fa-solid fa-user-ninja ml-1"></i> <span id="preset-stealth">زيّ الشبح الظلامي</span>
                         </button>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- RIGHT COLUMN: COMBAT SIMULATOR & TRAINING GROUND (5 Cols) -->
-        <div class="lg:col-span-5 space-y-5 sm:space-y-6">
-            <div class="bg-cardBg border border-cardBorder rounded-2xl p-4 sm:p-5 shadow-xl space-y-4">
+        <!-- RIGHT COLUMN: CHARACTER CUSTOMIZATION CONTROLS PANEL (5 Cols) -->
+        <div class="lg:col-span-5 space-y-4">
+            <div class="bg-cardBg border border-cardBorder rounded-2xl p-4 sm:p-5 shadow-xl space-y-4 font-cairo">
                 
-                <!-- Arena Banner Title -->
                 <div class="flex items-center justify-between border-b border-slate-800 pb-3">
                     <div class="flex items-center gap-2.5">
-                        <div class="w-10 h-10 rounded-xl bg-red-500/10 border border-red-500/30 flex items-center justify-center text-red-400 text-lg">
-                            <i class="fa-solid fa-dumbbell"></i>
+                        <div class="w-9 h-9 rounded-xl bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center text-cyan-400 text-base">
+                            <i class="fa-solid fa-sliders"></i>
                         </div>
                         <div>
-                            <h3 class="font-cairo font-bold text-white text-base" id="title-training-mode">مرحلة التدريب والقتال الحقيقي</h3>
-                            <p class="text-xs text-slate-400" id="sub-training-mode">اقضِ على الخصم واكسب عملات **بُون (ϐ)**</p>
+                            <h3 class="font-bold text-white text-base" id="title-customizer-panel">ورشة تصميم الوجه والجسم</h3>
+                            <p class="text-xs text-slate-400" id="sub-customizer-panel">خصص ملامح مقاتلك البشري قبل خوض القتال</p>
                         </div>
                     </div>
-                    
-                    <span class="text-xs font-mono px-2.5 py-1 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30" id="stat-win-streak">0 انتصارات متتالية</span>
                 </div>
 
-                <!-- Live Health Bars Battle HUD -->
-                <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 space-y-3">
-                    <!-- Player Health Bar -->
+                <!-- Fighter Name & Gender Input -->
+                <div class="space-y-3 bg-slate-950 p-3.5 rounded-xl border border-slate-800">
                     <div>
-                        <div class="flex justify-between text-xs font-cairo font-bold mb-1">
-                            <span class="text-cyan-400" id="label-player-hp">مقاتلك (صقر الأثير)</span>
+                        <label class="block text-xs text-slate-400 mb-1" id="label-fighter-name">اسم المقاتل:</label>
+                        <input id="input-fighter-name" type="text" value="صقر الأثير" oninput="updateFighterName(this.value)" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-cyan-300 font-bold focus:outline-none focus:border-cyan-400">
+                    </div>
+
+                    <!-- Gender Selection -->
+                    <div>
+                        <label class="block text-xs text-slate-400 mb-1" id="label-gender">بنية الجسم (الجنس):</label>
+                        <div class="grid grid-cols-2 gap-2">
+                            <button id="btn-gender-male" onclick="setGender('male')" class="py-2 rounded-xl bg-cyan-500 text-slate-950 font-bold text-xs transition">
+                                <i class="fa-solid fa-mars ml-1"></i> <span id="gender-male">ذكر (Male)</span>
+                            </button>
+                            <button id="btn-gender-female" onclick="setGender('female')" class="py-2 rounded-xl bg-slate-900 text-slate-400 border border-slate-800 font-bold text-xs transition">
+                                <i class="fa-solid fa-venus ml-1"></i> <span id="gender-female">أنثى (Female)</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Face Shape Controls -->
+                <div class="space-y-2 bg-slate-950 p-3.5 rounded-xl border border-slate-800">
+                    <label class="block text-xs text-slate-300 font-bold" id="label-face-shape">شكل الوجه والرأس:</label>
+                    <div class="grid grid-cols-3 gap-2">
+                        <button onclick="setFaceShape('round')" class="py-2 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-700 text-slate-300 text-xs transition" id="face-round">
+                            مستدير (Round)
+                        </button>
+                        <button onclick="setFaceShape('oval')" class="py-2 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-700 text-slate-300 text-xs transition" id="face-oval">
+                            بيضاوي (Oval)
+                        </button>
+                        <button onclick="setFaceShape('long')" class="py-2 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-700 text-slate-300 text-xs transition" id="face-long">
+                            طويل (Long)
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Skin Tone Palette Options -->
+                <div class="space-y-2 bg-slate-950 p-3.5 rounded-xl border border-slate-800">
+                    <label class="block text-xs text-slate-300 font-bold" id="label-skin-tone">لون البشرة المتعدد:</label>
+                    <div class="flex items-center gap-2 overflow-x-auto pb-1">
+                        <button onclick="setSkinColor('#f8d5c2')" class="w-8 h-8 rounded-full bg-[#f8d5c2] border-2 border-white/20 hover:scale-110 transition shrink-0" title="Light"></button>
+                        <button onclick="setSkinColor('#d09b76')" class="w-8 h-8 rounded-full bg-[#d09b76] border-2 border-white/20 hover:scale-110 transition shrink-0" title="Warm Tan"></button>
+                        <button onclick="setSkinColor('#8d5524')" class="w-8 h-8 rounded-full bg-[#8d5524] border-2 border-white/20 hover:scale-110 transition shrink-0" title="Bronze Dark"></button>
+                        <button onclick="setSkinColor('#4a2e13')" class="w-8 h-8 rounded-full bg-[#4a2e13] border-2 border-white/20 hover:scale-110 transition shrink-0" title="Deep Ebony"></button>
+                        <button onclick="setSkinColor('#38bdf8')" class="w-8 h-8 rounded-full bg-[#38bdf8] border-2 border-white/20 hover:scale-110 transition shrink-0" title="Cyber Cyan Skin"></button>
+                        <button onclick="setSkinColor('#c084fc')" class="w-8 h-8 rounded-full bg-[#c084fc] border-2 border-white/20 hover:scale-110 transition shrink-0" title="Alien Violet"></button>
+                    </div>
+                </div>
+
+                <!-- Nose & Mouth Shape Morph Sliders -->
+                <div class="space-y-3 bg-slate-950 p-3.5 rounded-xl border border-slate-800 text-xs">
+                    <div>
+                        <div class="flex justify-between text-slate-400 mb-1">
+                            <span id="label-nose-size">بروز الأنف:</span>
+                            <span id="val-nose-size" class="font-mono text-cyan-400">1.0x</span>
+                        </div>
+                        <input type="range" min="0.6" max="1.5" step="0.1" value="1.0" oninput="morphNose(this.value)" class="w-full accent-cyan-400">
+                    </div>
+
+                    <div>
+                        <div class="flex justify-between text-slate-400 mb-1">
+                            <span id="label-mouth-size">عرض الفم والشفاه:</span>
+                            <span id="val-mouth-size" class="font-mono text-cyan-400">1.0x</span>
+                        </div>
+                        <input type="range" min="0.7" max="1.4" step="0.1" value="1.0" oninput="morphMouth(this.value)" class="w-full accent-cyan-400">
+                    </div>
+                </div>
+
+                <!-- Hairstyles & Hair Colors -->
+                <div class="space-y-2 bg-slate-950 p-3.5 rounded-xl border border-slate-800">
+                    <label class="block text-xs text-slate-300 font-bold" id="label-hairstyle">تسريحة الشعر:</label>
+                    <div class="grid grid-cols-3 gap-2">
+                        <button onclick="setHairstyle('short_crop')" class="py-2 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-700 text-slate-300 text-xs transition" id="hair-crop">
+                            قصة قصيرة
+                        </button>
+                        <button onclick="setHairstyle('cyber_ponytail')" class="py-2 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-700 text-slate-300 text-xs transition" id="hair-ponytail">
+                            ذيل سايبر
+                        </button>
+                        <button onclick="setHairstyle('buzzcut')" class="py-2 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-700 text-slate-300 text-xs transition" id="hair-buzz">
+                            شعر حلاقة
+                        </button>
+                    </div>
+
+                    <!-- Hair Color Swatches -->
+                    <div class="flex items-center gap-2 pt-2">
+                        <span class="text-xs text-slate-400" id="label-hair-color">لون الشعر:</span>
+                        <button onclick="setHairColor('#1e293b')" class="w-6 h-6 rounded-full bg-[#1e293b] border border-white/20 shrink-0"></button>
+                        <button onclick="setHairColor('#f59e0b')" class="w-6 h-6 rounded-full bg-[#f59e0b] border border-white/20 shrink-0"></button>
+                        <button onclick="setHairColor('#ef4444')" class="w-6 h-6 rounded-full bg-[#ef4444] border border-white/20 shrink-0"></button>
+                        <button onclick="setHairColor('#38bdf8')" class="w-6 h-6 rounded-full bg-[#38bdf8] border border-white/20 shrink-0"></button>
+                        <button onclick="setHairColor('#ffffff')" class="w-6 h-6 rounded-full bg-[#ffffff] border border-white/20 shrink-0"></button>
+                    </div>
+                </div>
+
+                <!-- Body Build & Height Sliders -->
+                <div class="space-y-3 bg-slate-950 p-3.5 rounded-xl border border-slate-800 text-xs">
+                    <div>
+                        <div class="flex justify-between text-slate-400 mb-1">
+                            <span id="label-height">الطول والقامة:</span>
+                            <span id="val-height" class="font-mono text-cyan-400">182 cm</span>
+                        </div>
+                        <input type="range" min="0.85" max="1.25" step="0.05" value="1.0" oninput="morphHeight(this.value)" class="w-full accent-cyan-400">
+                    </div>
+
+                    <div>
+                        <div class="flex justify-between text-slate-400 mb-1">
+                            <span id="label-muscles">الكتلة العضلية (Build):</span>
+                            <span id="val-muscles" class="font-mono text-cyan-400">Athletic</span>
+                        </div>
+                        <input type="range" min="0.8" max="1.3" step="0.1" value="1.0" oninput="morphMuscles(this.value)" class="w-full accent-cyan-400">
+                    </div>
+                </div>
+
+                <!-- Confirm Character & Enter Arena Button -->
+                <button onclick="saveCharacterAndEnterArena()" class="w-full py-3 rounded-xl bg-gradient-to-r from-cyan-500 via-amber-500 to-amber-600 hover:from-cyan-400 hover:to-amber-500 text-slate-950 font-black text-xs sm:text-sm shadow-xl shadow-cyan-500/20 transition flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-check-circle text-base"></i>
+                    <span id="btn-save-character">حفظ الشخصية ودخول حلبة القتال (Enter Combat)</span>
+                </button>
+
+            </div>
+        </div>
+
+    </div>
+</section>
+
+<!-- VIEW 2: COMBAT & TRAINING ARENA (حلبة المعارك والتدريب) -->
+<section id="view-arena" class="max-w-7xl mx-auto px-3 sm:px-4 mt-5 hidden">
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-5 sm:gap-6">
+        
+        <!-- Arena Canvas Side -->
+        <div class="lg:col-span-7 space-y-4">
+            <div class="bg-cardBg border border-cardBorder rounded-2xl overflow-hidden shadow-2xl relative">
+                <div class="p-3.5 border-b border-cardBorder flex items-center justify-between bg-slate-950/80">
+                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold font-cairo bg-red-500/10 text-red-400 border border-red-500/30">
+                        <i class="fa-solid fa-crosshairs text-xs"></i>
+                        حلبة النزال السايبرانية 3D
+                    </span>
+                    <h2 class="font-cairo font-bold text-slate-200 text-xs sm:text-sm" id="arena-fighter-name">المقاتل الشخصي: صقر الأثير</h2>
+                </div>
+
+                <div id="arena-canvas-container" class="relative bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 h-96 flex items-center justify-center">
+                    <div class="text-center p-6 space-y-3">
+                        <div class="w-20 h-20 rounded-full bg-red-500/10 border-2 border-red-500/40 flex items-center justify-center text-red-400 text-3xl mx-auto animate-pulse">
+                            ⚔️
+                        </div>
+                        <h3 class="font-cairo font-extrabold text-white text-lg" id="arena-ready-title">مستعد للقتال!</h3>
+                        <p class="text-xs text-slate-400 max-w-sm mx-auto" id="arena-ready-desc">تم تحميل شخصيتك المعدلة بالكامل. وجه الضربات للخصوم لكسب عملة **بُون (ϐ)** ورصيد الخبرة XP!</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Combat HUD Controls -->
+        <div class="lg:col-span-5 space-y-4">
+            <div class="bg-cardBg border border-cardBorder rounded-2xl p-4 sm:p-5 shadow-xl space-y-4 font-cairo">
+                <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+                    <div class="flex items-center gap-2">
+                        <i class="fa-solid fa-hand-fist text-red-400 text-lg"></i>
+                        <h3 class="font-bold text-white text-base" id="title-fight-hud">مواجهة الخصم</h3>
+                    </div>
+                    <span class="text-xs font-mono px-2.5 py-1 rounded-full bg-emerald-500/20 text-emerald-400" id="arena-win-streak">0 انتصارات</span>
+                </div>
+
+                <!-- Health Bars HUD -->
+                <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 space-y-3">
+                    <div>
+                        <div class="flex justify-between text-xs font-bold mb-1">
+                            <span class="text-cyan-400" id="hud-player-name">مقاتلك الشخصي</span>
                             <span id="player-hp-text" class="text-slate-300 font-mono">100 / 100 HP</span>
                         </div>
                         <div class="w-full h-3 bg-slate-900 rounded-full overflow-hidden border border-slate-800">
@@ -302,13 +415,11 @@
                         </div>
                     </div>
 
-                    <!-- VS Divider -->
-                    <div class="text-center font-black font-cairo text-xs text-red-500 tracking-widest">VS</div>
+                    <div class="text-center font-black text-xs text-red-500 tracking-widest">VS</div>
 
-                    <!-- Rival AI Enemy Health Bar -->
-                    <div id="enemy-card-hud">
-                        <div class="flex justify-between text-xs font-cairo font-bold mb-1">
-                            <span class="text-red-400" id="enemy-name-display">الخصم: وحش الأوبسيديان #04</span>
+                    <div>
+                        <div class="flex justify-between text-xs font-bold mb-1">
+                            <span class="text-red-400" id="hud-enemy-name">الخصم: الشبح النيون #03</span>
                             <span id="enemy-hp-text" class="text-slate-300 font-mono">100 / 100 HP</span>
                         </div>
                         <div class="w-full h-3 bg-slate-900 rounded-full overflow-hidden border border-slate-800">
@@ -317,37 +428,37 @@
                     </div>
                 </div>
 
-                <!-- Real-time Combat Action Buttons -->
-                <div class="grid grid-cols-2 gap-2.5 pt-1">
-                    <button onclick="executeCombatMove('attack')" class="py-3 px-4 rounded-xl bg-gradient-to-r from-red-600 to-red-500 hover:from-red-500 hover:to-red-400 text-white font-cairo font-extrabold text-xs shadow-lg shadow-red-500/20 transition flex items-center justify-center gap-2">
+                <!-- Action Buttons -->
+                <div class="grid grid-cols-2 gap-2.5">
+                    <button onclick="executeMove('attack')" class="py-3 rounded-xl bg-gradient-to-r from-red-600 to-red-500 hover:from-red-500 hover:to-red-400 text-white font-extrabold text-xs shadow-lg shadow-red-500/20 transition flex items-center justify-center gap-1.5">
                         <i class="fa-solid fa-hand-fist"></i>
-                        <span id="btn-attack-normal">هجوم عادي بالسيف</span>
+                        <span id="btn-attack-strike">هجوم خاطف</span>
                     </button>
 
-                    <button onclick="executeCombatMove('special')" class="py-3 px-4 rounded-xl bg-gradient-to-r from-cyan-600 to-indigo-600 hover:from-cyan-500 hover:to-indigo-500 text-white font-cairo font-extrabold text-xs shadow-lg shadow-cyan-500/20 transition flex items-center justify-center gap-2">
+                    <button onclick="executeMove('special')" class="py-3 rounded-xl bg-gradient-to-r from-cyan-600 to-indigo-600 hover:from-cyan-500 hover:to-indigo-500 text-white font-extrabold text-xs shadow-lg shadow-cyan-500/20 transition flex items-center justify-center gap-1.5">
                         <i class="fa-solid fa-bolt"></i>
-                        <span id="btn-attack-special">ضربة الذكاء الكيميائية</span>
+                        <span id="btn-attack-cyber">ضربة الطاقة السايبرانية</span>
                     </button>
 
-                    <button onclick="executeCombatMove('defend')" class="py-3 px-4 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-700 text-slate-300 font-cairo font-bold text-xs transition flex items-center justify-center gap-2">
+                    <button onclick="executeMove('defend')" class="py-3 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-700 text-slate-300 font-bold text-xs transition flex items-center justify-center gap-1.5">
                         <i class="fa-solid fa-shield-halved text-amber-400"></i>
-                        <span id="btn-defend-guard">الدفاع واستعادة الطاقة</span>
+                        <span id="btn-defend-shield">الدفاع واستعادة الصحة</span>
                     </button>
 
-                    <button onclick="executeCombatMove('ultimate')" class="py-3 px-4 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-cairo font-black text-xs shadow-lg shadow-amber-500/20 transition flex items-center justify-center gap-2">
+                    <button onclick="executeMove('ultimate')" class="py-3 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-black text-xs shadow-lg shadow-amber-500/20 transition flex items-center justify-center gap-1.5">
                         <i class="fa-solid fa-skull"></i>
-                        <span id="btn-attack-ultimate">القاضية الفائقة (الذهب)</span>
+                        <span id="btn-attack-finisher">القاضية الفائقة</span>
                     </button>
                 </div>
 
-                <!-- Live Battle Log Window -->
+                <!-- Battle Log Stream -->
                 <div class="bg-slate-950 p-3 rounded-xl border border-slate-800">
-                    <div class="text-[11px] font-cairo font-bold text-slate-400 mb-1 flex items-center justify-between">
-                        <span><i class="fa-solid fa-scroll text-amber-400 ml-1"></i> <span id="label-battle-log">سجل أحداث المعركة الحية:</span></span>
-                        <span class="text-[9px] text-emerald-400 font-mono">Live Combat Engine</span>
+                    <div class="text-[11px] font-bold text-slate-400 mb-1 flex items-center justify-between">
+                        <span><i class="fa-solid fa-scroll text-amber-400 ml-1"></i> <span id="label-battle-stream">سجل المعركة الحية:</span></span>
+                        <span class="text-[9px] text-emerald-400 font-mono">Live Combat</span>
                     </div>
                     <div id="battle-log-text" class="text-xs text-slate-300 font-mono space-y-1 max-h-24 overflow-y-auto">
-                        <div class="text-amber-400">⚔️ تبدأ المعركة الحجمية! وجه الضربات واقضِ على الخصم!</div>
+                        <div class="text-amber-400">⚔️ تبدأ الملحمة! سدّد الضربات للخصوم!</div>
                     </div>
                 </div>
 
@@ -357,122 +468,81 @@
     </div>
 </section>
 
-<!-- VIEW 2: P2P MARKETPLACE & COUNTER-OFFER BIDDING (سوق التداول والمناقصات) -->
-<section id="view-market" class="max-w-6xl mx-auto px-4 mt-6 hidden">
-    <div class="bg-cardBg border border-cardBorder rounded-2xl p-4 sm:p-6 shadow-xl space-y-6">
+<!-- VIEW 3: P2P MARKETPLACE & COUNTER OFFERS (سوق التداول والمناقصات) -->
+<section id="view-market" class="max-w-6xl mx-auto px-4 mt-5 hidden">
+    <div class="bg-cardBg border border-cardBorder rounded-2xl p-4 sm:p-6 shadow-xl space-y-5 font-cairo">
         
-        <!-- Marketplace Header -->
-        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between border-b border-slate-800 pb-4 gap-3">
+        <div class="flex items-center justify-between border-b border-slate-800 pb-4">
             <div class="flex items-center gap-3">
                 <div class="w-12 h-12 rounded-2xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 text-2xl">
                     <i class="fa-solid fa-store"></i>
                 </div>
                 <div>
-                    <h2 class="font-cairo font-black text-white text-lg sm:text-xl" id="title-market-full">سوق تداول الأسلحة والدروع (P2P Marketplace)</h2>
-                    <p class="text-xs text-slate-400" id="sub-market-full">اعرض بضاعتك بالسعر الذي تريده، أو قدم عروض أسعار منافسة للشراء بـ **بُون (ϐ)**!</p>
+                    <h2 class="font-black text-white text-lg sm:text-xl" id="title-market-full">سوق تداول المعدات والمناقصات (P2P Market)</h2>
+                    <p class="text-xs text-slate-400" id="sub-market-full">اعرض ملابسك وأسلحتك بسعر محدد أو فاوض على أسعار الآخرين بـ **بُون (ϐ)**!</p>
                 </div>
             </div>
 
-            <!-- Seller Commission Note -->
             <div class="bg-slate-950 px-3 py-2 rounded-xl border border-amber-500/30 text-right ltr:text-left">
-                <div class="text-[10px] text-slate-400" id="label-commission-note">عمولة منصة اللعبة للعمليات:</div>
-                <div class="text-xs font-mono font-bold text-amber-400">5% System Fee</div>
+                <div class="text-[10px] text-slate-400" id="label-fee-note">عمولة المنصة عند البيع:</div>
+                <div class="text-xs font-mono font-bold text-amber-400">5% Platform Fee</div>
             </div>
         </div>
 
-        <!-- Sell Your Item Action Modal Box -->
+        <!-- List Item for Sale Box -->
         <div class="bg-slate-950 p-4 rounded-2xl border border-slate-800 space-y-3">
-            <h3 class="font-cairo font-bold text-white text-sm flex items-center gap-2">
+            <h3 class="font-bold text-white text-sm flex items-center gap-2">
                 <i class="fa-solid fa-plus-circle text-emerald-400"></i>
-                <span id="title-list-item">عرض سلعة من ممتلكاتك للبيع في المتجر:</span>
+                <span id="title-list-gear">عرض قطعة ملابس أو سلاح للبيع:</span>
             </h3>
-            
-            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs font-cairo">
+
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
                 <div>
-                    <label class="block text-slate-400 mb-1" id="label-select-sell-item">اختر السلعة من خزانتك:</label>
-                    <select id="sell-item-select" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-amber-400">
+                    <label class="block text-slate-400 mb-1" id="label-select-gear">اختر السلعة من خزانتك:</label>
+                    <select id="market-sell-select" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-amber-400">
                         <option value="سيف الأثير السايبراني #09">سيف الأثير السايبراني #09</option>
+                        <option value="درع التكتيك الفولاذي #02">درع التكتيك الفولاذي #02</option>
                         <option value="خوذة الساموراي الذهبية #01">خوذة الساموراي الذهبية #01</option>
-                        <option value="درع الأوبسيديان الفولاذي #05">درع الأوبسيديان الفولاذي #05</option>
                     </select>
                 </div>
 
                 <div>
-                    <label class="block text-slate-400 mb-1" id="label-sell-price">السعر المطلوب بعملة (ϐ Boon):</label>
-                    <input id="sell-price-input" type="number" min="50" value="200" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-amber-400 font-mono font-bold focus:outline-none focus:border-amber-400">
+                    <label class="block text-slate-400 mb-1" id="label-ask-price">السعر المطلوب بعملة (ϐ Boon):</label>
+                    <input id="market-price-input" type="number" min="50" value="250" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-amber-400 font-mono font-bold focus:outline-none focus:border-amber-400">
                 </div>
 
                 <div class="flex items-end">
-                    <button onclick="listItemForSale()" class="w-full py-2.5 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-slate-950 font-cairo font-extrabold text-xs shadow-lg shadow-emerald-500/20 transition flex items-center justify-center gap-2">
+                    <button onclick="postItemToMarket()" class="w-full py-2.5 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-slate-950 font-extrabold text-xs shadow-lg shadow-emerald-500/20 transition flex items-center justify-center gap-2">
                         <i class="fa-solid fa-tag"></i>
-                        <span id="btn-list-sale">تأكيد العرض في السوق</span>
+                        <span id="btn-post-item">تأكيد العرض بالسوق</span>
                     </button>
                 </div>
             </div>
         </div>
 
-        <!-- Active Marketplace Items Grid -->
-        <div>
-            <h3 class="font-cairo font-bold text-white text-sm mb-3 flex items-center gap-2">
-                <i class="fa-solid fa-fire text-amber-400"></i>
-                <span id="title-market-listings">السلع المعروضة حالياً وتلقي عروض الأسعار (Counter-Offers):</span>
-            </h3>
-
-            <div id="market-listings-container" class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <!-- Listing 1 -->
-                <div class="bg-slate-950 p-4 rounded-2xl border border-slate-800 space-y-3">
-                    <div class="flex items-start justify-between">
-                        <div>
-                            <span class="text-[10px] bg-amber-500/10 text-amber-400 border border-amber-500/30 px-2 py-0.5 rounded-full font-cairo font-bold">أسطوري LEGENDARY</span>
-                            <h4 class="font-cairo font-bold text-white text-base mt-1">سيف الأثير الحارق #007</h4>
-                            <p class="text-xs text-slate-400">البائع: <span class="text-cyan-400 font-mono">user_77 (أبو فهد)</span></p>
-                        </div>
-                        <div class="text-left ltr:text-right">
-                            <div class="text-[10px] text-slate-400">السعر المطلوب</div>
-                            <div class="font-mono font-extrabold text-amber-400 text-lg">350 ϐ</div>
-                        </div>
+        <!-- Listings Grid -->
+        <div id="market-cards-container" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <!-- Item 1 -->
+            <div class="bg-slate-950 p-4 rounded-2xl border border-slate-800 space-y-3">
+                <div class="flex items-start justify-between">
+                    <div>
+                        <span class="text-[10px] bg-amber-500/10 text-amber-400 border border-amber-500/30 px-2 py-0.5 rounded-full font-bold">أسطوري LEGENDARY</span>
+                        <h4 class="font-bold text-white text-base mt-1">سيف الأثير السايبراني #09</h4>
+                        <p class="text-xs text-slate-400">البائع: <span class="text-cyan-400 font-mono">user_88 (أبو فهد)</span></p>
                     </div>
-
-                    <!-- Direct Buy or Counter Offer Actions -->
-                    <div class="grid grid-cols-2 gap-2 pt-2 border-t border-slate-900">
-                        <button onclick="buyMarketItem('سيف الأثير الحارق #007', 350, 'user_77')" class="py-2 px-3 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-cairo font-extrabold text-xs transition flex items-center justify-center gap-1.5">
-                            <i class="fa-solid fa-bag-shopping"></i>
-                            <span id="btn-buy-direct-1">شراء مباشر (350 ϐ)</span>
-                        </button>
-
-                        <button onclick="openCounterOfferModal('سيف الأثير الحارق #007', 350)" class="py-2 px-3 rounded-xl bg-slate-900 hover:bg-slate-800 border border-cyan-500/40 text-cyan-300 font-cairo font-bold text-xs transition flex items-center justify-center gap-1.5">
-                            <i class="fa-solid fa-comments-dollar"></i>
-                            <span id="btn-offer-price-1">تقديم عرض سعر آخر</span>
-                        </button>
+                    <div class="text-left ltr:text-right">
+                        <div class="text-[10px] text-slate-400">السعر المطلوب</div>
+                        <div class="font-mono font-extrabold text-amber-400 text-lg">250 ϐ</div>
                     </div>
                 </div>
 
-                <!-- Listing 2 -->
-                <div class="bg-slate-950 p-4 rounded-2xl border border-slate-800 space-y-3">
-                    <div class="flex items-start justify-between">
-                        <div>
-                            <span class="text-[10px] bg-cyan-500/10 text-cyan-400 border border-cyan-500/30 px-2 py-0.5 rounded-full font-cairo font-bold">نادر RARE</span>
-                            <h4 class="font-cairo font-bold text-white text-base mt-1">خوذة الساموراي النيون #042</h4>
-                            <p class="text-xs text-slate-400">البائع: <span class="text-cyan-400 font-mono">player_99</span></p>
-                        </div>
-                        <div class="text-left ltr:text-right">
-                            <div class="text-[10px] text-slate-400">السعر المطلوب</div>
-                            <div class="font-mono font-extrabold text-amber-400 text-lg">180 ϐ</div>
-                        </div>
-                    </div>
-
-                    <!-- Direct Buy or Counter Offer Actions -->
-                    <div class="grid grid-cols-2 gap-2 pt-2 border-t border-slate-900">
-                        <button onclick="buyMarketItem('خوذة الساموراي النيون #042', 180, 'player_99')" class="py-2 px-3 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-cairo font-extrabold text-xs transition flex items-center justify-center gap-1.5">
-                            <i class="fa-solid fa-bag-shopping"></i>
-                            <span id="btn-buy-direct-2">شراء مباشر (180 ϐ)</span>
-                        </button>
-
-                        <button onclick="openCounterOfferModal('خوذة الساموراي النيون #042', 180)" class="py-2 px-3 rounded-xl bg-slate-900 hover:bg-slate-800 border border-cyan-500/40 text-cyan-300 font-cairo font-bold text-xs transition flex items-center justify-center gap-1.5">
-                            <i class="fa-solid fa-comments-dollar"></i>
-                            <span id="btn-offer-price-2">تقديم عرض سعر آخر</span>
-                        </button>
-                    </div>
+                <div class="grid grid-cols-2 gap-2 pt-2 border-t border-slate-900">
+                    <button onclick="buyMarketItem('سيف الأثير السايبراني #09', 250)" class="py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-extrabold text-xs transition">
+                        شراء مباشر (250 ϐ)
+                    </button>
+                    <button onclick="makeCounterOffer('سيف الأثير السايبراني #09', 250)" class="py-2 rounded-xl bg-slate-900 hover:bg-slate-800 border border-cyan-500/40 text-cyan-300 font-bold text-xs transition">
+                        تقديم عرض سعر للمساومة
+                    </button>
                 </div>
             </div>
         </div>
@@ -480,317 +550,188 @@
     </div>
 </section>
 
-<!-- VIEW 3: WAGER DUELS ARENA (تحدي الرهان - الفائز يأخذ كلا السلعتين) -->
-<section id="view-duels" class="max-w-4xl mx-auto px-4 mt-6 hidden">
-    <div class="bg-cardBg border border-purple-500/30 rounded-2xl p-4 sm:p-6 shadow-2xl space-y-6 relative overflow-hidden">
+<!-- VIEW 4: ITEM WAGER DUELS (تحدي الرهان - الفائز يأخذ كلا السلعتين) -->
+<section id="view-duels" class="max-w-4xl mx-auto px-4 mt-5 hidden">
+    <div class="bg-cardBg border border-purple-500/30 rounded-2xl p-4 sm:p-6 shadow-2xl space-y-5 font-cairo">
         
         <div class="flex items-center gap-3 border-b border-slate-800 pb-4">
             <div class="w-12 h-12 rounded-2xl bg-purple-500/10 border border-purple-500/30 flex items-center justify-center text-purple-400 text-2xl">
                 <i class="fa-solid fa-skull"></i>
             </div>
             <div>
-                <h2 class="font-cairo font-black text-white text-lg sm:text-xl flex items-center gap-2">
-                    <span id="title-wager-arena">تحدي الرهان والمبارزة (Item Wager Duel)</span>
+                <h2 class="font-black text-white text-lg sm:text-xl flex items-center gap-2">
+                    <span id="title-wager-full">مبارزة الرهان الشرسة (Item Wager Duel)</span>
                     <span class="text-xs font-mono font-bold px-2.5 py-0.5 rounded-full bg-red-500/20 text-red-400 border border-red-500/30">HIGH STAKES</span>
                 </h2>
-                <p class="text-xs text-slate-400" id="sub-wager-arena">راهن بسلعة ضد الخصم.. الفائز بالقتال يحصل على السلعتين معاً!</p>
+                <p class="text-xs text-slate-400" id="sub-wager-full">تحدَّ غريمك بسلعة.. الفائز في القتال يحصل على السلعتين بالكامل!</p>
             </div>
         </div>
 
-        <!-- Wager Matchmaking Setup -->
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <!-- Player 1 Wager (Your Wager) -->
+            <!-- Player Wager -->
             <div class="bg-slate-950 p-4 rounded-2xl border border-cyan-500/30 space-y-3">
-                <div class="flex items-center justify-between border-b border-slate-900 pb-2">
-                    <span class="text-xs font-cairo font-bold text-cyan-400" id="label-your-wager">سلعتك المراهَن عليها:</span>
-                    <i class="fa-solid fa-shield text-cyan-400"></i>
-                </div>
-
-                <select id="wager-player-item-select" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-cyan-400 font-cairo">
+                <span class="text-xs font-bold text-cyan-400" id="label-your-wager-item">سلعتك المراهَن عليها:</span>
+                <select id="wager-item-select" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white">
                     <option value="سيف الأثير السايبراني #09">سيف الأثير السايبراني #09 (قيمة: 250 ϐ)</option>
-                    <option value="خوذة الساموراي الذهبية #01">خوذة الساموراي الذهبية #01 (قيمة: 180 ϐ)</option>
+                    <option value="درع التكتيك الفولاذي #02">درع التكتيك الفولاذي #02 (قيمة: 180 ϐ)</option>
                 </select>
-                <div class="text-[11px] text-slate-400" id="label-wager-risk">إذا خسرت القتال ستفقد هذه السلعة لصالح الخصم!</div>
+                <p class="text-[10px] text-slate-500" id="label-wager-warn">خسارة القتال تعني فقدان هذه السلعة لصالح المنافس!</p>
             </div>
 
-            <!-- Enemy Rival Wager -->
+            <!-- Enemy Wager -->
             <div class="bg-slate-950 p-4 rounded-2xl border border-red-500/30 space-y-3">
-                <div class="flex items-center justify-between border-b border-slate-900 pb-2">
-                    <span class="text-xs font-cairo font-bold text-red-400" id="label-enemy-wager">سلعة الخصم (المنافس):</span>
-                    <i class="fa-solid fa-crosshairs text-red-400"></i>
+                <span class="text-xs font-bold text-red-400" id="label-enemy-wager-item">سلعة المنافس المقابلة:</span>
+                <div class="bg-slate-900 p-2.5 rounded-xl border border-slate-800 text-xs font-bold text-amber-400">
+                    خوذة الساموراي الذهبية #01 (قيمة: 300 ϐ)
                 </div>
-
-                <div class="bg-slate-900 p-2.5 rounded-xl border border-slate-800 text-xs font-cairo font-bold text-amber-400">
-                    درع التنين الأسطوري #09 (قيمة: 300 ϐ)
-                </div>
-                <div class="text-[11px] text-slate-400" id="label-wager-reward">إذا فزت بالقتال ستحصل على درع الخصم فوراً!</div>
+                <p class="text-[10px] text-slate-500" id="label-wager-gain">عند فوزك بالقتال ستتلقى خوذة المنافس فوراً!</p>
             </div>
         </div>
 
-        <!-- Start Duel Wager Button -->
-        <button onclick="startWagerFight()" class="w-full py-3.5 rounded-xl bg-gradient-to-r from-red-600 via-amber-500 to-amber-600 hover:from-red-500 hover:to-amber-500 text-slate-950 font-cairo font-black text-sm shadow-xl shadow-red-500/20 transition flex items-center justify-center gap-2">
+        <button onclick="startWagerDuel()" class="w-full py-3.5 rounded-xl bg-gradient-to-r from-red-600 via-amber-500 to-amber-600 hover:from-red-500 hover:to-amber-500 text-slate-950 font-black text-sm shadow-xl shadow-red-500/20 transition flex items-center justify-center gap-2">
             <i class="fa-solid fa-swords text-lg"></i>
-            <span id="btn-start-wager-duel">بدء مبارزة الرهان الآن (Fight for Both Items)</span>
+            <span id="btn-start-wager">بدء مبارزة الرهان الآن (Fight for Both Items)</span>
         </button>
 
     </div>
 </section>
-
-<!-- VIEW 4: IN-APP STORE & GOOGLE PLAY PURCHASES (المتجر والشراء المباشر) -->
-<section id="view-store" class="max-w-5xl mx-auto px-4 mt-6 hidden">
-    <div class="bg-cardBg border border-cardBorder rounded-2xl p-4 sm:p-6 shadow-xl space-y-6">
-        
-        <div class="flex items-center justify-between border-b border-slate-800 pb-4">
-            <div class="flex items-center gap-3">
-                <div class="w-12 h-12 rounded-2xl bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center text-cyan-400 text-2xl">
-                    <i class="fa-solid fa-cart-shopping"></i>
-                </div>
-                <div>
-                    <h2 class="font-cairo font-black text-white text-lg sm:text-xl" id="title-store-full">متجر الأسلحة والدروع الرسمية</h2>
-                    <p class="text-xs text-slate-400" id="sub-store-full">اشترِ المعدات النادرة بعملة **بُون (ϐ)** أو الشراء المباشر عبر Google Play Billing</p>
-                </div>
-            </div>
-        </div>
-
-        <!-- Store Catalog Grid -->
-        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 font-cairo">
-            <!-- Item 1 -->
-            <div class="bg-slate-950 p-4 rounded-2xl border border-amber-500/30 space-y-3 flex flex-col justify-between">
-                <div>
-                    <div class="w-12 h-12 rounded-xl bg-amber-500/20 text-amber-400 flex items-center justify-center text-2xl mb-2">
-                        <i class="fa-solid fa-wand-sparkles"></i>
-                    </div>
-                    <div class="text-[10px] text-amber-400 font-bold">فريد UNIQUE</div>
-                    <h4 class="font-bold text-white text-sm">سيف النيون الأثيري</h4>
-                    <p class="text-xs text-slate-400 mt-1">+85 قوة هجومية قاضية</p>
-                </div>
-
-                <div class="space-y-2 pt-2 border-t border-slate-900">
-                    <button onclick="buyStoreItem('سيف النيون الأثيري', 150, 'boon')" class="w-full py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs transition flex items-center justify-center gap-1.5">
-                        <span>150 ϐ Boon</span>
-                    </button>
-                    <button onclick="buyStoreItem('سيف النيون الأثيري', 4.99, 'google')" class="w-full py-2 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-700 text-slate-200 font-bold text-xs transition flex items-center justify-center gap-1.5">
-                        <i class="fa-brands fa-google-play text-red-400"></i>
-                        <span>$4.99 (Google Play)</span>
-                    </button>
-                </div>
-            </div>
-
-            <!-- Item 2 -->
-            <div class="bg-slate-950 p-4 rounded-2xl border border-cyan-500/30 space-y-3 flex flex-col justify-between">
-                <div>
-                    <div class="w-12 h-12 rounded-xl bg-cyan-500/20 text-cyan-400 flex items-center justify-center text-2xl mb-2">
-                        <i class="fa-solid fa-helmet-safety"></i>
-                    </div>
-                    <div class="text-[10px] text-cyan-400 font-bold">أسطوري LEGENDARY</div>
-                    <h4 class="font-bold text-white text-sm">خوذة الساموراي الذهبية</h4>
-                    <p class="text-xs text-slate-400 mt-1">+120 درع حماية واستعادة HP</p>
-                </div>
-
-                <div class="space-y-2 pt-2 border-t border-slate-900">
-                    <button onclick="buyStoreItem('خوذة الساموراي الذهبية', 220, 'boon')" class="w-full py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs transition flex items-center justify-center gap-1.5">
-                        <span>220 ϐ Boon</span>
-                    </button>
-                    <button onclick="buyStoreItem('خوذة الساموراي الذهبية', 7.99, 'google')" class="w-full py-2 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-700 text-slate-200 font-bold text-xs transition flex items-center justify-center gap-1.5">
-                        <i class="fa-brands fa-google-play text-red-400"></i>
-                        <span>$7.99 (Google Play)</span>
-                    </button>
-                </div>
-            </div>
-
-            <!-- Item 3 (Boon Token Pack) -->
-            <div class="bg-slate-950 p-4 rounded-2xl border border-purple-500/30 space-y-3 flex flex-col justify-between">
-                <div>
-                    <div class="w-12 h-12 rounded-xl bg-purple-500/20 text-purple-400 flex items-center justify-center text-2xl mb-2">
-                        <i class="fa-solid fa-coins"></i>
-                    </div>
-                    <div class="text-[10px] text-purple-400 font-bold">حزمة العملة BOON PACK</div>
-                    <h4 class="font-bold text-white text-sm">+1000 عملة بُون (ϐ)</h4>
-                    <p class="text-xs text-slate-400 mt-1">رصيد ممتاز لشراء وتداول المقتنيات</p>
-                </div>
-
-                <div class="pt-2 border-t border-slate-900">
-                    <button onclick="buyStoreItem('حزمة 1000 عملة بُون', 9.99, 'google')" class="w-full py-2.5 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-bold text-xs shadow-lg shadow-purple-500/20 transition flex items-center justify-center gap-1.5">
-                        <i class="fa-brands fa-google-play"></i>
-                        <span>شراء بـ $9.99 (Google Pay)</span>
-                    </button>
-                </div>
-            </div>
-        </div>
-
-    </div>
-</section>
-
-<!-- COUNTER OFFER MODAL (تقديم عرض سعر آخر للمساومة) -->
-<div id="counter-offer-modal" class="fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-md flex items-center justify-center p-4 hidden">
-    <div class="bg-cardBg border border-cyan-500/40 rounded-3xl w-full max-w-md p-6 shadow-2xl space-y-4 font-cairo">
-        <div class="flex items-center justify-between border-b border-slate-800 pb-3">
-            <h3 class="font-bold text-white text-base flex items-center gap-2">
-                <i class="fa-solid fa-comments-dollar text-cyan-400"></i>
-                <span id="modal-title-offer">تقديم عرض سعر للمساومة (Counter-Offer)</span>
-            </h3>
-            <button onclick="closeCounterOfferModal()" class="text-slate-400 hover:text-white">
-                <i class="fa-solid fa-xmark text-lg"></i>
-            </button>
-        </div>
-
-        <div class="space-y-2">
-            <div class="text-xs text-slate-300" id="modal-target-item-name">السلعة: سيف الأثير الحارق #007</div>
-            <label class="block text-xs text-slate-400" id="label-your-bid-price">عرضك المقترح للسلعة بـ (ϐ Boon):</label>
-            <input id="counter-offer-price-input" type="number" value="300" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-amber-400 font-mono font-bold text-sm focus:outline-none focus:border-cyan-400">
-            <div class="text-[10px] text-slate-500" id="label-seller-notified">سيصل إشعار للبائع لخصم المبلغ وقبول أو رفض عرضك.</div>
-        </div>
-
-        <button onclick="submitCounterOffer()" class="w-full py-2.5 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-extrabold text-xs shadow-lg shadow-cyan-500/20 transition flex items-center justify-center gap-2">
-            <i class="fa-solid fa-paper-plane"></i>
-            <span id="btn-submit-offer">إرسال العرض للبائع</span>
-        </button>
-    </div>
-</div>
 
 <script>
 // --- Global Game State ---
 let currentLang = 'ar';
 let userBoonBalance = 500;
-let userPowerLevel = 1450;
+let userPowerLevel = 1200;
 let playerHp = 100;
 let enemyHp = 100;
 let winStreak = 0;
-let selectedTargetItem = "";
 
-// 3D Scene Variables
-let scene, camera, renderer, fighterMesh, auraParticles;
+// Character Creator State
+let characterData = {
+    name: "صقر الأثير",
+    gender: "male",
+    faceShape: "round",
+    skinColor: "#d09b76",
+    noseScale: 1.0,
+    mouthScale: 1.0,
+    hairStyle: "short_crop",
+    hairColor: "#1e293b",
+    heightScale: 1.0,
+    muscleScale: 1.0,
+    outfit: "cyber_samurai"
+};
+
+// Three.js Core Variables
+let scene, camera, renderer, headMesh, bodyMesh, hairMesh, noseMesh, mouthMesh;
 let isDragging = false;
 let previousMousePosition = { x: 0, y: 0 };
-let currentAuraActive = true;
 
 // i18n Translation Dictionary
 const i18n = {
     ar: {
-        badgeVersion: "حلبة القتال 3D",
-        headerSubText: "مقاتلو الذكاء الاصطناعي والتداول المباشر",
+        badgeVersion: "مصمم الشخصيات 3D",
+        headerSubText: "ابتكار المقاتلين، المعارك، وتداول الأسلحة بـ (ϐ)",
+        btnNavCreator: "تخصيص الشخصية",
         btnNavArena: "حلبة القتال",
         btnNavMarket: "سوق التداول",
         btnNavDuels: "تحدي الرهان",
-        btnNavStore: "المتجر",
-        labelBoon: "عملة بُون (BOON)",
-        labelPower: "القوة القتالية",
-        badgeArenaStatus: "حلبة قتال ثلاثية الأبعاد 360°",
-        fighterNameDisplay: "المقاتل: صقر الأثير (AI Cyber Samurai)",
-        btnAuraToggle: "هالة الطاقة",
-        labelTouchArena: "اسحب لتدوير المقاتل والسلاح 360 درجة",
-        labelFighterClass: "فئة: الأسطوري (LEGENDARY)",
-        labelEquippedGear: "المعدات المجهزة:",
-        btnGearHelmet: "خوذة الساموراي",
-        btnGearSword: "سيف الأثير",
-        btnGearShield: "درع النيون",
-        btnSkinGold: "عنصر الذهب الحارق",
-        btnSkinCyber: "طاقة السايبر نيون",
-        btnSkinDark: "درع الأوبسيديان",
-        titleTrainingMode: "مرحلة التدريب والقتال الحقيقي",
-        subTrainingMode: "اقضِ على الخصم واكسب عملات **بُون (ϐ)**",
-        labelPlayerHp: "مقاتلك (صقر الأثير)",
-        enemyNameDisplay: "الخصم: وحش الأوبسيديان #04",
-        btnAttackNormal: "هجوم عادي بالسيف",
-        btnAttackSpecial: "ضربة الذكاء الكيميائية",
-        btnDefendGuard: "الدفاع واستعادة الطاقة",
-        btnAttackUltimate: "القاضية الفائقة (الذهب)",
-        labelBattleLog: "سجل أحداث المعركة الحية:",
-        titleMarketFull: "سوق تداول الأسلحة والدروع (P2P Marketplace)",
-        subMarketFull: "اعرض بضاعتك بالسعر الذي تريده، أو قدم عروض أسعار منافسة للشراء بـ **بُون (ϐ)**!",
-        labelCommissionNote: "عمولة منصة اللعبة للعمليات:",
-        titleListItem: "عرض سلعة من ممتلكاتك للبيع في المتجر:",
-        labelSelectSellItem: "اختر السلعة من خزانتك:",
-        labelSellPrice: "السعر المطلوب بعملة (ϐ Boon):",
-        btnListSale: "تأكيد العرض في السوق",
-        titleMarketListings: "السلع المعروضة حالياً وتلقي عروض الأسعار (Counter-Offers):",
-        titleWagerArena: "تحدي الرهان والمبارزة (Item Wager Duel)",
-        subWagerArena: "راهن بسلعة ضد الخصم.. الفائز بالقتال يحصل على السلعتين معاً!",
-        labelYourWager: "سلعتك المراهَن عليها:",
-        labelEnemyWager: "سلعة الخصم (المنافس):",
-        btnStartWagerDuel: "بدء مبارزة الرهان الآن (Fight for Both Items)",
-        titleStoreFull: "متجر الأسلحة والدروع الرسمية",
-        subStoreFull: "اشترِ المعدات النادرة بعملة **بُون (ϐ)** أو الشراء المباشر عبر Google Play Billing"
+        labelBoon: "رصيد بُون",
+        badgeCreator3d: "معاينة الشخصية البشرية 3D",
+        characterTitleDisplay: "المقاتل: صقر الأثير",
+        btnResetView: "ضبط الكاميرا",
+        labelTouchHint: "اسحب لتدوير الشخصية 360 درجة وفحص الملامح",
+        labelQuickOutfit: "تجهيز سريع:",
+        presetSamurai: "بدلة الساموراي",
+        presetTactical: "درع التكتيك الفولاذي",
+        presetStealth: "زيّ الشبح الظلامي",
+        titleCustomizerPanel: "ورشة تصميم الوجه والجسم",
+        subCustomizerPanel: "خصص ملامح مقاتلك البشري قبل خوض القتال",
+        labelFighterName: "اسم المقاتل:",
+        labelGender: "بنية الجسم (الجنس):",
+        genderMale: "ذكر (Male)",
+        genderFemale: "أنثى (Female)",
+        labelFaceShape: "شكل الوجه والرأس:",
+        faceRound: "مستدير (Round)",
+        faceOval: "بيضاوي (Oval)",
+        faceLong: "طويل (Long)",
+        labelSkinTone: "لون البشرة المتعدد:",
+        labelNoseSize: "بروز الأنف:",
+        labelMouthSize: "عرض الفم والشفاه:",
+        labelHairstyle: "تسريحة الشعر:",
+        hairCrop: "قصة قصيرة",
+        hairPonytail: "ذيل سايبر",
+        hairBuzz: "شعر حلاقة",
+        labelHairColor: "لون الشعر:",
+        labelHeight: "الطول والقامة:",
+        labelMuscles: "الكتلة العضلية (Build):",
+        btnSaveCharacter: "حفظ الشخصية ودخول حلبة القتال (Enter Combat)",
+        titleMarketFull: "سوق تداول المعدات والمناقصات (P2P Market)",
+        subMarketFull: "اعرض ملابسك وأسلحتك بسعر محدد أو فاوض على أسعار الآخرين بـ **بُون (ϐ)**!",
+        labelFeeNote: "عمولة المنصة عند البيع:",
+        titleListGear: "عرض قطعة ملابس أو سلاح للبيع:",
+        labelSelectGear: "اختر السلعة من خزانتك:",
+        labelAskPrice: "السعر المطلوب بعملة (ϐ Boon):",
+        btnPostItem: "تأكيد العرض بالسوق",
+        titleWagerFull: "مبارزة الرهان الشرسة (Item Wager Duel)",
+        subWagerFull: "تحدَّ غريمك بسلعة.. الفائز في القتال يحصل على السلعتين بالكامل!",
+        labelYourWagerItem: "سلعتك المراهَن عليها:",
+        labelEnemyWagerItem: "سلعة المنافس المقابلة:",
+        labelWagerWarn: "خسارة القتال تعني فقدان هذه السلعة لصالح المنافس!",
+        labelWagerGain: "عند فوزك بالقتال ستتلقى خوذة المنافس فوراً!",
+        btnStartWager: "بدء مبارزة الرهان الآن (Fight for Both Items)"
     },
     en: {
-        badgeVersion: "3D Fighter Arena",
-        headerSubText: "AI Combat Fighters & P2P Trading",
+        badgeVersion: "3D Character Creator",
+        headerSubText: "Human Fighters, Combat & P2P Trading (ϐ)",
+        btnNavCreator: "Character Creator",
         btnNavArena: "Battle Arena",
         btnNavMarket: "Marketplace",
         btnNavDuels: "Wager Duels",
-        btnNavStore: "In-App Store",
-        labelBoon: "BOON Token",
-        labelPower: "Combat Power",
-        badgeArenaStatus: "360° 3D Battle Simulator",
-        fighterNameDisplay: "Fighter: Aether Falcon (AI Samurai)",
-        btnAuraToggle: "Energy Aura",
-        labelTouchArena: "Drag to rotate fighter 360°",
-        labelFighterClass: "Class: LEGENDARY",
-        labelEquippedGear: "Equipped Gear:",
-        btnGearHelmet: "Samurai Visor",
-        btnGearSword: "Aether Sword",
-        btnGearShield: "Neon Shield",
-        btnSkinGold: "Blazing Gold Element",
-        btnSkinCyber: "Cyber Neon Energy",
-        btnSkinDark: "Obsidian Armor",
-        titleTrainingMode: "Training & Combat Ground",
-        subTrainingMode: "Defeat rivals to earn Boon (ϐ) tokens",
-        labelPlayerHp: "Your Fighter (Aether Falcon)",
-        enemyNameDisplay: "Rival: Obsidian Beast #04",
-        btnAttackNormal: "Normal Sword Strike",
-        btnAttackSpecial: "AI Elemental Skill",
-        btnDefendGuard: "Guard & Re-charge",
-        btnAttackUltimate: "Ultimate Gold Finisher",
-        labelBattleLog: "Live Battle Log Stream:",
+        labelBoon: "Boon Token",
+        badgeCreator3d: "Human 3D Character View",
+        characterTitleDisplay: "Fighter: Aether Falcon",
+        btnResetView: "Reset Camera",
+        labelTouchHint: "Drag to rotate character 360° to inspect details",
+        labelQuickOutfit: "Quick Presets:",
+        presetSamurai: "Cyber Samurai",
+        presetTactical: "Tactical Armor",
+        presetStealth: "Stealth Assassin",
+        titleCustomizerPanel: "Face & Body Workshop",
+        subCustomizerPanel: "Customize your human fighter's features before battle",
+        labelFighterName: "Fighter Name:",
+        labelGender: "Body Frame (Gender):",
+        genderMale: "Male",
+        genderFemale: "Female",
+        labelFaceShape: "Head & Face Shape:",
+        faceRound: "Round",
+        faceOval: "Oval",
+        faceLong: "Long",
+        labelSkinTone: "Multi Skin Tones:",
+        labelNoseSize: "Nose Scale:",
+        labelMouthSize: "Mouth Scale:",
+        labelHairstyle: "Hairstyle:",
+        hairCrop: "Short Crop",
+        hairPonytail: "Cyber Ponytail",
+        hairBuzz: "Buzzcut",
+        labelHairColor: "Hair Color:",
+        labelHeight: "Height Scale:",
+        labelMuscles: "Muscle Build:",
+        btnSaveCharacter: "Save Character & Enter Combat",
         titleMarketFull: "P2P Equipment Marketplace & Bids",
-        subMarketFull: "List your gear at custom prices or make counter-offers in Boon (ϐ)!",
-        labelCommissionNote: "Game System Platform Fee:",
-        titleListItem: "List an owned gear item for sale:",
-        labelSelectSellItem: "Select item from inventory:",
-        labelSellPrice: "Selling Price in (ϐ Boon):",
-        btnListSale: "Confirm Listing on Market",
-        titleMarketListings: "Active Market Listings & Counter-Offers:",
-        titleWagerArena: "High-Stakes Item Wager Duel",
-        subWagerArena: "Wager an item in a fight... Winner takes BOTH items!",
-        labelYourWager: "Your Wagered Item:",
-        labelEnemyWager: "Rival Wagered Item:",
-        btnStartWagerDuel: "Start Wager Duel (Fight for Both Items)",
-        titleStoreFull: "Official Equipment Store",
-        subStoreFull: "Purchase rare gear using Boon (ϐ) or Google Play Billing"
+        subMarketFull: "List your gear at fixed prices or negotiate counter-offers in Boon (ϐ)!",
+        labelFeeNote: "Platform Sale Commission:",
+        titleListGear: "List an Owned Outfit/Weapon for Sale:",
+        labelSelectGear: "Select Gear from Locker:",
+        labelAskPrice: "Asking Price in (ϐ Boon):",
+        btnPostItem: "Confirm Market Listing",
+        titleWagerFull: "High-Stakes Item Wager Duel",
+        subWagerFull: "Wager an item in a fight... Winner takes BOTH items!",
+        labelYourWagerItem: "Your Wagered Item:",
+        labelEnemyWagerItem: "Rival Wagered Item:",
+        labelWagerWarn: "Losing the fight means forfeiting this item!",
+        labelWagerGain: "Winning the fight earns you the rival's item!",
+        btnStartWager: "Start Wager Duel (Fight for Both Items)"
     }
 };
-
-const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-function playSound(type) {
-    if (audioCtx.state === 'suspended') audioCtx.resume();
-    const osc = audioCtx.createOscillator();
-    const gain = audioCtx.createGain();
-    osc.connect(gain);
-    gain.connect(audioCtx.destination);
-    const now = audioCtx.currentTime;
-
-    if (type === 'hit') {
-        osc.type = 'sawtooth';
-        osc.frequency.setValueAtTime(200, now);
-        osc.frequency.exponentialRampToValueAtTime(50, now + 0.1);
-        gain.gain.setValueAtTime(0.3, now);
-        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.1);
-        osc.start(now); osc.stop(now + 0.1);
-    } else if (type === 'victory') {
-        osc.type = 'sine';
-        osc.frequency.setValueAtTime(440, now);
-        osc.frequency.setValueAtTime(554.37, now + 0.1);
-        osc.frequency.setValueAtTime(659.25, now + 0.2);
-        gain.gain.setValueAtTime(0.3, now);
-        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.5);
-        osc.start(now); osc.stop(now + 0.5);
-    } else {
-        osc.frequency.setValueAtTime(500, now);
-        gain.gain.setValueAtTime(0.1, now);
-        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.05);
-        osc.start(now); osc.stop(now + 0.05);
-    }
-}
 
 function showToast(message, type = 'amber') {
     const container = document.getElementById('toast-container');
@@ -809,174 +750,9 @@ function showToast(message, type = 'amber') {
 }
 
 function navigateTo(viewId) {
-    playSound('click');
-    ['view-arena', 'view-market', 'view-duels', 'view-store'].forEach(v => document.getElementById(v).classList.add('hidden'));
+    ['view-creator', 'view-arena', 'view-market', 'view-duels'].forEach(v => document.getElementById(v).classList.add('hidden'));
     document.getElementById(`view-${viewId}`).classList.remove('hidden');
-    onWindowResize();
-}
-
-// REAL-TIME COMBAT LOGIC ENGINE
-function executeCombatMove(moveType) {
-    if (enemyHp <= 0 || playerHp <= 0) return;
-
-    let playerDamage = 0;
-    let battleText = "";
-
-    if (moveType === 'attack') {
-        playerDamage = Math.floor(Math.random() * 20) + 15;
-        battleText = currentLang === 'ar' ? `⚔️ ضربة سيف خاطفة! ألحقت بالخصم ${playerDamage} ضرر!` : `⚔️ Quick Sword Strike! Dealt ${playerDamage} DMG!`;
-    } else if (moveType === 'special') {
-        playerDamage = Math.floor(Math.random() * 30) + 25;
-        battleText = currentLang === 'ar' ? `⚡ صاعقة الذكاء الكيميائية! ألحقت ${playerDamage} ضرر بالخصم!` : `⚡ AI Elemental Blast! Dealt ${playerDamage} DMG!`;
-    } else if (moveType === 'defend') {
-        playerHp = Math.min(100, playerHp + 15);
-        battleText = currentLang === 'ar' ? `🛡️ استعادة طاقة وقوة درع حماية (+15 HP)` : `🛡️ Guard active & Shield restored (+15 HP)`;
-    } else if (moveType === 'ultimate') {
-        playerDamage = Math.floor(Math.random() * 45) + 35;
-        battleText = currentLang === 'ar' ? `🔥 القاضية الفائقة! ضربة حارقة بقدرة ${playerDamage} ضرر!` : `🔥 Ultimate Gold Finisher! Unveiled ${playerDamage} DMG!`;
-    }
-
-    playSound('hit');
-    enemyHp = Math.max(0, enemyHp - playerDamage);
-    document.getElementById('enemy-hp-bar').style.width = `${enemyHp}%`;
-    document.getElementById('enemy-hp-text').innerText = `${enemyHp} / 100 HP`;
-
-    appendBattleLog(battleText);
-
-    // Enemy Retaliation Attack
-    if (enemyHp > 0 && moveType !== 'defend') {
-        setTimeout(() => {
-            const enemyDamage = Math.floor(Math.random() * 18) + 10;
-            playerHp = Math.max(0, playerHp - enemyDamage);
-            document.getElementById('player-hp-bar').style.width = `${playerHp}%`;
-            document.getElementById('player-hp-text').innerText = `${playerHp} / 100 HP`;
-            appendBattleLog(currentLang === 'ar' ? `👹 هجم الخصم المرتد وألحق بك ${enemyDamage} ضرر!` : `👹 Enemy retaliated and dealt ${enemyDamage} DMG!`);
-
-            if (playerHp <= 0) {
-                showToast(currentLang === 'ar' ? "سقط مقاتلك في التدريب! حاول مرة أخرى." : "Your fighter collapsed! Try again.", 'red');
-                resetBattle();
-            }
-        }, 400);
-    }
-
-    // Check Player Victory
-    if (enemyHp <= 0) {
-        playSound('victory');
-        winStreak++;
-        userBoonBalance += 35;
-        userPowerLevel += 25;
-        updateBalanceUI();
-        document.getElementById('stat-win-streak').innerText = currentLang === 'ar' ? `${winStreak} انتصارات متتالية` : `${winStreak} Win Streak`;
-        showToast(currentLang === 'ar' ? "انتصار ساحق! حصلت على +35 ϐ Boon و +25 PWR!" : "Victory! Earned +35 Boon (ϐ) and +25 PWR!", 'emerald');
-        setTimeout(resetBattle, 2500);
-    }
-}
-
-function resetBattle() {
-    playerHp = 100;
-    enemyHp = 100;
-    document.getElementById('player-hp-bar').style.width = "100%";
-    document.getElementById('enemy-hp-bar').style.width = "100%";
-    document.getElementById('player-hp-text').innerText = "100 / 100 HP";
-    document.getElementById('enemy-hp-text').innerText = "100 / 100 HP";
-}
-
-function appendBattleLog(msg) {
-    const log = document.getElementById('battle-log-text');
-    const entry = document.createElement('div');
-    entry.innerText = msg;
-    log.insertBefore(entry, log.firstChild);
-}
-
-// MARKETPLACE & P2P COUNTER-OFFER TRADING
-function listItemForSale() {
-    const item = document.getElementById('sell-item-select').value;
-    const price = parseInt(document.getElementById('sell-price-input').value);
-
-    if (isNaN(price) || price <= 0) {
-        showToast(currentLang === 'ar' ? "يرجى كتابة سعر صحيح للمزايدة" : "Invalid price", 'amber');
-        return;
-    }
-
-    const container = document.getElementById('market-listings-container');
-    const card = document.createElement('div');
-    card.className = "bg-slate-950 p-4 rounded-2xl border border-emerald-500/30 space-y-3";
-    card.innerHTML = `
-        <div class="flex items-start justify-between font-cairo">
-            <div>
-                <span class="text-[10px] bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 px-2 py-0.5 rounded-full font-bold">عرضك الجديد</span>
-                <h4 class="font-bold text-white text-base mt-1">${item}</h4>
-                <p class="text-xs text-slate-400">البائع: <span class="text-amber-400 font-mono font-bold">أنت (أبو إياد)</span></p>
-            </div>
-            <div class="text-left ltr:text-right">
-                <div class="text-[10px] text-slate-400">السعر المطلوب</div>
-                <div class="font-mono font-extrabold text-amber-400 text-lg">${price} ϐ</div>
-            </div>
-        </div>
-        <div class="text-[10px] text-slate-500 font-cairo">بانتظار المشترين وتلقي عروض الأسعار...</div>
-    `;
-    container.insertBefore(card, container.firstChild);
-    showToast(currentLang === 'ar' ? "تمت إضافة السلعة بنجاح في سوق التداول!" : "Item listed on marketplace!", 'emerald');
-}
-
-function buyMarketItem(itemName, price, sellerId) {
-    if (userBoonBalance < price) {
-        showToast(currentLang === 'ar' ? "رصيدك غير كافٍ من عملة بُون للشراء!" : "Insufficient Boon token balance!", 'amber');
-        return;
-    }
-
-    const commission = Math.floor(price * 0.05); // 5% System Commission Fee
-    userBoonBalance -= price;
-    updateBalanceUI();
-    playSound('victory');
-    showToast(currentLang === 'ar' ? `تم شراء "${itemName}" خصم (${price} ϐ) والعمولة (${commission} ϐ)` : `Purchased "${itemName}" for (${price} ϐ)!`, 'emerald');
-}
-
-function openCounterOfferModal(itemName, currentPrice) {
-    selectedTargetItem = itemName;
-    document.getElementById('modal-target-item-name').innerText = (currentLang === 'ar' ? `السلعة: ${itemName}` : `Item: ${itemName}`);
-    document.getElementById('counter-offer-price-input').value = Math.floor(currentPrice * 0.85);
-    document.getElementById('counter-offer-modal').classList.remove('hidden');
-}
-
-function closeCounterOfferModal() {
-    document.getElementById('counter-offer-modal').classList.add('hidden');
-}
-
-function submitCounterOffer() {
-    const offerPrice = parseInt(document.getElementById('counter-offer-price-input').value);
-    if (isNaN(offerPrice) || offerPrice <= 0) return;
-    closeCounterOfferModal();
-    showToast(currentLang === 'ar' ? `تم تقديم عرضك بـ (${offerPrice} ϐ) للبائع بنجاح!` : `Counter offer (${offerPrice} ϐ) submitted to seller!`, 'emerald');
-}
-
-// WAGER DUELS SYSTEM (تحدي الرهان)
-function startWagerFight() {
-    const playerItem = document.getElementById('wager-player-item-select').value;
-    navigateTo('arena');
-    showToast(currentLang === 'ar' ? `بدأت مبارزة الرهان! الفائز سيكسب كلا السلعتين!` : `Wager Fight Started! Fight to win both items!`, 'red');
-    resetBattle();
-}
-
-// IN-APP STORE PURCHASES
-function buyStoreItem(itemName, cost, currencyType) {
-    if (currencyType === 'boon') {
-        if (userBoonBalance < cost) {
-            showToast(currentLang === 'ar' ? "رصيدك غير كافٍ من عملة بُون!" : "Insufficient Boon balance!", 'amber');
-            return;
-        }
-        userBoonBalance -= cost;
-        updateBalanceUI();
-        playSound('victory');
-        showToast(currentLang === 'ar' ? `تم شراء "${itemName}" بنجاح!` : `Purchased "${itemName}"!`, 'emerald');
-    } else {
-        showToast(currentLang === 'ar' ? `جاري الاتصال بـ Google Play للشراء ($${cost})...` : `Connecting to Google Play ($${cost})...`, 'emerald');
-    }
-}
-
-function updateBalanceUI() {
-    document.getElementById('header-boon-balance').innerText = `${userBoonBalance} ϐ`;
-    document.getElementById('header-power-level').innerText = `${userPowerLevel} PWR`;
+    if (viewId === 'creator') onWindowResize();
 }
 
 function toggleLanguage() {
@@ -992,7 +768,7 @@ function toggleLanguage() {
     }
 }
 
-// 3D GRAPHICS ENGINE (THREE.JS PROCEDURAL FIGHTER & GEAR VISUALIZER)
+// THREE.JS 3D CHARACTER CREATOR ENGINE
 window.onload = function() {
     init3DScene();
     animate3D();
@@ -1003,13 +779,13 @@ function init3DScene() {
     const container = document.getElementById('canvas-container');
     container.innerHTML = '';
     const width = container.clientWidth;
-    const height = container.clientHeight || 380;
+    const height = container.clientHeight || 420;
 
     scene = new THREE.Scene();
-    scene.background = new THREE.Color(0x05070e);
+    scene.background = new THREE.Color(0x030712);
 
     camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 1000);
-    camera.position.set(0, 0, 6.5);
+    camera.position.set(0, 0.5, 5.5);
 
     renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
     renderer.setSize(width, height);
@@ -1019,76 +795,153 @@ function init3DScene() {
     const ambientLight = new THREE.AmbientLight(0xffffff, 0.9);
     scene.add(ambientLight);
 
-    const redSpotLight = new THREE.SpotLight(0xef4444, 3);
-    redSpotLight.position.set(5, 8, 5);
-    scene.add(redSpotLight);
+    const cyanLight = new THREE.PointLight(0x38bdf8, 2, 10);
+    cyanLight.position.set(3, 4, 3);
+    scene.add(cyanLight);
 
-    buildProceduralSamuraiHelmet();
-    buildAuraParticles();
+    const amberLight = new THREE.PointLight(0xfbbf24, 1.5, 10);
+    amberLight.position.set(-3, -2, -2);
+    scene.add(amberLight);
 
+    buildHuman3DModel();
     window.addEventListener('resize', onWindowResize);
 }
 
-function buildProceduralSamuraiHelmet() {
-    const group = new THREE.Group();
+function buildHuman3DModel() {
+    if (headMesh) scene.remove(headMesh);
+    if (bodyMesh) scene.remove(bodyMesh);
 
-    const headGeo = new THREE.SphereGeometry(1.2, 32, 24);
-    const headMat = new THREE.MeshStandardMaterial({ color: 0x0c1222, roughness: 0.2, metalness: 0.9 });
-    const headMesh = new THREE.Mesh(headGeo, headMat);
-    group.add(headMesh);
+    const characterGroup = new THREE.Group();
 
-    const crestGeo = new THREE.ConeGeometry(0.8, 1.2, 4);
-    const crestMat = new THREE.MeshStandardMaterial({ color: 0xfbbf24, roughness: 0.1, metalness: 0.95 });
-    const crestMesh = new THREE.Mesh(crestGeo, crestMat);
-    crestMesh.position.set(0, 1.4, 0.2);
-    crestMesh.rotation.x = -0.3;
-    group.add(crestMesh);
+    // 1. Head Mesh
+    const headGeo = new THREE.SphereGeometry(0.8, 32, 24);
+    if (characterData.faceShape === 'long') headGeo.scale(0.9, 1.25, 0.95);
+    else if (characterData.faceShape === 'oval') headGeo.scale(0.95, 1.1, 1.0);
+    else headGeo.scale(1.1, 1.0, 1.0);
 
-    fighterMesh = group;
-    scene.add(fighterMesh);
+    const skinMat = new THREE.MeshStandardMaterial({
+        color: new THREE.Color(characterData.skinColor),
+        roughness: 0.4,
+        metalness: 0.1
+    });
+    headMesh = new THREE.Mesh(headGeo, skinMat);
+    headMesh.position.set(0, 1.2, 0);
+    characterGroup.add(headMesh);
+
+    // 2. Nose Feature
+    const noseGeo = new THREE.ConeGeometry(0.12 * characterData.noseScale, 0.3, 16);
+    const noseMat = new THREE.MeshStandardMaterial({ color: new THREE.Color(characterData.skinColor).multiplyScalar(0.9) });
+    noseMesh = new THREE.Mesh(noseGeo, noseMat);
+    noseMesh.position.set(0, 1.15, 0.82);
+    noseMesh.rotation.x = 0.2;
+    characterGroup.add(noseMesh);
+
+    // 3. Mouth Feature
+    const mouthGeo = new THREE.CylinderGeometry(0.18 * characterData.mouthScale, 0.18 * characterData.mouthScale, 0.05, 16);
+    mouthGeo.rotateZ(Math.PI / 2);
+    const mouthMat = new THREE.MeshStandardMaterial({ color: 0x9f1239 });
+    mouthMesh = new THREE.Mesh(mouthGeo, mouthMat);
+    mouthMesh.position.set(0, 0.92, 0.78);
+    characterGroup.add(mouthMesh);
+
+    // 4. Hair Mesh
+    const hairGeo = characterData.hairStyle === 'cyber_ponytail' 
+        ? new THREE.CylinderGeometry(0.85, 0.2, 1.2, 16)
+        : new THREE.SphereGeometry(0.84, 24, 16, 0, Math.PI * 2, 0, Math.PI / 2);
+    const hairMat = new THREE.MeshStandardMaterial({ color: new THREE.Color(characterData.hairColor), roughness: 0.3 });
+    hairMesh = new THREE.Mesh(hairGeo, hairMat);
+    hairMesh.position.set(0, 1.35, -0.05);
+    characterGroup.add(hairMesh);
+
+    // 5. Body & Armor Torso
+    const bodyGeo = new THREE.CylinderGeometry(0.7 * characterData.muscleScale, 0.5, 1.8, 16);
+    const outfitColor = characterData.outfit === 'cyber_samurai' ? 0x0f172a : (characterData.outfit === 'tactical_armored' ? 0xd97706 : 0x4c1d95);
+    const bodyMat = new THREE.MeshStandardMaterial({ color: outfitColor, roughness: 0.2, metalness: 0.7 });
+    bodyMesh = new THREE.Mesh(bodyGeo, bodyMat);
+    bodyMesh.position.set(0, -0.2, 0);
+    characterGroup.add(bodyMesh);
+
+    // Apply Global Height Scale
+    characterGroup.scale.set(1, characterData.heightScale, 1);
+
+    scene.add(characterGroup);
+    headMesh = characterGroup;
 }
 
-function buildAuraParticles() {
-    const particleCount = 100;
-    const geometry = new THREE.BufferGeometry();
-    const positions = new Float32Array(particleCount * 3);
-
-    for (let i = 0; i < particleCount * 3; i += 3) {
-        positions[i] = (Math.random() - 0.5) * 5;
-        positions[i + 1] = (Math.random() - 0.5) * 5;
-        positions[i + 2] = (Math.random() - 0.5) * 5;
-    }
-
-    geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-    const material = new THREE.PointsMaterial({ color: 0xef4444, size: 0.08, transparent: true, opacity: 0.8 });
-    auraParticles = new THREE.Points(geometry, material);
-    scene.add(auraParticles);
+function setGender(g) {
+    characterData.gender = g;
+    document.getElementById('btn-gender-male').className = g === 'male' ? "py-2 rounded-xl bg-cyan-500 text-slate-950 font-bold text-xs transition" : "py-2 rounded-xl bg-slate-900 text-slate-400 border border-slate-800 font-bold text-xs transition";
+    document.getElementById('btn-gender-female').className = g === 'female' ? "py-2 rounded-xl bg-cyan-500 text-slate-950 font-bold text-xs transition" : "py-2 rounded-xl bg-slate-900 text-slate-400 border border-slate-800 font-bold text-xs transition";
+    characterData.muscleScale = g === 'female' ? 0.85 : 1.1;
+    buildHuman3DModel();
 }
 
-function switch3DObject(type) {
-    if (!scene) return;
-    if (fighterMesh) scene.remove(fighterMesh);
+function setFaceShape(s) {
+    characterData.faceShape = s;
+    buildHuman3DModel();
+}
 
-    if (type === 'helmet') buildProceduralSamuraiHelmet();
-    else if (type === 'sword') {
-        const geo = new THREE.CylinderGeometry(0.1, 0.1, 3.2, 16);
-        const mat = new THREE.MeshStandardMaterial({ color: 0x38bdf8, roughness: 0.1, metalness: 0.95 });
-        fighterMesh = new THREE.Mesh(geo, mat);
-        scene.add(fighterMesh);
-    } else if (type === 'shield') {
-        const geo = new THREE.CylinderGeometry(1.4, 1.4, 0.2, 32);
-        geo.rotateX(Math.PI / 2);
-        const mat = new THREE.MeshStandardMaterial({ color: 0xc084fc, roughness: 0.2, metalness: 0.8 });
-        fighterMesh = new THREE.Mesh(geo, mat);
-        scene.add(fighterMesh);
-    }
+function setSkinColor(c) {
+    characterData.skinColor = c;
+    buildHuman3DModel();
+}
+
+function morphNose(v) {
+    characterData.noseScale = parseFloat(v);
+    document.getElementById('val-nose-size').innerText = `${v}x`;
+    buildHuman3DModel();
+}
+
+function morphMouth(v) {
+    characterData.mouthScale = parseFloat(v);
+    document.getElementById('val-mouth-size').innerText = `${v}x`;
+    buildHuman3DModel();
+}
+
+function setHairstyle(h) {
+    characterData.hairStyle = h;
+    buildHuman3DModel();
+}
+
+function setHairColor(c) {
+    characterData.hairColor = c;
+    buildHuman3DModel();
+}
+
+function morphHeight(v) {
+    characterData.heightScale = parseFloat(v);
+    document.getElementById('val-height').innerText = `${Math.round(180 * v)} cm`;
+    buildHuman3DModel();
+}
+
+function morphMuscles(v) {
+    characterData.muscleScale = parseFloat(v);
+    document.getElementById('val-muscles').innerText = v > 1.1 ? 'Muscular Heavy' : (v < 0.9 ? 'Lean Slim' : 'Athletic');
+    buildHuman3DModel();
+}
+
+function applyOutfitPreset(p) {
+    characterData.outfit = p;
+    buildHuman3DModel();
+    showToast(currentLang === 'ar' ? "تم تجهيز البدلة والدروع بنجاح!" : "Outfit preset equipped!", 'emerald');
+}
+
+function updateFighterName(val) {
+    characterData.name = val || "صقر الأثير";
+    document.getElementById('character-title-display').innerText = `${currentLang === 'ar' ? 'المقاتل: ' : 'Fighter: '}${characterData.name}`;
+    document.getElementById('arena-fighter-name').innerText = `${currentLang === 'ar' ? 'المقاتل الشخصي: ' : 'Custom Fighter: '}${characterData.name}`;
+    document.getElementById('hud-player-name').innerText = characterData.name;
+}
+
+function saveCharacterAndEnterArena() {
+    navigateTo('arena');
+    showToast(currentLang === 'ar' ? `تم حفظ شخصية "${characterData.name}" وتجهيزها للقتال!` : `Fighter "${characterData.name}" saved & battle ready!`, 'emerald');
 }
 
 function animate3D() {
     requestAnimationFrame(animate3D);
-    if (!isDragging && fighterMesh) fighterMesh.rotation.y += 0.005;
-    if (auraParticles && currentAuraActive) auraParticles.rotation.y -= 0.003;
-    renderer.render(scene, camera);
+    if (!isDragging && headMesh) headMesh.rotation.y += 0.005;
+    if (renderer) renderer.render(scene, camera);
 }
 
 function setupTouchAndMouseInteractions() {
@@ -1099,9 +952,8 @@ function setupTouchAndMouseInteractions() {
     });
     window.addEventListener('mouseup', () => { isDragging = false; });
     container.addEventListener('mousemove', (e) => {
-        if (!isDragging || !fighterMesh) return;
-        fighterMesh.rotation.y += (e.clientX - previousMousePosition.x) * 0.008;
-        fighterMesh.rotation.x += (e.clientY - previousMousePosition.y) * 0.008;
+        if (!isDragging || !headMesh) return;
+        headMesh.rotation.y += (e.clientX - previousMousePosition.x) * 0.008;
         previousMousePosition = { x: e.clientX, y: e.clientY };
     });
 
@@ -1113,9 +965,8 @@ function setupTouchAndMouseInteractions() {
     });
     window.addEventListener('touchend', () => { isDragging = false; });
     container.addEventListener('touchmove', (e) => {
-        if (!isDragging || e.touches.length !== 1 || !fighterMesh) return;
-        fighterMesh.rotation.y += (e.touches[0].clientX - previousMousePosition.x) * 0.008;
-        fighterMesh.rotation.x += (e.touches[0].clientY - previousMousePosition.y) * 0.008;
+        if (!isDragging || e.touches.length !== 1 || !headMesh) return;
+        headMesh.rotation.y += (e.touches[0].clientX - previousMousePosition.x) * 0.008;
         previousMousePosition = { x: e.touches[0].clientX, y: e.touches[0].clientY };
     });
 }
@@ -1124,19 +975,107 @@ function onWindowResize() {
     const container = document.getElementById('canvas-container');
     if (!container || !renderer) return;
     const width = container.clientWidth;
-    const height = container.clientHeight || 380;
+    const height = container.clientHeight || 420;
     camera.aspect = width / height;
     camera.updateProjectionMatrix();
     renderer.setSize(width, height);
 }
 
-function resetCamera() { if (fighterMesh) fighterMesh.rotation.set(0, 0, 0); }
-function toggleAuraEffect() { if (auraParticles) auraParticles.visible = !auraParticles.visible; }
-function setMaterialStyle(style) {
-    if (!fighterMesh) return;
-    const col = style === 'gold' ? 0xfbbf24 : (style === 'cyber' ? 0x38bdf8 : 0xc084fc);
-    if (fighterMesh.material) fighterMesh.material.color.setHex(col);
-    fighterMesh.children.forEach(c => { if (c.material) c.material.color.setHex(col); });
+function reset3DCamera() {
+    if (headMesh) headMesh.rotation.set(0, 0, 0);
+}
+
+// COMBAT ENGINE LOGIC
+function executeMove(type) {
+    if (enemyHp <= 0 || playerHp <= 0) return;
+
+    let dmg = 0;
+    if (type === 'attack') dmg = Math.floor(Math.random() * 20) + 15;
+    else if (type === 'special') dmg = Math.floor(Math.random() * 30) + 25;
+    else if (type === 'defend') {
+        playerHp = Math.min(100, playerHp + 15);
+        appendLog(currentLang === 'ar' ? '🛡️ استعادة طاقة وقوة حماية (+15 HP)' : '🛡️ Restored energy (+15 HP)');
+    } else if (type === 'ultimate') dmg = Math.floor(Math.random() * 45) + 35;
+
+    if (dmg > 0) {
+        enemyHp = Math.max(0, enemyHp - dmg);
+        document.getElementById('enemy-hp-bar').style.width = `${enemyHp}%`;
+        document.getElementById('enemy-hp-text').innerText = `${enemyHp} / 100 HP`;
+        appendLog(currentLang === 'ar' ? `⚔️ وجهت ضربة ألحقت ${dmg} ضرر بالخصم!` : `⚔️ Dealt ${dmg} DMG to enemy!`);
+    }
+
+    if (enemyHp <= 0) {
+        winStreak++;
+        userBoonBalance += 35;
+        document.getElementById('header-boon-balance').innerText = `${userBoonBalance} ϐ`;
+        document.getElementById('arena-win-streak').innerText = `${winStreak} ${currentLang === 'ar' ? 'انتصارات' : 'Wins'}`;
+        showToast(currentLang === 'ar' ? "انتصار ساحق! حصلت على +35 ϐ Boon!" : "Victory! Earned +35 Boon (ϐ)!", 'emerald');
+        setTimeout(resetBattle, 2000);
+    }
+}
+
+function resetBattle() {
+    playerHp = 100;
+    enemyHp = 100;
+    document.getElementById('player-hp-bar').style.width = "100%";
+    document.getElementById('enemy-hp-bar').style.width = "100%";
+    document.getElementById('player-hp-text').innerText = "100 / 100 HP";
+    document.getElementById('enemy-hp-text').innerText = "100 / 100 HP";
+}
+
+function appendLog(msg) {
+    const log = document.getElementById('battle-log-text');
+    const entry = document.createElement('div');
+    entry.innerText = msg;
+    log.insertBefore(entry, log.firstChild);
+}
+
+// MARKETPLACE & WAGERS
+function postItemToMarket() {
+    const item = document.getElementById('market-sell-select').value;
+    const price = parseInt(document.getElementById('market-price-input').value);
+    if (!price || price <= 0) return;
+
+    const container = document.getElementById('market-cards-container');
+    const card = document.createElement('div');
+    card.className = "bg-slate-950 p-4 rounded-2xl border border-emerald-500/30 space-y-3 font-cairo";
+    card.innerHTML = `
+        <div class="flex items-start justify-between">
+            <div>
+                <span class="text-[10px] bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 px-2 py-0.5 rounded-full font-bold">عرضك الجديد</span>
+                <h4 class="font-bold text-white text-base mt-1">${item}</h4>
+                <p class="text-xs text-slate-400">البائع: <span class="text-amber-400 font-bold">${characterData.name} (أنت)</span></p>
+            </div>
+            <div class="text-left ltr:text-right">
+                <div class="text-[10px] text-slate-400">السعر المطلوبة</div>
+                <div class="font-mono font-extrabold text-amber-400 text-lg">${price} ϐ</div>
+            </div>
+        </div>
+    `;
+    container.insertBefore(card, container.firstChild);
+    showToast(currentLang === 'ar' ? "تمت إضافة السلعة بنجاح في السوق!" : "Item listed on marketplace!", 'emerald');
+}
+
+function buyMarketItem(itemName, price) {
+    if (userBoonBalance < price) {
+        showToast(currentLang === 'ar' ? "رصيدك غير كافٍ من عملة بُون!" : "Insufficient Boon balance!", 'amber');
+        return;
+    }
+    userBoonBalance -= price;
+    document.getElementById('header-boon-balance').innerText = `${userBoonBalance} ϐ`;
+    showToast(currentLang === 'ar' ? `تم شراء "${itemName}" بنجاح!` : `Purchased "${itemName}"!`, 'emerald');
+}
+
+function makeCounterOffer(itemName, price) {
+    const offer = prompt(currentLang === 'ar' ? `أدخل عرض السعر المقترح لـ ${itemName}:` : `Enter your counter-offer for ${itemName}:`, Math.floor(price * 0.85));
+    if (offer) {
+        showToast(currentLang === 'ar' ? `تم إرسال عرضك بـ (${offer} ϐ) للبائع بنجاح!` : `Counter offer (${offer} ϐ) sent to seller!`, 'emerald');
+    }
+}
+
+function startWagerDuel() {
+    navigateTo('arena');
+    showToast(currentLang === 'ar' ? "بدأت مبارزة الرهان! الفائز يحصل على كلا السلعتين!" : "Wager duel started! Winner takes both items!", 'red');
 }
 </script>
 
