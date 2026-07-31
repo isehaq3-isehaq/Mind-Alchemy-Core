@@ -4,9 +4,16 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mind Alchemy Fighters - Realistic 3D</title>
-    <!-- استدعاء مكتبة Three.js ومتحكمات الكاميرا ثلاثية الأبعاد -->
+    
+    <!-- 1. استدعاء مكتبة Three.js الأساسية -->
     <script src="https://cloudflare.com"></script>
+    
+    <!-- 2. استدعاء متحكمات الكاميرا ثلاثية الأبعاد (OrbitControls) -->
     <script src="https://jsdelivr.net"></script>
+    
+    <!-- 3. استدعاء أداة تحميل المجسمات الواقعية ثلاثية الأبعاد (GLTFLoader) -->
+    <script src="https://jsdelivr.net"></script>
+
     <style>
         :root {
             --neon-cyan: #00f3ff;
@@ -17,7 +24,7 @@
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', sans-serif; }
-        body { background-color: var(--bg-dark); color: var(--text-color); }
+        body { background-color: var(--bg-dark); color: var(--text-color); overflow-x: hidden; }
         
         header {
             background: #101026;
@@ -32,7 +39,6 @@
         
         .container { max-width: 1200px; margin: 30px auto; padding: 0 20px; }
 
-        /* حاوية العرض ثلاثي الأبعاد الواقعي */
         .fighter-3d-container {
             display: grid;
             grid-template-columns: 2fr 1fr;
@@ -43,7 +49,6 @@
             border: 1px solid #232344;
         }
 
-        /* نافذة محرك الـ 3D */
         #canvas-3d-viewport {
             width: 100%;
             height: 500px;
@@ -52,6 +57,21 @@
             position: relative;
             overflow: hidden;
             border: 1px solid var(--neon-cyan);
+        }
+
+        /* شاشة التحميل للمجسم */
+        #loading-overlay {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.85);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: var(--neon-cyan);
+            font-size: 18px;
+            font-weight: bold;
+            z-index: 10;
+            transition: opacity 0.5s;
         }
 
         .fighter-details {
@@ -86,73 +106,73 @@
 
     <header>
         <div class="logo">Mind Alchemy Fighters (صناعة واقعية 3D)</div>
-        <div style="font-weight: bold; color: gold;">إصدار محاكاة الرندرة الحية ϐ</div>
+        <div style="font-weight: bold; color: gold;">محرك GLTFLoader مفعل ϐ</div>
     </header>
 
     <div class="container">
         <h2 style="margin-bottom: 20px; color: var(--neon-cyan);">استعراض مقاتلي الذكاء الاصطناعي الفائق الواقعية</h2>
         
         <div class="fighter-3d-container">
-            <!-- مساحة محرك الـ 3D الحية -->
-            <div>
+            <div style="position: relative;">
+                <!-- شاشة تحميل المجسم ثلاثي الأبعاد -->
+                <div id="loading-overlay">جاري تحميل مجسم الشخصية الواقعي 3D...</div>
                 <div id="canvas-3d-viewport"></div>
-                <p class="hint-text">💡 اسحب بالفأرة لتدوير الشخصية 360 درجة، واستخدم البكرة لتقريب الوجوه وتدقيق خامات الدروع الواقعية.</p>
+                <p class="hint-text">💡 اسحب بالفأرة لتدوير المقاتل 360 درجة، واستخدم البكرة لتقريب ملامح الوجه والدروع الواقعية.</p>
             </div>
 
-            <!-- تفاصيل المقاتل والتحكم -->
             <div class="fighter-details">
-                <h3 style="font-size: 28px; margin-bottom: 10px;" id="fighter-name">صقر الأثير Cyber Falcon</h3>
+                <h3 style="font-size: 28px; margin-bottom: 10px;">صقر الأثير Cyber Falcon</h3>
                 <p style="color: var(--neon-magenta); font-weight: bold; margin-bottom: 15px;">المستوى الذكائي المطور: Max 4</p>
                 
                 <div style="margin-bottom: 10px;">
                     <label>دقة الخامات والدروع الحقيقية (PBR):</label>
-                    <p style="color: #aaa; font-size: 14px;">تم تفعيل انعكاسات النيون على الجسد والوجه البشري بدقة عالية.</p>
+                    <p style="color: #aaa; font-size: 14px;">تم تفعيل انعكاسات البيئة والنيون على جلود وجسد المقاتل ثلاثي الأبعاد.</p>
                 </div>
 
-                <button class="btn-action" onclick="changeFighterSkin('cyber')">تغيير زي النيون المستقبلية</button>
-                <button class="btn-action" style="background: var(--neon-magenta); color:#fff;" onclick="triggerAttackAnimation()">محاكاة حركة الهجوم الواقعية</button>
+                <button class="btn-action" onclick="triggerAttackAnimation()">محاكاة حركة الهجوم الواقعية</button>
             </div>
         </div>
     </div>
 
     <script>
-        // إعداد مشهد ثلاثي الأبعاد واقعي باستخدام Three.js
-        let scene, camera, renderer, controls, characterMesh;
+        let scene, camera, renderer, controls, characterMesh, mixer;
+        let clock = new THREE.Clock();
 
         function init3D() {
             const viewport = document.getElementById('canvas-3d-viewport');
             
-            // 1. إنشاء المشهد والخلفية
+            // 1. إعداد المشهد والخلفية والضباب السيبراني
             scene = new THREE.Scene();
             scene.background = new THREE.Color(0x05050a);
             scene.fog = new THREE.FogExp2(0x05050a, 0.15);
 
-            // 2. الكاميرا
+            // 2. الكاميرا وزوايا الرؤية
             camera = new THREE.PerspectiveCamera(45, viewport.clientWidth / viewport.clientHeight, 0.1, 100);
             camera.position.set(0, 1.5, 4);
 
-            // 3. المحرك ومؤثرات الواقعية (Renderer)
-            renderer = new THREE.WebGLRenderer({ antialias: true }); // مانع التعرج لتنعيم الحواف لتبدو حقيقية
+            // 3. المحرك وإعدادات تنعيم الحواف (Antialiasing) للواقعية
+            renderer = new THREE.WebGLRenderer({ antialias: true });
             renderer.setSize(viewport.clientWidth, viewport.clientHeight);
             renderer.shadowMap.enabled = true;
+            renderer.outputEncoding = THREE.sRGBEncoding; // لضمان ظهور ألوان الخامات بشكل حقيقي ومطابق للواقع
             viewport.appendChild(renderer.domElement);
 
-            // 4. التحكم بالكاميرا بالماوس (Orbit Controls)
+            // 4. التحكم لتدوير وتقريب الكاميرا بالماوس أو اللمس
             controls = new THREE.OrbitControls(camera, renderer.domElement);
             controls.enableDamping = true;
             controls.dampingFactor = 0.05;
-            controls.maxPolarAngle = Math.PI / 2; // منع الكاميرا من النزول تحت الأرض
+            controls.maxPolarAngle = Math.PI / 2;
 
-            // 5. الإضاءة الواقعية (Cinema Lighting)
-            const ambientLight = new THREE.AmbientLight(0xffffff, 0.4);
+            // 5. الإضاءة السينمائية (النيون المتعاكس لتعزيز واقعية الأسطح والمجسم)
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
             scene.add(ambientLight);
 
-            const neonBlueLight = new THREE.DirectionalLight(0x00f3ff, 1.2);
-            neonBlueLight.position.set(2, 4, 3);
+            const neonBlueLight = new THREE.DirectionalLight(0x00f3ff, 1.5);
+            neonBlueLight.position.set(3, 5, 3);
             scene.add(neonBlueLight);
 
-            const neonPinkLight = new THREE.DirectionalLight(0xff0055, 0.8);
-            neonPinkLight.position.set(-2, 2, -1);
+            const neonPinkLight = new THREE.DirectionalLight(0xff0055, 1.0);
+            neonPinkLight.position.set(-3, 3, -2);
             scene.add(neonPinkLight);
 
             // 6. أرضية عاكسة ومستقبلية للحلبة
@@ -163,64 +183,65 @@
             floor.position.y = -0.5;
             scene.add(floor);
 
-            // 7. مجسم افتراضي يمثل المقاتل بدلاً من الملف الخارجي (لأغراض العرض المباشر)
-            // في مشروعك الحقيقي ستقوم باستبدال هذا الجزء بسطر تحمّيل ملف GLTF للشخصية الواقعية المصممة بـ MetaHuman
-            const geometry = new THREE.CylinderGeometry(0.4, 0.6, 1.8, 32);
-            const material = new THREE.MeshStandardMaterial({ 
-                color: 0x333355, 
-                roughness: 0.1, // منخفض ليعطي لمعان حقيقي
-                metalness: 0.9, // معدني عالي ليحاكي الدروع السيبرانية
-            });
-            characterMesh = new THREE.Mesh(geometry, material);
-            characterMesh.position.y = 0.4;
-            scene.add(characterMesh);
+            // 7. استدعاء أداة GLTFLoader لتحميل مجسمك الواقعي
+            const loader = new THREE.GLTFLoader();
+            
+            // ⚠️ ملاحظة: استبدل رابط 'models/cyber_fighter.glb' بمسار ملف الـ 3D الفعلي الخاص بك في مستودع الجيت هب
+            loader.load('models/cyber_fighter.glb', function (gltf) {
+                characterMesh = gltf.scene;
+                characterMesh.position.y = -0.5;
+                characterMesh.scale.set(1, 1, 1); // تحجيم المقاتل ليتناسب مع الحلبة
+                
+                scene.add(characterMesh);
+                
+                // تشغيل الأنميشن الحركي (إذا كان الملف يحتوي على حركات من Mixamo أو Blender)
+                if (gltf.animations && gltf.animations.length > 0) {
+                    mixer = new THREE.AnimationMixer(characterMesh);
+                    const action = mixer.clipAction(gltf.animations[0]); // تشغيل أول حركة تلقائياً (مثل الوقوف Idle)
+                    action.play();
+                }
 
-            // بدء حلقة الرندرة المستمرة والتحديث
+                // إخفاء شاشة التحميل فور اكتمال الرندرة
+                document.getElementById('loading-overlay').style.opacity = 0;
+                setTimeout(() => { document.getElementById('loading-overlay').style.display = 'none'; }, 500);
+
+            }, function (xhr) {
+                // تتبع نسبة تحميل الملف في المتصفح
+                console.log((xhr.loaded / xhr.total * 100) + '% loaded');
+            }, function (error) {
+                console.error('حدث خطأ أثناء تحميل ملف الـ 3D الشخصية:', error);
+                // في حال عدم وجود ملف حقيقي بعد، سيتم إخفاء الشاشة لضمان عدم توقف واجهة اللعبة
+                document.getElementById('loading-overlay').innerText = "⚠️ لم يتم العثور على ملف مجسم ثلاثي أبعاد، يرجى رفع ملف cyber_fighter.glb في مجلد models";
+            });
+
             animate();
         }
 
         function animate() {
             requestAnimationFrame(animate);
             
-            // جعل المقاتل يدور ببطء لعرض تفاصيل الـ 3D بشكل تلقائي
-            if (characterMesh) {
-                characterMesh.rotation.y += 0.005;
+            let delta = clock.getDelta();
+            if (mixer) mixer.update(delta); // تحديث الحركات الفيزيائية للمقاتل في كل إطار
+
+            // دوران طفيف تلقائي للمجسم لعرض التفاصيل الواقعية إذا لم يقم المستخدم بالسحب
+            if (characterMesh && !controls.state == -1) {
+                characterMesh.rotation.y += 0.003;
             }
 
             controls.update();
             renderer.render(scene, camera);
         }
 
-        // تغيير مظهر الشخصية لحظياً لمحاكاة تغيير الدروع بالمتجر
-        function changeFighterSkin(type) {
-            if(characterMesh) {
-                characterMesh.material.color.setHex(Math.random() * 0xffffff); // تغيير الألوان بشكل عشوائي يحاكي جلود/دروع مخصصة
-                alert("تم تحديث خامات الدرع ثلاثي الأبعاد إلى مظهر واقعي جديد!");
-            }
-        }
-
         // محاكاة تأثير الحركة الهجومية للمجسم الواقعي
         function triggerAttackAnimation() {
             if(characterMesh) {
+                // تفعيل تأثير حركة ميكانيكية فورية للمجسم
                 let initialY = characterMesh.position.y;
-                // حركة قفز سريعة لأعلى وأسفل
-                characterMesh.position.y += 0.5;
-                setTimeout(() => {
-                    characterMesh.position.y = initialY;
-                }, 150);
+                characterMesh.position.y += 0.4;
+                setTimeout(() => { characterMesh.position.y = initialY; }, 150);
             }
         }
 
-        // تشغيل المحرك فوراً عند فتح الصفحة
         window.onload = init3D;
 
-        // تعديل حجم المحرك ثلاثي الأبعاد عند تغيير حجم الشاشة تلقائياً
         window.addEventListener('resize', () => {
-            const viewport = document.getElementById('canvas-3d-viewport');
-            camera.aspect = viewport.clientWidth / viewport.clientHeight;
-            camera.updateProjectionMatrix();
-            renderer.setSize(viewport.clientWidth, viewport.clientHeight);
-        });
-    </script>
-</body>
-</html>
