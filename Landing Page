@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mind Alchemy Fighters - Creators Arena</title>
+    
+    <style>
+        :root {
+            --neon-cyan: #00f3ff;
+            --neon-magenta: #ff0055;
+            --bg-dark: #05050a;
+            --card-bg: #0f0f1e;
+            --text-color: #ffffff;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', sans-serif; }
+        body { background-color: var(--bg-dark); color: var(--text-color); overflow-x: hidden; }
+        
+        /* تأثير النيون في الخلفية */
+        .hero-section {
+            text-align: center;
+            padding: 40px 15px;
+            background: radial-gradient(circle at center, #1a1a3a 0%, var(--bg-dark) 100%);
+        }
+
+        .main-title {
+            font-size: 28px;
+            color: var(--neon-cyan);
+            text-shadow: 0 0 15px var(--neon-cyan);
+            margin-bottom: 10px;
+        }
+
+        .sub-title {
+            font-size: 14px;
+            color: #aaa;
+            margin-bottom: 25px;
+        }
+
+        /* حاوية الـ 3D التفاعلية للمشاهير */
+        .viewport-box {
+            width: 100%;
+            height: 300px;
+            background: #000;
+            border-radius: 15px;
+            border: 2px solid var(--neon-magenta);
+            box-shadow: 0 0 20px rgba(255, 0, 85, 0.3);
+            position: relative;
+            margin-bottom: 25px;
+        }
+
+        #loading-text {
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            color: var(--neon-cyan);
+            font-weight: bold;
+            font-size: 14px;
+        }
+
+        /* بطاقات ميزات صناع المحتوى */
+        .features-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            padding: 0 15px;
+        }
+
+        .feature-card {
+            background: var(--card-bg);
+            border: 1px solid #232344;
+            border-radius: 10px;
+            padding: 20px;
+            text-align: right;
+            position: relative;
+        }
+
+        .feature-card h3 {
+            color: var(--neon-cyan);
+            margin-bottom: 8px;
+            font-size: 18px;
+        }
+
+        .feature-card p {
+            color: #ccc;
+            font-size: 13px;
+            line-height: 1.5;
+        }
+
+        .badge {
+            position: absolute;
+            top: 15px; left: 15px;
+            background: var(--neon-magenta);
+            color: white;
+            font-size: 11px;
+            padding: 3px 8px;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+
+        .cta-btn {
+            background: linear-gradient(90deg, var(--neon-cyan), var(--neon-magenta));
+            color: #fff;
+            border: none;
+            padding: 15px;
+            border-radius: 8px;
+            font-weight: bold;
+            font-size: 16px;
+            width: calc(100% - 30px);
+            margin: 25px auto;
+            display: block;
+            text-align: center;
+            text-decoration: none;
+            box-shadow: 0 0 15px rgba(0, 243, 255, 0.4);
+        }
+    </style>
+
+    <script type="importmap">
+      {
+        "imports": {
+          "three": "https://unpkg.com",
+          "three/addons/": "https://unpkg.com"
+        }
+      }
+    </script>
+</head>
+<body>
+
+    <div class="hero-section">
+        <h1 class="main-title">Mind Alchemy Fighters</h1>
+        <p class="sub-title">أول ساحة قتالية ثلاثية أبعاد مصممة لـ تيك توك ويوتيوب 🎮</p>
+        
+        <!-- العرض ثلاثي الأبعاد المباشر للخوذة -->
+        <div class="viewport-box">
+            <div id="loading-text">جاري تشغيل الرندرة الحية 3D...</div>
+            <div id="canvas-container" style="width:100%; height:100%;"></div>
+        </div>
+    </div>
+
+    <!-- شبكة الميزات الموجهة للمشاهير وجني الأرباح -->
+    <div class="features-grid">
+        <div class="feature-card">
+            <span class="badge">🔥 تفاعلي</span>
+            <h3>دعم البث المباشر (TikTok Live)</h3>
+            <p>اجعل جمهورك يتدخل في المعركة مباشرة! هدايا البث تتحول إلى أسلحة ودروع ودعم قتالي فوري على الشاشة أمام المتابعين.</p>
+        </div>
+
+        <div class="feature-card">
+            <span class="badge">💰 كسب دخل</span>
+            <h3>سوق التداول وعملة ϐ (بُون)</h3>
+            <p>اقتصاد متكامل يتيح بيع وشراء الدروع النادرة والمخصصة للمشاهير. اكسب عمولة 5% من كل عملية تبادل P2P بين اللاعبين.</p>
+        </div>
+
+        <div class="feature-card">
+            <span class="badge">⚔️ حماس عالي</span>
+            <h3>نزالات الرهان (Item Wager)</h3>
+            <p>تحدَّ صناع المحتوى الآخرين في مبارزات حية؛ الفائز يربح مقتنيات الخصم بالكامل وسط أجواء مشحونة ومثيرة للمشاهدين.</p>
+        </div>
+    </div>
+
+    <a href="#" class="cta-btn">ابدأ شراكة صناع المحتوى الآن</a>
+
+    <script type="module">
+        import * as THREE from 'three';
+        import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+        import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+
+        let scene, camera, renderer, controls, model;
+
+        function init() {
+            const container = document.getElementById('canvas-container');
+            
+            scene = new THREE.Scene();
+            scene.background = new THREE.Color(0x05050a);
+
+            camera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 0.1, 100);
+            camera.position.set(0, 0, 2.5);
+
+            renderer = new THREE.WebGLRenderer({ antialias: true });
+            renderer.setSize(container.clientWidth, container.clientHeight);
+            renderer.outputEncoding = THREE.sRGBEncoding;
+            container.appendChild(renderer.domElement);
+
+            controls = new OrbitControls(camera, renderer.domElement);
+            controls.enableDamping = true;
+            controls.dampingFactor = 0.05;
+
+            // إضاءة النيون الجذابة المتوافقة مع ذوق المشاهير
+            const ambient = new THREE.AmbientLight(0xffffff, 0.7);
+            scene.add(ambient);
+
+            const cyanLight = new THREE.DirectionalLight(0x00f3ff, 2.0);
+            cyanLight.position.set(2, 2, 2);
+            scene.add(cyanLight);
+
+            const pinkLight = new THREE.DirectionalLight(0xff0055, 2.0);
+            pinkLight.position.set(-2, 2, -2);
+            scene.add(pinkLight);
+
+            // جلب مجسم الخوذة القتالية الواقعية عبر بروتوكول HTTPS الآمن لجيت هب صفحتك
+            const loader = new GLTFLoader();
+            loader.load('https://githubusercontent.com', (gltf) => {
+                model = gltf.scene;
+                model.scale.set(0.55, 0.55, 0.55);
+                scene.add(model);
+                document.getElementById('loading-text').style.display = 'none';
+            });
+
+            animate();
+        }
+
+        function animate() {
+            requestAnimationFrame(animate);
+            if(model) model.rotation.y += 0.006; // دوران مستمر جذاب للمعاينة
+            controls.update();
+            renderer.render(scene, camera);
+        }
+
+        window.onload = init;
+        window.addEventListener('resize', () => {
+            const container = document.getElementById('canvas-container');
+            camera.aspect = container.clientWidth / container.clientHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(container.clientWidth, container.clientHeight);
+        });
+    </script>
+</body>
+</html>
