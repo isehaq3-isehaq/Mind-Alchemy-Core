@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Mind Alchemy - خريطة المراحل والتداول 3D</title>
+    <title>Mind Alchemy Fighters - حلبة القتال والتداول 3D</title>
     
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -24,11 +24,12 @@
             theme: {
                 extend: {
                     colors: {
-                        darkBg: '#050811',
-                        cardBg: '#0f172a',
+                        darkBg: '#05070e',
+                        cardBg: '#0c1222',
                         cardBorder: '#1e293b',
                         boonGold: '#fbbf24',
-                        accentGreen: '#deff9a',
+                        accentRed: '#ef4444',
+                        accentGreen: '#10b981',
                         accentCyan: '#38bdf8',
                         accentPurple: '#c084fc',
                     },
@@ -45,7 +46,7 @@
 
     <style>
         body {
-            background-color: #050811;
+            background-color: #05070e;
             color: #f8fafc;
             font-family: 'Tajawal', 'Inter', sans-serif;
             overflow-x: hidden;
@@ -56,23 +57,27 @@
             box-shadow: 0 0 25px rgba(251, 191, 36, 0.25);
         }
 
-        .emerald-glow {
-            box-shadow: 0 0 25px rgba(16, 185, 129, 0.25);
+        .red-glow {
+            box-shadow: 0 0 25px rgba(239, 68, 68, 0.3);
+        }
+
+        .cyan-glow {
+            box-shadow: 0 0 25px rgba(56, 189, 248, 0.25);
         }
 
         .glass-panel {
-            background: rgba(15, 23, 42, 0.85);
+            background: rgba(12, 18, 34, 0.88);
             backdrop-filter: blur(14px);
             border: 1px solid rgba(255, 255, 255, 0.08);
         }
 
-        /* Custom Mobile Scrollbar */
+        /* Custom Scrollbar */
         ::-webkit-scrollbar {
             width: 5px;
             height: 5px;
         }
         ::-webkit-scrollbar-track {
-            background: #050811;
+            background: #05070e;
         }
         ::-webkit-scrollbar-thumb {
             background: #1e293b;
@@ -100,13 +105,14 @@
             animation: toastIn 0.3s ease forwards;
         }
 
-        /* Pulse Animation for Current Stage */
-        @keyframes stagePulse {
-            0%, 100% { transform: scale(1); border-color: rgba(16, 185, 129, 0.6); }
-            50% { transform: scale(1.05); border-color: rgba(251, 191, 36, 1); box-shadow: 0 0 20px rgba(251, 191, 36, 0.4); }
+        /* Health Bar Shake on Damage */
+        @keyframes damageShake {
+            0%, 100% { transform: translateX(0); }
+            20%, 60% { transform: translateX(-6px); }
+            40%, 80% { transform: translateX(6px); }
         }
-        .active-stage-card {
-            animation: stagePulse 2s infinite ease-in-out;
+        .shake-effect {
+            animation: damageShake 0.3s ease;
         }
     </style>
 </head>
@@ -115,50 +121,49 @@
 <!-- Toast Notification Container -->
 <div id="toast-container" class="fixed top-5 left-1/2 -translate-x-1/2 z-50 flex flex-col gap-2 w-11/12 max-w-md pointer-events-none"></div>
 
-<!-- Top Sticky Header Navigation -->
+<!-- Top Sticky Navigation Bar -->
 <header class="sticky top-0 z-40 glass-panel border-b border-slate-800 px-4 py-3">
     <div class="max-w-7xl mx-auto flex items-center justify-between flex-wrap gap-2">
         <div class="flex items-center gap-3">
-            <div onclick="navigateTo('stages')" class="w-10 h-10 rounded-xl bg-gradient-to-tr from-amber-500 to-amber-300 flex items-center justify-center font-black text-slate-950 font-cairo text-2xl shadow-lg shadow-amber-500/20 cursor-pointer">
-                ϐ
+            <div onclick="navigateTo('arena')" class="w-10 h-10 rounded-xl bg-gradient-to-tr from-red-600 via-amber-500 to-amber-300 flex items-center justify-center font-black text-slate-950 font-cairo text-2xl shadow-lg shadow-red-500/20 cursor-pointer">
+                ⚔️
             </div>
             <div>
                 <h1 class="font-cairo font-extrabold text-base sm:text-lg text-white leading-tight flex items-center gap-2">
-                    Mind Alchemy 
-                    <span class="text-boonGold text-[10px] font-semibold px-2 py-0.5 rounded-full bg-amber-500/10 border border-amber-500/30" id="badge-live-preview">المعاينة الحية</span>
+                    Mind Alchemy <span class="text-amber-400">Fighters</span>
+                    <span class="text-boonGold text-[10px] font-semibold px-2 py-0.5 rounded-full bg-amber-500/10 border border-amber-500/30" id="badge-version">حلبة القتال 3D</span>
                 </h1>
-                <p class="text-[11px] text-slate-400 hidden sm:block" id="header-sub-text">متزامن مع Firebase Cloud: Mind-Alchemy-Core</p>
+                <p class="text-[11px] text-slate-400 hidden sm:block" id="header-sub-text">مقاتلو الذكاء الاصطناعي والتداول المباشر</p>
             </div>
         </div>
 
-        <!-- Wallet Balance & Navigation Controls -->
+        <!-- Wallet Balances & Navigation Controls -->
         <div class="flex items-center gap-2 sm:gap-3 flex-wrap">
             <!-- Navigation Buttons -->
-            <button id="nav-btn-stages" onclick="navigateTo('stages')" class="bg-emerald-600/30 hover:bg-emerald-600/50 text-emerald-300 border border-emerald-500/50 px-3 py-1.5 rounded-xl text-xs font-cairo font-bold transition flex items-center gap-1.5 shadow-lg shadow-emerald-500/10">
-                <i class="fa-solid fa-map-location-dot text-xs"></i>
-                <span id="btn-stages-nav">خريطة المراحل</span>
+            <button id="nav-btn-arena" onclick="navigateTo('arena')" class="bg-red-600/30 hover:bg-red-600/50 text-red-300 border border-red-500/50 px-3 py-1.5 rounded-xl text-xs font-cairo font-bold transition flex items-center gap-1.5 shadow-lg shadow-red-500/10">
+                <i class="fa-solid fa-hand-fist text-xs"></i>
+                <span id="btn-nav-arena">حلبة القتال</span>
             </button>
 
-            <button id="nav-btn-solver" onclick="navigateTo('solver')" class="bg-slate-800/90 hover:bg-slate-700 text-cyan-300 border border-cyan-500/40 px-2.5 py-1.5 rounded-xl text-xs font-cairo font-bold transition flex items-center gap-1.5">
-                <i class="fa-solid fa-brain text-xs"></i>
-                <span id="btn-solver-nav">غرفة الألغاز 3D</span>
+            <button id="nav-btn-market" onclick="navigateTo('market')" class="bg-slate-800/90 hover:bg-slate-700 text-amber-300 border border-amber-500/40 px-2.5 py-1.5 rounded-xl text-xs font-cairo font-bold transition flex items-center gap-1.5">
+                <i class="fa-solid fa-store text-xs"></i>
+                <span id="btn-nav-market">سوق التداول</span>
             </button>
 
-            <button id="nav-btn-auction" onclick="navigateTo('auction')" class="bg-slate-800/90 hover:bg-slate-700 text-amber-300 border border-amber-500/40 px-2.5 py-1.5 rounded-xl text-xs font-cairo font-bold transition flex items-center gap-1.5">
-                <i class="fa-solid fa-gavel text-xs"></i>
-                <span class="hidden sm:inline" id="btn-auction-nav">المزاد</span>
+            <button id="nav-btn-duels" onclick="navigateTo('duels')" class="bg-slate-800/90 hover:bg-slate-700 text-purple-300 border border-purple-500/40 px-2.5 py-1.5 rounded-xl text-xs font-cairo font-bold transition flex items-center gap-1.5">
+                <i class="fa-solid fa-skull text-xs"></i>
+                <span id="btn-nav-duels">تحدي الرهان</span>
             </button>
 
-            <!-- Language Selector Toggle -->
+            <button id="nav-btn-store" onclick="navigateTo('store')" class="bg-slate-800/90 hover:bg-slate-700 text-cyan-300 border border-cyan-500/40 px-2.5 py-1.5 rounded-xl text-xs font-cairo font-bold transition flex items-center gap-1.5">
+                <i class="fa-solid fa-cart-shopping text-xs"></i>
+                <span id="btn-nav-store">المتجر</span>
+            </button>
+
+            <!-- Language Selector Toggle Button -->
             <button onclick="toggleLanguage()" class="bg-slate-800/90 hover:bg-slate-700 text-amber-400 border border-amber-500/40 px-2.5 py-1.5 rounded-xl text-xs font-cairo font-bold transition flex items-center gap-1.5">
                 <i class="fa-solid fa-globe text-xs"></i>
                 <span id="lang-btn-text">English</span>
-            </button>
-
-            <!-- Inventory Locker Modal Toggle Button -->
-            <button onclick="toggleInventoryModal()" class="bg-slate-800/90 hover:bg-slate-700 text-cyan-300 border border-cyan-500/40 px-2.5 py-1.5 rounded-xl text-xs font-cairo font-bold transition flex items-center gap-1.5" title="الخزانة والمقتنيات">
-                <i class="fa-solid fa-box-open text-xs"></i>
-                <span class="hidden sm:inline" id="btn-inventory-text">الخزانة</span>
             </button>
 
             <!-- Boon Token Balance -->
@@ -167,679 +172,591 @@
                     ϐ
                 </div>
                 <div class="text-right ltr:text-left">
-                    <div class="text-[9px] text-slate-400 font-medium leading-none" id="label-boon">بُون (BOON)</div>
+                    <div class="text-[9px] text-slate-400 font-medium leading-none" id="label-boon">عملة بُون (BOON)</div>
                     <div id="header-boon-balance" class="font-mono font-bold text-amber-400 text-xs sm:text-sm leading-tight">500 ϐ</div>
                 </div>
             </div>
 
-            <!-- IQ Rank Balance -->
+            <!-- Player Power Rank -->
             <div class="flex items-center gap-2 bg-slate-900/90 border border-cyan-500/40 px-2.5 py-1.5 rounded-xl">
-                <i class="fa-solid fa-brain text-cyan-400 text-xs"></i>
+                <i class="fa-solid fa-bolt text-cyan-400 text-xs"></i>
                 <div class="text-right ltr:text-left">
-                    <div class="text-[9px] text-slate-400 font-medium leading-none" id="label-iq">مستوى الذكاء</div>
-                    <div id="header-iq-score" class="font-mono font-bold text-cyan-300 text-xs sm:text-sm leading-tight">1200 IQ</div>
+                    <div class="text-[9px] text-slate-400 font-medium leading-none" id="label-power">القوة القتالية</div>
+                    <div id="header-power-level" class="font-mono font-bold text-cyan-300 text-xs sm:text-sm leading-tight">1450 PWR</div>
                 </div>
             </div>
-
-            <!-- User Auth Status Button -->
-            <button id="auth-btn-top" onclick="navigateTo('auth')" class="bg-indigo-600/30 hover:bg-indigo-600/50 text-indigo-300 border border-indigo-500/40 px-2.5 py-1.5 rounded-xl text-xs font-cairo font-bold transition flex items-center gap-1.5">
-                <i class="fa-solid fa-user text-xs"></i>
-                <span id="top-user-name">دخول</span>
-            </button>
-
-            <!-- TikTok Streamer Mode Toggle Button -->
-            <button id="streamer-mode-btn" onclick="toggleStreamerMode()" class="bg-purple-600/20 hover:bg-purple-600/40 text-purple-300 border border-purple-500/40 px-2.5 py-1.5 rounded-xl text-xs font-cairo font-bold transition flex items-center gap-1.5">
-                <i class="fa-brands fa-tiktok text-xs"></i>
-                <span class="hidden md:inline" id="btn-streamer-mode">وضع البث (TikTok)</span>
-            </button>
         </div>
     </div>
 </header>
 
-<!-- PRIMARY SECTION 1: STAGE MAP (FEATURED AT TOP OF PAGE) -->
-<section id="view-stages" class="max-w-7xl mx-auto px-3 sm:px-4 mt-6">
-    <div class="bg-cardBg border border-cardBorder rounded-3xl p-5 sm:p-7 shadow-2xl space-y-6 relative overflow-hidden">
+<!-- VIEW 1: COMBAT & TRAINING ARENA (حلبة القتال والتدريب) -->
+<section id="view-arena" class="max-w-7xl mx-auto px-3 sm:px-4 mt-6">
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-5 sm:gap-6">
         
-        <!-- Header Banner for Stage Map -->
-        <div class="flex flex-col md:flex-row items-start md:items-center justify-between border-b border-slate-800 pb-5 gap-4">
-            <div class="flex items-center gap-4">
-                <div class="w-14 h-14 rounded-2xl bg-gradient-to-tr from-emerald-500 to-teal-400 p-0.5 shadow-xl shadow-emerald-500/20">
-                    <div class="w-full h-full bg-slate-950 rounded-[14px] flex items-center justify-center text-emerald-400 text-2xl">
-                        <i class="fa-solid fa-map-location-dot"></i>
-                    </div>
-                </div>
-                <div>
-                    <h2 class="font-cairo font-black text-white text-xl sm:text-2xl flex items-center gap-2">
-                        <span id="title-stage-map">خريطة المراحل وتحديات الذكاء الكيميائي</span>
-                        <span class="text-xs font-mono font-bold px-2.5 py-1 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/40" id="badge-stage-count">20 مرحلة متاحة</span>
-                    </h2>
-                    <p class="text-xs sm:text-sm text-slate-400 mt-0.5" id="sub-stage-map">انقر على أي مرحلة مفتوحة للبدء بالحل ودخول غرفة المحاكاة الـ 3D مباشرة!</p>
-                </div>
-            </div>
-
-            <!-- Player Progress Metrics Badge -->
-            <div class="flex items-center gap-3 bg-slate-950 p-3 rounded-2xl border border-slate-800/80 w-full md:w-auto justify-around">
-                <div class="text-center px-3 border-l ltr:border-r ltr:border-l-0 border-slate-800">
-                    <div class="text-[10px] text-slate-400 font-bold" id="label-completed-stages">المراحل المكتملة</div>
-                    <div id="stat-completed-count" class="font-mono font-black text-emerald-400 text-base">0 / 20</div>
-                </div>
-                <div class="text-center px-3">
-                    <div class="text-[10px] text-slate-400 font-bold" id="label-earned-stars">إجمالي النجوم</div>
-                    <div id="stat-stars-count" class="font-mono font-black text-amber-400 text-base">0 ⭐</div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Filter / Quick Action Bar -->
-        <div class="flex items-center justify-between bg-slate-950/80 p-3 rounded-2xl border border-slate-800/80 text-xs font-cairo font-bold">
-            <div class="flex items-center gap-2">
-                <i class="fa-solid fa-filter text-emerald-400"></i>
-                <span class="text-slate-300" id="label-map-mode">اختر مرحلة للتحدي الفكري:</span>
-            </div>
-            <button onclick="playNextUnlockedStage()" class="px-4 py-2 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-slate-950 font-cairo font-black text-xs transition shadow-lg shadow-emerald-500/20 flex items-center gap-2">
-                <i class="fa-solid fa-play"></i>
-                <span id="btn-play-current">لعب المرحلة الحالية المفتوحة</span>
-            </button>
-        </div>
-
-        <!-- Interactive Dynamic Stages Grid Container -->
-        <div id="stages-grid-container" class="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-5 gap-4 pt-1">
-            <!-- Populated dynamically via JavaScript logic -->
-        </div>
-    </div>
-</section>
-
-<!-- SECTION 2: MAIN PUZZLE SOLVER & 3D INSPECTOR ROOM -->
-<section id="view-solver" class="max-w-7xl mx-auto px-3 sm:px-4 mt-6 hidden">
-    <div class="grid grid-cols-1 lg:col-span-12 lg:grid-cols-12 gap-5 sm:gap-6">
-
-        <!-- LEFT COLUMN: 3D Inspector Canvas (7 Cols) -->
+        <!-- LEFT COLUMN: 3D Fighter & Weapon Canvas (7 Cols) -->
         <div class="lg:col-span-7 space-y-5 sm:space-y-6">
-            
-            <!-- 3D Interactive Viewer Card -->
             <div class="bg-cardBg border border-cardBorder rounded-2xl overflow-hidden shadow-2xl relative">
                 
-                <!-- Card Header Badge & Mode Select -->
-                <div class="p-3.5 border-b border-cardBorder flex items-center justify-between bg-slate-950/60">
+                <!-- Card Header Banner -->
+                <div class="p-3.5 border-b border-cardBorder flex items-center justify-between bg-slate-950/70">
                     <div class="flex items-center gap-2">
-                        <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold font-cairo bg-amber-500/10 text-amber-400 border border-amber-500/30" id="tag-vr-sim">
-                            <i class="fa-solid fa-vr-cardboard text-xs"></i>
-                            محاكاة VR تفاعلية 360°
+                        <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold font-cairo bg-red-500/10 text-red-400 border border-red-500/30" id="badge-arena-status">
+                            <i class="fa-solid fa-crosshairs text-xs"></i>
+                            حلبة قتال ثلاثية الأبعاد 360°
                         </span>
-                        <h2 class="font-cairo font-bold text-slate-200 text-xs sm:text-sm" id="item-title-vr">خوذة العبقري #001</h2>
+                        <h2 class="font-cairo font-bold text-slate-200 text-xs sm:text-sm" id="fighter-name-display">المقاتل: صقر الأثير (AI Cyber Samurai)</h2>
                     </div>
-                    
+
                     <div class="flex items-center gap-1.5">
-                        <button onclick="resetCamera()" class="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs transition" title="Reset Camera">
+                        <button onclick="resetCamera()" class="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs transition" title="Reset 3D View">
                             <i class="fa-solid fa-rotate-right"></i>
                         </button>
-                        <button id="toggle-aura-btn" onclick="toggleAuraEffect()" class="px-2.5 py-1 rounded-lg bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40 text-xs font-cairo font-bold transition">
-                            <i class="fa-solid fa-wand-magic-sparkles text-xs ml-1"></i> <span id="btn-aura-text">الهالة</span>
+                        <button onclick="toggleAuraEffect()" class="px-2.5 py-1 rounded-lg bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40 text-xs font-cairo font-bold transition">
+                            <i class="fa-solid fa-wand-magic-sparkles text-xs ml-1"></i> <span id="btn-aura-toggle">هالة الطاقة</span>
                         </button>
                     </div>
                 </div>
 
-                <!-- 3D Canvas Container Wrapper -->
+                <!-- 3D Canvas Container -->
                 <div id="canvas-wrapper" class="relative bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950">
                     <div id="canvas-container"></div>
                     
-                    <!-- Simulated TikTok Live Chat Overlay (Streamer Mode) -->
-                    <div id="streamer-live-chat" class="hidden absolute left-3 bottom-12 z-20 w-64 max-h-44 overflow-y-auto space-y-1.5 pointer-events-none font-cairo text-xs">
-                        <div class="bg-slate-950/80 backdrop-blur-md p-2 rounded-lg border border-purple-500/30 text-slate-200 animate-pulse">
-                            <span class="text-amber-400 font-bold">أبو فهد 👑:</span> لّف الخوذة للجهة الذهبية! 🔥
-                        </div>
-                        <div class="bg-slate-950/80 backdrop-blur-md p-2 rounded-lg border border-cyan-500/30 text-slate-200">
-                            <span class="text-cyan-400 font-bold">User_99:</span> أرسل لك 50 ϐ Boon هدية بث! 🎁
-                        </div>
-                    </div>
-
-                    <!-- Touch Instructions Overlay -->
-                    <div class="absolute bottom-3 right-3 bg-slate-950/85 backdrop-blur border border-slate-800 px-3 py-1.5 rounded-xl text-[11px] text-slate-300 flex items-center gap-2 pointer-events-none z-10">
+                    <!-- Touch Controls Hint -->
+                    <div class="absolute bottom-3 right-3 bg-slate-950/85 backdrop-blur border border-slate-800 px-3 py-1.5 rounded-xl text-[11px] text-slate-300 flex items-center gap-2 pointer-events-none">
                         <i class="fa-solid fa-hand-pointer text-amber-400 animate-bounce"></i>
-                        <span id="label-touch-hint">مس الشاشة ولّف المجسم 360 درجة</span>
+                        <span id="label-touch-arena">اسحب لتدوير المقاتل والسلاح 360 درجة</span>
                     </div>
 
-                    <!-- Live Item Rarity Tag Overlay -->
-                    <div class="absolute top-3 right-3 bg-gradient-to-r from-amber-600/90 to-amber-500/90 text-slate-950 font-cairo font-extrabold text-xs px-3 py-1 rounded-lg shadow-lg flex items-center gap-1.5 z-10" id="tag-rarity">
-                        <i class="fa-solid fa-crown text-xs"></i>
-                        <span>قطعة فريدة (UNIQUE #001)</span>
+                    <!-- Fighter Class Tag -->
+                    <div class="absolute top-3 right-3 bg-gradient-to-r from-red-600 to-amber-600 text-slate-950 font-cairo font-extrabold text-xs px-3 py-1 rounded-lg shadow-lg flex items-center gap-1.5">
+                        <i class="fa-solid fa-shield-halved text-xs"></i>
+                        <span id="label-fighter-class">فئة: الأسطوري (LEGENDARY)</span>
                     </div>
                 </div>
 
-                <!-- 3D Object Selector Bar & Material Change Controls -->
+                <!-- 3D Fighter & Equipment Selector -->
                 <div class="p-3 bg-slate-950/90 border-t border-cardBorder space-y-2 text-xs font-cairo font-bold">
                     <div class="flex items-center justify-between gap-1.5 overflow-x-auto pb-1">
-                        <span class="text-slate-400 text-[11px] whitespace-nowrap" id="label-select-object">المجسم المعاين:</span>
+                        <span class="text-slate-400 text-[11px] whitespace-nowrap" id="label-equipped-gear">المعدات المجهزة:</span>
                         <div class="flex items-center gap-1.5">
-                            <button onclick="switch3DObject('helmet')" id="obj-btn-helmet" class="px-2.5 py-1 rounded-lg bg-amber-500/20 text-amber-300 border border-amber-500/40 transition whitespace-nowrap">
-                                <i class="fa-solid fa-vr-cardboard ml-1"></i> <span id="btn-obj-helmet">الخوذة</span>
+                            <button onclick="switch3DObject('helmet')" class="px-2.5 py-1 rounded-lg bg-amber-500/20 text-amber-300 border border-amber-500/40 transition whitespace-nowrap">
+                                <i class="fa-solid fa-helmet-safety ml-1"></i> <span id="btn-gear-helmet">خوذة الساموراي</span>
                             </button>
-                            <button onclick="switch3DObject('cube')" id="obj-btn-cube" class="px-2.5 py-1 rounded-lg bg-slate-900 text-slate-400 border border-slate-800 transition whitespace-nowrap">
-                                <i class="fa-solid fa-cube ml-1"></i> <span id="btn-obj-cube">مكعب الشفرة</span>
+                            <button onclick="switch3DObject('sword')" class="px-2.5 py-1 rounded-lg bg-slate-900 text-slate-400 border border-slate-800 transition whitespace-nowrap">
+                                <i class="fa-solid fa-wand-sparkles ml-1"></i> <span id="btn-gear-sword">سيف الأثير</span>
                             </button>
-                            <button onclick="switch3DObject('prism')" id="obj-btn-prism" class="px-2.5 py-1 rounded-lg bg-slate-900 text-slate-400 border border-slate-800 transition whitespace-nowrap">
-                                <i class="fa-solid fa-gem ml-1"></i> <span id="btn-obj-prism">المنشور الأثيري</span>
-                            </button>
-                            <button onclick="switch3DObject('coin')" id="obj-btn-coin" class="px-2.5 py-1 rounded-lg bg-slate-900 text-slate-400 border border-slate-800 transition whitespace-nowrap">
-                                <i class="fa-solid fa-coins ml-1"></i> <span id="btn-obj-coin">عملة بُون</span>
+                            <button onclick="switch3DObject('shield')" class="px-2.5 py-1 rounded-lg bg-slate-900 text-slate-400 border border-slate-800 transition whitespace-nowrap">
+                                <i class="fa-solid fa-shield-cat ml-1"></i> <span id="btn-gear-shield">درع النيون</span>
                             </button>
                         </div>
                     </div>
 
-                    <!-- Material Controls -->
-                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                    <!-- Material & Elemental Skins Controls -->
+                    <div class="grid grid-cols-2 sm:grid-cols-3 gap-2">
                         <button onclick="setMaterialStyle('gold')" class="p-2 rounded-xl bg-slate-900 hover:bg-slate-800 border border-amber-500/30 text-amber-300 transition flex items-center justify-center gap-1.5">
                             <span class="w-2.5 h-2.5 rounded-full bg-amber-400 inline-block"></span>
-                            <span id="btn-mat-gold">ذهب وأوبسيديان</span>
+                            <span id="btn-skin-gold">عنصر الذهب الحارق</span>
                         </button>
                         <button onclick="setMaterialStyle('cyber')" class="p-2 rounded-xl bg-slate-900 hover:bg-slate-800 border border-cyan-500/30 text-cyan-300 transition flex items-center justify-center gap-1.5">
                             <span class="w-2.5 h-2.5 rounded-full bg-cyan-400 inline-block"></span>
-                            <span id="btn-mat-cyber">سايبر نيون</span>
+                            <span id="btn-skin-cyber">طاقة السايبر نيون</span>
                         </button>
                         <button onclick="setMaterialStyle('obsidian')" class="p-2 rounded-xl bg-slate-900 hover:bg-slate-800 border border-purple-500/30 text-purple-300 transition flex items-center justify-center gap-1.5">
                             <span class="w-2.5 h-2.5 rounded-full bg-purple-400 inline-block"></span>
-                            <span id="btn-mat-obsidian">أسود غامض</span>
-                        </button>
-                        <button onclick="toggleWireframe()" class="p-2 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-700 text-slate-300 transition flex items-center justify-center gap-1.5">
-                            <i class="fa-solid fa-draw-polygon text-xs"></i>
-                            <span id="btn-mat-wireframe">شبكة الـ 3D</span>
+                            <span id="btn-skin-dark">درع الأوبسيديان</span>
                         </button>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- RIGHT COLUMN: AI Companion "Atheer" & Hybrid Puzzle System (5 Cols) -->
+        <!-- RIGHT COLUMN: COMBAT SIMULATOR & TRAINING GROUND (5 Cols) -->
         <div class="lg:col-span-5 space-y-5 sm:space-y-6">
-
-            <!-- AI Companion Avatar Card (المرشد الذكي أثير) -->
-            <div class="bg-cardBg border border-cardBorder rounded-2xl p-4 sm:p-5 shadow-xl relative">
-                <div class="flex items-center gap-3 border-b border-slate-800 pb-3 mb-4">
-                    <div class="relative">
-                        <div class="w-12 h-12 rounded-full bg-gradient-to-tr from-cyan-500 to-indigo-500 p-0.5">
-                            <div class="w-full h-full bg-slate-950 rounded-full flex items-center justify-center overflow-hidden">
-                                <i class="fa-solid fa-robot text-cyan-400 text-xl"></i>
-                            </div>
-                        </div>
-                        <span class="w-3.5 h-3.5 bg-emerald-500 border-2 border-slate-950 rounded-full absolute bottom-0 right-0 animate-pulse"></span>
-                    </div>
-                    <div>
-                        <h3 class="font-cairo font-bold text-white text-base flex items-center gap-2">
-                            <span id="title-atheer-name">المرشد الذكي 3D ("أثير")</span>
-                            <span class="text-[9px] bg-cyan-500/10 text-cyan-400 border border-cyan-500/30 px-2 py-0.5 rounded-full font-mono">GEMINI AI INTEGRATED</span>
-                        </h3>
-                        <p class="text-xs text-slate-400" id="sub-atheer-desc">توليد حوارات وتلميحات ذكية تلقائياً</p>
-                    </div>
-                </div>
-
-                <!-- Dialogue Box from Atheer -->
-                <div class="bg-slate-950 p-3.5 rounded-xl border border-cyan-500/30 relative mb-4">
-                    <div class="text-xs text-cyan-400 font-cairo font-bold mb-1 flex items-center justify-between">
-                        <span><i class="fa-solid fa-comment-dots ml-1"></i> <span id="label-atheer-speaking">أثير يتحدث إليك:</span></span>
-                        <span class="text-[10px] text-slate-500" id="badge-model-status">Gemini API Active</span>
-                    </div>
-                    <p id="atheer-dialogue-text" class="text-xs sm:text-sm text-slate-200 leading-relaxed font-tajawal">
-                        "مرحباً بك يا صديقي العبقري! ادر الحلقات الميكانيكية للوصول إلى رمز القفل الخاص بهذه المرحلة!"
-                    </p>
-                </div>
-
-                <!-- Interactive AI Hint Request Button -->
-                <button onclick="requestAiHint()" class="w-full py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 border border-cyan-500/40 text-cyan-300 font-cairo font-bold text-xs transition flex items-center justify-center gap-2">
-                    <i class="fa-solid fa-lightbulb text-amber-400"></i>
-                    <span id="btn-request-hint">طلب تلميح ذكي من "أثير" (تكلفة: 5 ϐ Boon)</span>
-                </button>
-            </div>
-
-            <!-- Hybrid Puzzle Generator Simulation (خوارزمية الألغاز) -->
-            <div class="bg-cardBg border border-cardBorder rounded-2xl p-4 sm:p-5 shadow-xl">
-                <div class="flex items-center justify-between border-b border-slate-800 pb-3 mb-4">
+            <div class="bg-cardBg border border-cardBorder rounded-2xl p-4 sm:p-5 shadow-xl space-y-4">
+                
+                <!-- Arena Banner Title -->
+                <div class="flex items-center justify-between border-b border-slate-800 pb-3">
                     <div class="flex items-center gap-2.5">
-                        <div class="w-9 h-9 rounded-lg bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400 text-sm">
-                            <i class="fa-solid fa-brain"></i>
+                        <div class="w-10 h-10 rounded-xl bg-red-500/10 border border-red-500/30 flex items-center justify-center text-red-400 text-lg">
+                            <i class="fa-solid fa-dumbbell"></i>
                         </div>
                         <div>
-                            <h3 class="font-cairo font-bold text-white text-sm sm:text-base" id="title-puzzle-gen">مولد الألغاز الهجين (AI Puzzle)</h3>
-                            <p class="text-[10px] text-slate-400" id="sub-puzzle-gen">توليد عكسي + CSP Solvability Engine</p>
+                            <h3 class="font-cairo font-bold text-white text-base" id="title-training-mode">مرحلة التدريب والقتال الحقيقي</h3>
+                            <p class="text-xs text-slate-400" id="sub-training-mode">اقضِ على الخصم واكسب عملات **بُون (ϐ)**</p>
+                        </div>
+                    </div>
+                    
+                    <span class="text-xs font-mono px-2.5 py-1 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30" id="stat-win-streak">0 انتصارات متتالية</span>
+                </div>
+
+                <!-- Live Health Bars Battle HUD -->
+                <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 space-y-3">
+                    <!-- Player Health Bar -->
+                    <div>
+                        <div class="flex justify-between text-xs font-cairo font-bold mb-1">
+                            <span class="text-cyan-400" id="label-player-hp">مقاتلك (صقر الأثير)</span>
+                            <span id="player-hp-text" class="text-slate-300 font-mono">100 / 100 HP</span>
+                        </div>
+                        <div class="w-full h-3 bg-slate-900 rounded-full overflow-hidden border border-slate-800">
+                            <div id="player-hp-bar" class="h-full bg-gradient-to-r from-cyan-500 to-emerald-400 w-full transition-all duration-300"></div>
                         </div>
                     </div>
 
-                    <button onclick="navigateTo('stages')" class="px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 text-xs font-cairo font-bold transition flex items-center gap-1.5">
-                        <i class="fa-solid fa-map-location-dot text-xs"></i>
-                        <span id="btn-back-map">العودة للخريطة</span>
+                    <!-- VS Divider -->
+                    <div class="text-center font-black font-cairo text-xs text-red-500 tracking-widest">VS</div>
+
+                    <!-- Rival AI Enemy Health Bar -->
+                    <div id="enemy-card-hud">
+                        <div class="flex justify-between text-xs font-cairo font-bold mb-1">
+                            <span class="text-red-400" id="enemy-name-display">الخصم: وحش الأوبسيديان #04</span>
+                            <span id="enemy-hp-text" class="text-slate-300 font-mono">100 / 100 HP</span>
+                        </div>
+                        <div class="w-full h-3 bg-slate-900 rounded-full overflow-hidden border border-slate-800">
+                            <div id="enemy-hp-bar" class="h-full bg-gradient-to-r from-red-600 to-amber-500 w-full transition-all duration-300"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Real-time Combat Action Buttons -->
+                <div class="grid grid-cols-2 gap-2.5 pt-1">
+                    <button onclick="executeCombatMove('attack')" class="py-3 px-4 rounded-xl bg-gradient-to-r from-red-600 to-red-500 hover:from-red-500 hover:to-red-400 text-white font-cairo font-extrabold text-xs shadow-lg shadow-red-500/20 transition flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-hand-fist"></i>
+                        <span id="btn-attack-normal">هجوم عادي بالسيف</span>
+                    </button>
+
+                    <button onclick="executeCombatMove('special')" class="py-3 px-4 rounded-xl bg-gradient-to-r from-cyan-600 to-indigo-600 hover:from-cyan-500 hover:to-indigo-500 text-white font-cairo font-extrabold text-xs shadow-lg shadow-cyan-500/20 transition flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-bolt"></i>
+                        <span id="btn-attack-special">ضربة الذكاء الكيميائية</span>
+                    </button>
+
+                    <button onclick="executeCombatMove('defend')" class="py-3 px-4 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-700 text-slate-300 font-cairo font-bold text-xs transition flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-shield-halved text-amber-400"></i>
+                        <span id="btn-defend-guard">الدفاع واستعادة الطاقة</span>
+                    </button>
+
+                    <button onclick="executeCombatMove('ultimate')" class="py-3 px-4 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-cairo font-black text-xs shadow-lg shadow-amber-500/20 transition flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-skull"></i>
+                        <span id="btn-attack-ultimate">القاضية الفائقة (الذهب)</span>
                     </button>
                 </div>
 
-                <!-- Current Active Puzzle Box -->
-                <div class="space-y-3">
-                    <div class="bg-slate-950 p-3.5 rounded-xl border border-slate-800">
-                        <div id="puzzle-title-text" class="font-cairo font-bold text-emerald-400 text-xs sm:text-sm mb-1">
-                            اللغز #1: سر قفل الخزينة الأثيرية
+                <!-- Live Battle Log Window -->
+                <div class="bg-slate-950 p-3 rounded-xl border border-slate-800">
+                    <div class="text-[11px] font-cairo font-bold text-slate-400 mb-1 flex items-center justify-between">
+                        <span><i class="fa-solid fa-scroll text-amber-400 ml-1"></i> <span id="label-battle-log">سجل أحداث المعركة الحية:</span></span>
+                        <span class="text-[9px] text-emerald-400 font-mono">Live Combat Engine</span>
+                    </div>
+                    <div id="battle-log-text" class="text-xs text-slate-300 font-mono space-y-1 max-h-24 overflow-y-auto">
+                        <div class="text-amber-400">⚔️ تبدأ المعركة الحجمية! وجه الضربات واقضِ على الخصم!</div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+</section>
+
+<!-- VIEW 2: P2P MARKETPLACE & COUNTER-OFFER BIDDING (سوق التداول والمناقصات) -->
+<section id="view-market" class="max-w-6xl mx-auto px-4 mt-6 hidden">
+    <div class="bg-cardBg border border-cardBorder rounded-2xl p-4 sm:p-6 shadow-xl space-y-6">
+        
+        <!-- Marketplace Header -->
+        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between border-b border-slate-800 pb-4 gap-3">
+            <div class="flex items-center gap-3">
+                <div class="w-12 h-12 rounded-2xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 text-2xl">
+                    <i class="fa-solid fa-store"></i>
+                </div>
+                <div>
+                    <h2 class="font-cairo font-black text-white text-lg sm:text-xl" id="title-market-full">سوق تداول الأسلحة والدروع (P2P Marketplace)</h2>
+                    <p class="text-xs text-slate-400" id="sub-market-full">اعرض بضاعتك بالسعر الذي تريده، أو قدم عروض أسعار منافسة للشراء بـ **بُون (ϐ)**!</p>
+                </div>
+            </div>
+
+            <!-- Seller Commission Note -->
+            <div class="bg-slate-950 px-3 py-2 rounded-xl border border-amber-500/30 text-right ltr:text-left">
+                <div class="text-[10px] text-slate-400" id="label-commission-note">عمولة منصة اللعبة للعمليات:</div>
+                <div class="text-xs font-mono font-bold text-amber-400">5% System Fee</div>
+            </div>
+        </div>
+
+        <!-- Sell Your Item Action Modal Box -->
+        <div class="bg-slate-950 p-4 rounded-2xl border border-slate-800 space-y-3">
+            <h3 class="font-cairo font-bold text-white text-sm flex items-center gap-2">
+                <i class="fa-solid fa-plus-circle text-emerald-400"></i>
+                <span id="title-list-item">عرض سلعة من ممتلكاتك للبيع في المتجر:</span>
+            </h3>
+            
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs font-cairo">
+                <div>
+                    <label class="block text-slate-400 mb-1" id="label-select-sell-item">اختر السلعة من خزانتك:</label>
+                    <select id="sell-item-select" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-amber-400">
+                        <option value="سيف الأثير السايبراني #09">سيف الأثير السايبراني #09</option>
+                        <option value="خوذة الساموراي الذهبية #01">خوذة الساموراي الذهبية #01</option>
+                        <option value="درع الأوبسيديان الفولاذي #05">درع الأوبسيديان الفولاذي #05</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-slate-400 mb-1" id="label-sell-price">السعر المطلوب بعملة (ϐ Boon):</label>
+                    <input id="sell-price-input" type="number" min="50" value="200" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-amber-400 font-mono font-bold focus:outline-none focus:border-amber-400">
+                </div>
+
+                <div class="flex items-end">
+                    <button onclick="listItemForSale()" class="w-full py-2.5 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-slate-950 font-cairo font-extrabold text-xs shadow-lg shadow-emerald-500/20 transition flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-tag"></i>
+                        <span id="btn-list-sale">تأكيد العرض في السوق</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Active Marketplace Items Grid -->
+        <div>
+            <h3 class="font-cairo font-bold text-white text-sm mb-3 flex items-center gap-2">
+                <i class="fa-solid fa-fire text-amber-400"></i>
+                <span id="title-market-listings">السلع المعروضة حالياً وتلقي عروض الأسعار (Counter-Offers):</span>
+            </h3>
+
+            <div id="market-listings-container" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <!-- Listing 1 -->
+                <div class="bg-slate-950 p-4 rounded-2xl border border-slate-800 space-y-3">
+                    <div class="flex items-start justify-between">
+                        <div>
+                            <span class="text-[10px] bg-amber-500/10 text-amber-400 border border-amber-500/30 px-2 py-0.5 rounded-full font-cairo font-bold">أسطوري LEGENDARY</span>
+                            <h4 class="font-cairo font-bold text-white text-base mt-1">سيف الأثير الحارق #007</h4>
+                            <p class="text-xs text-slate-400">البائع: <span class="text-cyan-400 font-mono">user_77 (أبو فهد)</span></p>
                         </div>
-                        <p id="puzzle-desc-text" class="text-xs text-slate-300 leading-relaxed">
-                            تقف أمام قفل كيميائي ميكانيكي ثلاثي الحلقات، ادر الحلقات الأثيرية لضبط الرمز السرّي المشتق من زوايا المجسم!
-                        </p>
+                        <div class="text-left ltr:text-right">
+                            <div class="text-[10px] text-slate-400">السعر المطلوب</div>
+                            <div class="font-mono font-extrabold text-amber-400 text-lg">350 ϐ</div>
+                        </div>
                     </div>
 
-                    <!-- Combination Dial Lock Minigame UI -->
-                    <div class="bg-slate-900 p-4 rounded-xl border border-emerald-500/30 flex flex-col items-center justify-center gap-3">
-                        <div class="text-[11px] text-emerald-300 font-cairo font-bold" id="label-dial-lock-title">قفل الشفرة الميكانيكي الأثيري:</div>
-                        
-                        <div class="flex items-center justify-center gap-4">
-                            <!-- Ring 1 -->
-                            <div class="flex flex-col items-center gap-1">
-                                <button onclick="rotateDial(0, 1)" class="w-8 h-8 rounded-lg bg-slate-800 hover:bg-emerald-500/30 text-emerald-400 flex items-center justify-center transition">
-                                    <i class="fa-solid fa-chevron-up text-xs"></i>
-                                </button>
-                                <div id="dial-val-0" class="w-12 h-14 bg-slate-950 border-2 border-emerald-500/60 rounded-xl flex items-center justify-center font-mono font-black text-emerald-400 text-2xl shadow-lg shadow-emerald-500/20">
-                                    0
-                                </div>
-                                <button onclick="rotateDial(0, -1)" class="w-8 h-8 rounded-lg bg-slate-800 hover:bg-emerald-500/30 text-emerald-400 flex items-center justify-center transition">
-                                    <i class="fa-solid fa-chevron-down text-xs"></i>
-                                </button>
-                            </div>
+                    <!-- Direct Buy or Counter Offer Actions -->
+                    <div class="grid grid-cols-2 gap-2 pt-2 border-t border-slate-900">
+                        <button onclick="buyMarketItem('سيف الأثير الحارق #007', 350, 'user_77')" class="py-2 px-3 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-cairo font-extrabold text-xs transition flex items-center justify-center gap-1.5">
+                            <i class="fa-solid fa-bag-shopping"></i>
+                            <span id="btn-buy-direct-1">شراء مباشر (350 ϐ)</span>
+                        </button>
 
-                            <span class="text-slate-600 font-black text-xl">-</span>
-
-                            <!-- Ring 2 -->
-                            <div class="flex flex-col items-center gap-1">
-                                <button onclick="rotateDial(1, 1)" class="w-8 h-8 rounded-lg bg-slate-800 hover:bg-emerald-500/30 text-emerald-400 flex items-center justify-center transition">
-                                    <i class="fa-solid fa-chevron-up text-xs"></i>
-                                </button>
-                                <div id="dial-val-1" class="w-12 h-14 bg-slate-950 border-2 border-emerald-500/60 rounded-xl flex items-center justify-center font-mono font-black text-emerald-400 text-2xl shadow-lg shadow-emerald-500/20">
-                                    0
-                                </div>
-                                <button onclick="rotateDial(1, -1)" class="w-8 h-8 rounded-lg bg-slate-800 hover:bg-emerald-500/30 text-emerald-400 flex items-center justify-center transition">
-                                    <i class="fa-solid fa-chevron-down text-xs"></i>
-                                </button>
-                            </div>
-
-                            <span class="text-slate-600 font-black text-xl">-</span>
-
-                            <!-- Ring 3 -->
-                            <div class="flex flex-col items-center gap-1">
-                                <button onclick="rotateDial(2, 1)" class="w-8 h-8 rounded-lg bg-slate-800 hover:bg-emerald-500/30 text-emerald-400 flex items-center justify-center transition">
-                                    <i class="fa-solid fa-chevron-up text-xs"></i>
-                                </button>
-                                <div id="dial-val-2" class="w-12 h-14 bg-slate-950 border-2 border-emerald-500/60 rounded-xl flex items-center justify-center font-mono font-black text-emerald-400 text-2xl shadow-lg shadow-emerald-500/20">
-                                    0
-                                </div>
-                                <button onclick="rotateDial(2, -1)" class="w-8 h-8 rounded-lg bg-slate-800 hover:bg-emerald-500/30 text-emerald-400 flex items-center justify-center transition">
-                                    <i class="fa-solid fa-chevron-down text-xs"></i>
-                                </button>
-                            </div>
-                        </div>
-
-                        <button onclick="verifyPuzzleSolution()" class="w-full mt-1 py-2.5 rounded-xl bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-400 hover:to-emerald-500 text-slate-950 font-cairo font-extrabold text-xs shadow-lg shadow-emerald-500/20 transition flex items-center justify-center gap-2">
-                            <i class="fa-solid fa-unlock-keyhole"></i>
-                            <span id="btn-submit-answer">فتح القفل الأثيري ورصد المكافأة</span>
+                        <button onclick="openCounterOfferModal('سيف الأثير الحارق #007', 350)" class="py-2 px-3 rounded-xl bg-slate-900 hover:bg-slate-800 border border-cyan-500/40 text-cyan-300 font-cairo font-bold text-xs transition flex items-center justify-center gap-1.5">
+                            <i class="fa-solid fa-comments-dollar"></i>
+                            <span id="btn-offer-price-1">تقديم عرض سعر آخر</span>
                         </button>
                     </div>
-
-                    <!-- Live JSON Schema Toggle View -->
-                    <details class="group bg-slate-950 rounded-xl border border-slate-800/80">
-                        <summary class="p-2.5 text-xs font-mono text-slate-400 cursor-pointer flex items-center justify-between select-none">
-                            <span><i class="fa-solid fa-code text-cyan-400 ml-1"></i> <span id="label-json-response">استجابة السيرفر (Backend JSON Prompt)</span></span>
-                            <i class="fa-solid fa-chevron-down text-xs group-open:rotate-180 transition"></i>
-                        </summary>
-                        <pre class="p-3 pt-0 text-[10px] font-mono text-slate-300 overflow-x-auto text-left" dir="ltr"><code id="json-schema-code">{
-  "stage_id": 1,
-  "solver_validated": true,
-  "difficulty_iq": 1200,
-  "logic": { "key_code": "379", "node_depth": 3 },
-  "boon_reward": 25
-}</code></pre>
-                    </details>
                 </div>
-            </div>
 
-            <!-- Firebase Status Card -->
-            <div class="bg-slate-950/90 border border-slate-800 rounded-xl p-3 flex items-center justify-between text-xs">
-                <div class="flex items-center gap-2">
-                    <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping"></span>
-                    <span class="text-slate-300 font-mono text-[11px]">Firestore Cloud Status: Connected</span>
-                </div>
-                <span class="text-slate-500 text-[10px]">Project: Mind-Alchemy-Core</span>
-            </div>
+                <!-- Listing 2 -->
+                <div class="bg-slate-950 p-4 rounded-2xl border border-slate-800 space-y-3">
+                    <div class="flex items-start justify-between">
+                        <div>
+                            <span class="text-[10px] bg-cyan-500/10 text-cyan-400 border border-cyan-500/30 px-2 py-0.5 rounded-full font-cairo font-bold">نادر RARE</span>
+                            <h4 class="font-cairo font-bold text-white text-base mt-1">خوذة الساموراي النيون #042</h4>
+                            <p class="text-xs text-slate-400">البائع: <span class="text-cyan-400 font-mono">player_99</span></p>
+                        </div>
+                        <div class="text-left ltr:text-right">
+                            <div class="text-[10px] text-slate-400">السعر المطلوب</div>
+                            <div class="font-mono font-extrabold text-amber-400 text-lg">180 ϐ</div>
+                        </div>
+                    </div>
 
-        </div>
+                    <!-- Direct Buy or Counter Offer Actions -->
+                    <div class="grid grid-cols-2 gap-2 pt-2 border-t border-slate-900">
+                        <button onclick="buyMarketItem('خوذة الساموراي النيون #042', 180, 'player_99')" class="py-2 px-3 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-cairo font-extrabold text-xs transition flex items-center justify-center gap-1.5">
+                            <i class="fa-solid fa-bag-shopping"></i>
+                            <span id="btn-buy-direct-2">شراء مباشر (180 ϐ)</span>
+                        </button>
 
-    </div>
-</section>
-
-<!-- SECTION 3: FRIDAY AUCTION HOUSE SCREEN -->
-<section id="view-auction" class="max-w-4xl mx-auto px-4 mt-6 hidden">
-    <div class="bg-cardBg border border-cardBorder rounded-2xl p-4 sm:p-6 shadow-xl relative overflow-hidden space-y-5">
-        <div class="flex items-center justify-between border-b border-slate-800 pb-3">
-            <div class="flex items-center gap-3">
-                <div class="w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 text-base">
-                    <i class="fa-solid fa-gavel"></i>
-                </div>
-                <div>
-                    <h3 class="font-cairo font-bold text-base sm:text-lg text-white" id="title-auction-full">سوق المزادات الأسبوعي (سوق الجمعة)</h3>
-                    <p class="text-xs text-slate-400" id="sub-auction-full">التداول بالعملة الممتازة "بُون" (ϐ)</p>
-                </div>
-            </div>
-            
-            <div class="text-left ltr:text-right">
-                <div class="text-[10px] text-slate-400 font-medium" id="label-auction-ends">ينتهي المزاد خلال</div>
-                <div class="font-mono text-xs sm:text-sm font-bold text-amber-400" id="auction-timer">14:22:09</div>
-            </div>
-        </div>
-
-        <!-- Current Auction Item Details -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <div class="bg-slate-950 p-3.5 rounded-xl border border-slate-800/80 space-y-2">
-                <div class="text-xs text-slate-400" id="label-auction-item">السلعة المعروضة للمزاد</div>
-                <div class="font-cairo font-bold text-white text-sm sm:text-base" id="auction-item-name">خوذة العبقري الفريدة #001</div>
-                <div class="text-xs text-slate-400 flex items-center gap-2">
-                    <span id="label-seller">مالك السلعة الحالي:</span>
-                    <span class="text-cyan-400 font-mono font-semibold">user_001 (أبو إياد)</span>
-                </div>
-            </div>
-
-            <div class="bg-slate-950 p-3.5 rounded-xl border border-slate-800/80 flex flex-col justify-between">
-                <div>
-                    <div class="text-xs text-slate-400 mb-1" id="label-highest-bid">أعلى مزايدة حالية (Highest Bid)</div>
-                    <div class="flex items-baseline gap-2">
-                        <span id="auction-current-bid" class="font-mono font-extrabold text-2xl text-amber-400">300</span>
-                        <span class="text-amber-400 font-bold text-xs">ϐ Boon</span>
+                        <button onclick="openCounterOfferModal('خوذة الساموراي النيون #042', 180)" class="py-2 px-3 rounded-xl bg-slate-900 hover:bg-slate-800 border border-cyan-500/40 text-cyan-300 font-cairo font-bold text-xs transition flex items-center justify-center gap-1.5">
+                            <i class="fa-solid fa-comments-dollar"></i>
+                            <span id="btn-offer-price-2">تقديم عرض سعر آخر</span>
+                        </button>
                     </div>
                 </div>
-                <div class="text-[10px] text-slate-500" id="label-tax-note">شاملة رسم الحرق 5% لحماية اقتصاد اللعبة من التضخم</div>
             </div>
         </div>
 
-        <!-- Bidding Action Box -->
-        <div class="bg-slate-900/90 p-3.5 rounded-xl border border-amber-500/20 flex flex-col sm:flex-row items-center gap-3">
-            <div class="flex-1 w-full">
-                <label class="block text-xs text-slate-400 mb-1 font-cairo" id="label-bid-amount">مزايدتك بالعملة (ϐ Boon):</label>
-                <div class="relative">
-                    <input id="bid-input-amount" type="number" min="310" value="350" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-amber-400 font-mono font-bold focus:outline-none focus:border-amber-500 text-sm">
-                    <span class="absolute left-3 top-2.5 text-xs text-amber-500 font-bold">ϐ</span>
-                </div>
-            </div>
-            <button onclick="placeBid()" class="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-cairo font-extrabold text-xs sm:text-sm shadow-lg shadow-amber-500/20 transition flex items-center justify-center gap-2">
-                <i class="fa-solid fa-gavel"></i>
-                <span id="btn-submit-bid">تقديم المزايدة الآن</span>
-            </button>
-        </div>
+    </div>
+</section>
+
+<!-- VIEW 3: WAGER DUELS ARENA (تحدي الرهان - الفائز يأخذ كلا السلعتين) -->
+<section id="view-duels" class="max-w-4xl mx-auto px-4 mt-6 hidden">
+    <div class="bg-cardBg border border-purple-500/30 rounded-2xl p-4 sm:p-6 shadow-2xl space-y-6 relative overflow-hidden">
         
-        <!-- Live Bidding History Log -->
-        <div>
-            <div class="text-xs font-cairo font-bold text-slate-400 mb-2" id="label-bid-history">سجل المزايدات الحية (Firestore Sync):</div>
-            <div id="bidding-log-container" class="space-y-1.5 max-h-28 overflow-y-auto pr-1">
-                <div class="text-xs bg-slate-950/60 p-2 rounded-lg flex items-center justify-between border border-slate-800/50">
-                    <span class="text-cyan-400 font-mono">user_001 (أبو إياد)</span>
-                    <span class="text-slate-400 text-[10px]">منذ دقيقتين</span>
-                    <span class="text-amber-400 font-mono font-bold">300 ϐ</span>
+        <div class="flex items-center gap-3 border-b border-slate-800 pb-4">
+            <div class="w-12 h-12 rounded-2xl bg-purple-500/10 border border-purple-500/30 flex items-center justify-center text-purple-400 text-2xl">
+                <i class="fa-solid fa-skull"></i>
+            </div>
+            <div>
+                <h2 class="font-cairo font-black text-white text-lg sm:text-xl flex items-center gap-2">
+                    <span id="title-wager-arena">تحدي الرهان والمبارزة (Item Wager Duel)</span>
+                    <span class="text-xs font-mono font-bold px-2.5 py-0.5 rounded-full bg-red-500/20 text-red-400 border border-red-500/30">HIGH STAKES</span>
+                </h2>
+                <p class="text-xs text-slate-400" id="sub-wager-arena">راهن بسلعة ضد الخصم.. الفائز بالقتال يحصل على السلعتين معاً!</p>
+            </div>
+        </div>
+
+        <!-- Wager Matchmaking Setup -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <!-- Player 1 Wager (Your Wager) -->
+            <div class="bg-slate-950 p-4 rounded-2xl border border-cyan-500/30 space-y-3">
+                <div class="flex items-center justify-between border-b border-slate-900 pb-2">
+                    <span class="text-xs font-cairo font-bold text-cyan-400" id="label-your-wager">سلعتك المراهَن عليها:</span>
+                    <i class="fa-solid fa-shield text-cyan-400"></i>
+                </div>
+
+                <select id="wager-player-item-select" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-cyan-400 font-cairo">
+                    <option value="سيف الأثير السايبراني #09">سيف الأثير السايبراني #09 (قيمة: 250 ϐ)</option>
+                    <option value="خوذة الساموراي الذهبية #01">خوذة الساموراي الذهبية #01 (قيمة: 180 ϐ)</option>
+                </select>
+                <div class="text-[11px] text-slate-400" id="label-wager-risk">إذا خسرت القتال ستفقد هذه السلعة لصالح الخصم!</div>
+            </div>
+
+            <!-- Enemy Rival Wager -->
+            <div class="bg-slate-950 p-4 rounded-2xl border border-red-500/30 space-y-3">
+                <div class="flex items-center justify-between border-b border-slate-900 pb-2">
+                    <span class="text-xs font-cairo font-bold text-red-400" id="label-enemy-wager">سلعة الخصم (المنافس):</span>
+                    <i class="fa-solid fa-crosshairs text-red-400"></i>
+                </div>
+
+                <div class="bg-slate-900 p-2.5 rounded-xl border border-slate-800 text-xs font-cairo font-bold text-amber-400">
+                    درع التنين الأسطوري #09 (قيمة: 300 ϐ)
+                </div>
+                <div class="text-[11px] text-slate-400" id="label-wager-reward">إذا فزت بالقتال ستحصل على درع الخصم فوراً!</div>
+            </div>
+        </div>
+
+        <!-- Start Duel Wager Button -->
+        <button onclick="startWagerFight()" class="w-full py-3.5 rounded-xl bg-gradient-to-r from-red-600 via-amber-500 to-amber-600 hover:from-red-500 hover:to-amber-500 text-slate-950 font-cairo font-black text-sm shadow-xl shadow-red-500/20 transition flex items-center justify-center gap-2">
+            <i class="fa-solid fa-swords text-lg"></i>
+            <span id="btn-start-wager-duel">بدء مبارزة الرهان الآن (Fight for Both Items)</span>
+        </button>
+
+    </div>
+</section>
+
+<!-- VIEW 4: IN-APP STORE & GOOGLE PLAY PURCHASES (المتجر والشراء المباشر) -->
+<section id="view-store" class="max-w-5xl mx-auto px-4 mt-6 hidden">
+    <div class="bg-cardBg border border-cardBorder rounded-2xl p-4 sm:p-6 shadow-xl space-y-6">
+        
+        <div class="flex items-center justify-between border-b border-slate-800 pb-4">
+            <div class="flex items-center gap-3">
+                <div class="w-12 h-12 rounded-2xl bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center text-cyan-400 text-2xl">
+                    <i class="fa-solid fa-cart-shopping"></i>
+                </div>
+                <div>
+                    <h2 class="font-cairo font-black text-white text-lg sm:text-xl" id="title-store-full">متجر الأسلحة والدروع الرسمية</h2>
+                    <p class="text-xs text-slate-400" id="sub-store-full">اشترِ المعدات النادرة بعملة **بُون (ϐ)** أو الشراء المباشر عبر Google Play Billing</p>
                 </div>
             </div>
         </div>
+
+        <!-- Store Catalog Grid -->
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 font-cairo">
+            <!-- Item 1 -->
+            <div class="bg-slate-950 p-4 rounded-2xl border border-amber-500/30 space-y-3 flex flex-col justify-between">
+                <div>
+                    <div class="w-12 h-12 rounded-xl bg-amber-500/20 text-amber-400 flex items-center justify-center text-2xl mb-2">
+                        <i class="fa-solid fa-wand-sparkles"></i>
+                    </div>
+                    <div class="text-[10px] text-amber-400 font-bold">فريد UNIQUE</div>
+                    <h4 class="font-bold text-white text-sm">سيف النيون الأثيري</h4>
+                    <p class="text-xs text-slate-400 mt-1">+85 قوة هجومية قاضية</p>
+                </div>
+
+                <div class="space-y-2 pt-2 border-t border-slate-900">
+                    <button onclick="buyStoreItem('سيف النيون الأثيري', 150, 'boon')" class="w-full py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs transition flex items-center justify-center gap-1.5">
+                        <span>150 ϐ Boon</span>
+                    </button>
+                    <button onclick="buyStoreItem('سيف النيون الأثيري', 4.99, 'google')" class="w-full py-2 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-700 text-slate-200 font-bold text-xs transition flex items-center justify-center gap-1.5">
+                        <i class="fa-brands fa-google-play text-red-400"></i>
+                        <span>$4.99 (Google Play)</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Item 2 -->
+            <div class="bg-slate-950 p-4 rounded-2xl border border-cyan-500/30 space-y-3 flex flex-col justify-between">
+                <div>
+                    <div class="w-12 h-12 rounded-xl bg-cyan-500/20 text-cyan-400 flex items-center justify-center text-2xl mb-2">
+                        <i class="fa-solid fa-helmet-safety"></i>
+                    </div>
+                    <div class="text-[10px] text-cyan-400 font-bold">أسطوري LEGENDARY</div>
+                    <h4 class="font-bold text-white text-sm">خوذة الساموراي الذهبية</h4>
+                    <p class="text-xs text-slate-400 mt-1">+120 درع حماية واستعادة HP</p>
+                </div>
+
+                <div class="space-y-2 pt-2 border-t border-slate-900">
+                    <button onclick="buyStoreItem('خوذة الساموراي الذهبية', 220, 'boon')" class="w-full py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs transition flex items-center justify-center gap-1.5">
+                        <span>220 ϐ Boon</span>
+                    </button>
+                    <button onclick="buyStoreItem('خوذة الساموراي الذهبية', 7.99, 'google')" class="w-full py-2 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-700 text-slate-200 font-bold text-xs transition flex items-center justify-center gap-1.5">
+                        <i class="fa-brands fa-google-play text-red-400"></i>
+                        <span>$7.99 (Google Play)</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Item 3 (Boon Token Pack) -->
+            <div class="bg-slate-950 p-4 rounded-2xl border border-purple-500/30 space-y-3 flex flex-col justify-between">
+                <div>
+                    <div class="w-12 h-12 rounded-xl bg-purple-500/20 text-purple-400 flex items-center justify-center text-2xl mb-2">
+                        <i class="fa-solid fa-coins"></i>
+                    </div>
+                    <div class="text-[10px] text-purple-400 font-bold">حزمة العملة BOON PACK</div>
+                    <h4 class="font-bold text-white text-sm">+1000 عملة بُون (ϐ)</h4>
+                    <p class="text-xs text-slate-400 mt-1">رصيد ممتاز لشراء وتداول المقتنيات</p>
+                </div>
+
+                <div class="pt-2 border-t border-slate-900">
+                    <button onclick="buyStoreItem('حزمة 1000 عملة بُون', 9.99, 'google')" class="w-full py-2.5 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-bold text-xs shadow-lg shadow-purple-500/20 transition flex items-center justify-center gap-1.5">
+                        <i class="fa-brands fa-google-play"></i>
+                        <span>شراء بـ $9.99 (Google Pay)</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
     </div>
 </section>
 
-<!-- SECTION 4: GOOGLE AUTHENTICATION SCREEN -->
-<section id="view-auth" class="max-w-md mx-auto px-4 mt-12 hidden">
-    <div class="bg-cardBg border border-cardBorder rounded-3xl p-6 sm:p-8 shadow-2xl text-center space-y-6 relative overflow-hidden">
-        <div class="w-20 h-20 mx-auto rounded-3xl bg-gradient-to-tr from-amber-500 to-amber-300 flex items-center justify-center font-black text-slate-950 font-cairo text-4xl shadow-xl shadow-amber-500/30">
-            ϐ
-        </div>
-
-        <div>
-            <h2 class="font-cairo font-black text-2xl text-white mb-2" id="auth-title">تسجيل الدخول إلى Mind Alchemy</h2>
-            <p class="text-xs text-slate-400 leading-relaxed" id="auth-desc">احفظ تقدمك السحابي، رصيد عملة بُون (ϐ)، ومقتنياتك الفريدة عبر ربط حساب Google الخاص بك.</p>
-        </div>
-
-        <div class="space-y-3 pt-2">
-            <button onclick="signInWithGoogle()" class="w-full py-3 px-4 rounded-xl bg-white hover:bg-slate-100 text-slate-900 font-cairo font-extrabold text-sm shadow-lg transition flex items-center justify-center gap-3">
-                <i class="fa-brands fa-google text-red-500 text-lg"></i>
-                <span id="btn-google-login">المتابعة باستخدام Google</span>
-            </button>
-
-            <button onclick="loginAsGuest()" class="w-full py-3 px-4 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-700 text-slate-300 font-cairo font-bold text-xs transition flex items-center justify-center gap-2">
-                <i class="fa-solid fa-user-ninja text-amber-400"></i>
-                <span id="btn-guest-login">الدخول كـ "لاعب ضيف" (تجربة سريعة)</span>
-            </button>
-        </div>
-
-        <div class="text-[10px] text-slate-500 border-t border-slate-800/80 pt-4" id="auth-footer-text">
-            متوافق مع محرك Google Cloud Platform و Firebase Firestore
-        </div>
-    </div>
-</section>
-
-<!-- LEVEL VICTORY POPUP MODAL -->
-<div id="victory-modal" class="fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-md flex items-center justify-center p-4 hidden">
-    <div class="bg-cardBg border border-emerald-500/50 rounded-3xl w-full max-w-md p-6 shadow-2xl space-y-5 text-center relative overflow-hidden emerald-glow">
-        <div class="w-20 h-20 mx-auto rounded-full bg-emerald-500/20 border-2 border-emerald-400 flex items-center justify-center text-emerald-400 text-3xl animate-bounce">
-            <i class="fa-solid fa-trophy"></i>
-        </div>
-
-        <div>
-            <h3 class="font-cairo font-black text-2xl text-white mb-1" id="modal-victory-title">مبروك! تم فك القفل الأثيري!</h3>
-            <p class="text-xs text-slate-300" id="modal-victory-desc">أنجزت المرحلة بنجاح وحصلت على المكافآت التالية:</p>
-        </div>
-
-        <div class="grid grid-cols-2 gap-3 py-2">
-            <div class="bg-slate-950 p-3 rounded-2xl border border-amber-500/40">
-                <div class="text-[10px] text-slate-400 font-bold" id="label-reward-boon">مكافأة بُون</div>
-                <div class="font-mono font-black text-amber-400 text-lg">+25 ϐ</div>
-            </div>
-
-            <div class="bg-slate-950 p-3 rounded-2xl border border-cyan-500/40">
-                <div class="text-[10px] text-slate-400 font-bold" id="label-reward-iq">ارتفاع الذكاء</div>
-                <div class="font-mono font-black text-cyan-300 text-lg">+15 IQ</div>
-            </div>
-        </div>
-
-        <div class="flex gap-2">
-            <button onclick="closeVictoryModal(); navigateTo('stages');" class="flex-1 py-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-cairo font-bold text-xs transition">
-                <span id="btn-modal-map">خريطة المراحل</span>
-            </button>
-            <button onclick="closeVictoryModal(); playNextUnlockedStage();" class="flex-1 py-3 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 text-slate-950 font-cairo font-black text-xs transition shadow-lg shadow-emerald-500/20">
-                <span id="btn-modal-next">المرحلة التالية</span>
-            </button>
-        </div>
-    </div>
-</div>
-
-<!-- Interactive 3D Inventory Locker Modal -->
-<div id="inventory-modal" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4 hidden">
-    <div class="bg-cardBg border border-cardBorder rounded-2xl w-full max-w-lg p-5 shadow-2xl space-y-4">
+<!-- COUNTER OFFER MODAL (تقديم عرض سعر آخر للمساومة) -->
+<div id="counter-offer-modal" class="fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-md flex items-center justify-center p-4 hidden">
+    <div class="bg-cardBg border border-cyan-500/40 rounded-3xl w-full max-w-md p-6 shadow-2xl space-y-4 font-cairo">
         <div class="flex items-center justify-between border-b border-slate-800 pb-3">
-            <h3 class="font-cairo font-bold text-white text-base flex items-center gap-2">
-                <i class="fa-solid fa-box-open text-cyan-400"></i>
-                <span id="modal-title-inv">خزانة المقتنيات النادرة (3D Inventory)</span>
+            <h3 class="font-bold text-white text-base flex items-center gap-2">
+                <i class="fa-solid fa-comments-dollar text-cyan-400"></i>
+                <span id="modal-title-offer">تقديم عرض سعر للمساومة (Counter-Offer)</span>
             </h3>
-            <button onclick="toggleInventoryModal()" class="text-slate-400 hover:text-white">
+            <button onclick="closeCounterOfferModal()" class="text-slate-400 hover:text-white">
                 <i class="fa-solid fa-xmark text-lg"></i>
             </button>
         </div>
 
-        <div class="grid grid-cols-2 gap-3 text-xs font-cairo">
-            <div class="bg-slate-950 p-3 rounded-xl border border-amber-500/40 space-y-1">
-                <div class="text-[10px] text-amber-400 font-bold" id="rarity-helmet">فريد (UNIQUE #001)</div>
-                <div class="font-bold text-white" id="inv-helmet-name">خوذة العبقري</div>
-                <div class="text-[10px] text-slate-400" id="inv-helmet-desc">مجهزة حالياً في محاكاة الـ 3D</div>
-                <button onclick="switch3DObject('helmet'); toggleInventoryModal();" class="mt-2 w-full py-1 rounded bg-amber-500/20 text-amber-300 border border-amber-500/30 text-[11px] font-bold" id="btn-preview-helmet">معاينة المجسم</button>
-            </div>
-
-            <div class="bg-slate-950 p-3 rounded-xl border border-cyan-500/40 space-y-1">
-                <div class="text-[10px] text-cyan-400 font-bold" id="rarity-cube">نادر (RARE #042)</div>
-                <div class="font-bold text-white" id="inv-cube-name">مكعب الشفرة الكيميائي</div>
-                <div class="text-[10px] text-slate-400" id="inv-cube-desc">أداة فك الألغاز الحسابية</div>
-                <button onclick="switch3DObject('cube'); toggleInventoryModal();" class="mt-2 w-full py-1 rounded bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 text-[11px] font-bold" id="btn-preview-cube">معاينة المجسم</button>
-            </div>
+        <div class="space-y-2">
+            <div class="text-xs text-slate-300" id="modal-target-item-name">السلعة: سيف الأثير الحارق #007</div>
+            <label class="block text-xs text-slate-400" id="label-your-bid-price">عرضك المقترح للسلعة بـ (ϐ Boon):</label>
+            <input id="counter-offer-price-input" type="number" value="300" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-amber-400 font-mono font-bold text-sm focus:outline-none focus:border-cyan-400">
+            <div class="text-[10px] text-slate-500" id="label-seller-notified">سيصل إشعار للبائع لخصم المبلغ وقبول أو رفض عرضك.</div>
         </div>
+
+        <button onclick="submitCounterOffer()" class="w-full py-2.5 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-extrabold text-xs shadow-lg shadow-cyan-500/20 transition flex items-center justify-center gap-2">
+            <i class="fa-solid fa-paper-plane"></i>
+            <span id="btn-submit-offer">إرسال العرض للبائع</span>
+        </button>
     </div>
 </div>
 
 <script>
-
-// --- Global State Variables ---
+// --- Global Game State ---
 let currentLang = 'ar';
 let userBoonBalance = 500;
-let userIqScore = 1200;
-let currentBid = 300;
-let unlockedStageCount = 1;
-let currentPlayingStage = 1;
+let userPowerLevel = 1450;
+let playerHp = 100;
+let enemyHp = 100;
+let winStreak = 0;
+let selectedTargetItem = "";
 
-// Level Definitions Database
-const stagesList = [
-    { id: 1, titleAr: "سر القفل الأثيري", titleEn: "Secret of the Aether Vault", code: "379", obj: "helmet", stars: 0, iqReq: 1200 },
-    { id: 2, titleAr: "متاهة البلورة الذهبية", titleEn: "Golden Crystal Labyrinth", code: "512", obj: "prism", stars: 0, iqReq: 1215 },
-    { id: 3, titleAr: "شفرة مكعب الأوبسيديان", titleEn: "Obsidian Cube Cipher", code: "884", obj: "cube", stars: 0, iqReq: 1230 },
-    { id: 4, titleAr: "معادلة عملة بُون", titleEn: "Boon Token Equation", code: "920", obj: "coin", stars: 0, iqReq: 1245 },
-    { id: 5, titleAr: "مفتاح البوابة الكمومية", titleEn: "Quantum Gate Key", code: "147", obj: "helmet", stars: 0, iqReq: 1260 },
-    { id: 6, titleAr: "لغز محرك الطاقة الأثيرية", titleEn: "Aether Engine Puzzle", code: "631", obj: "prism", stars: 0, iqReq: 1275 },
-    { id: 7, titleAr: "حسابات زوايا العبقري", titleEn: "Genius Geometry Logic", code: "428", obj: "cube", stars: 0, iqReq: 1290 },
-    { id: 8, titleAr: "شفرة الهالة المزدوجة", titleEn: "Dual Aura Code", code: "753", obj: "coin", stars: 0, iqReq: 1305 },
-    { id: 9, titleAr: "قفل الخزينة الأثرية", titleEn: "Ancient Relic Lock", code: "296", obj: "helmet", stars: 0, iqReq: 1320 },
-    { id: 10, titleAr: "تحدي الأومني المتقدم", titleEn: "Advanced Omni Challenge", code: "814", obj: "prism", stars: 0, iqReq: 1335 },
-    { id: 11, titleAr: "رمز العقدة الكيميائية", titleEn: "Alchemy Node Symbol", code: "592", obj: "cube", stars: 0, iqReq: 1350 },
-    { id: 12, titleAr: "لغز بلورة النيون", titleEn: "Neon Crystal Puzzle", code: "348", obj: "coin", stars: 0, iqReq: 1365 },
-    { id: 13, titleAr: "سر المحك السايبراني", titleEn: "Cyber Crucible Secret", code: "175", obj: "helmet", stars: 0, iqReq: 1380 },
-    { id: 14, titleAr: "مصفوفة النظائر الثنائية", titleEn: "Binary Isotope Matrix", code: "963", obj: "prism", stars: 0, iqReq: 1395 },
-    { id: 15, titleAr: "معادلة الأفق المظلم", titleEn: "Dark Horizon Formula", code: "284", obj: "cube", stars: 0, iqReq: 1410 },
-    { id: 16, titleAr: "شفرة البرج الأثيري", titleEn: "Aether Citadel Code", code: "719", obj: "coin", stars: 0, iqReq: 1425 },
-    { id: 17, titleAr: "قفل الخوذة الملكية", titleEn: "Royal Visor Vault", code: "452", obj: "helmet", stars: 0, iqReq: 1440 },
-    { id: 18, titleAr: "متاهة الأوتار الثلاثية", titleEn: "Triple String Helix", code: "836", obj: "prism", stars: 0, iqReq: 1455 },
-    { id: 19, titleAr: "لغز النواة الذهبية", titleEn: "Golden Core Mystery", code: "197", obj: "cube", stars: 0, iqReq: 1470 },
-    { id: 20, titleAr: "تحدي الكيميائي الأكبر", titleEn: "Grand Alchemist Masterwork", code: "999", obj: "coin", stars: 0, iqReq: 1500 }
-];
-
-let currentDialValues = [0, 0, 0];
-let currentActiveObject = 'helmet';
-let currentUser = { name: 'لاعب ضيف', email: 'guest@mindalchemy.io', isGuest: true };
-
-// Three.js Core Variables
-let scene, camera, renderer, helmetMesh, auraParticles;
+// 3D Scene Variables
+let scene, camera, renderer, fighterMesh, auraParticles;
 let isDragging = false;
 let previousMousePosition = { x: 0, y: 0 };
 let currentAuraActive = true;
-let wireframeActive = false;
 
 // i18n Translation Dictionary
 const i18n = {
     ar: {
-        badgeLivePreview: "المعاينة الحية",
-        btnStagesNav: "خريطة المراحل",
-        btnSolverNav: "غرفة الألغاز 3D",
-        btnAuctionNav: "المزاد",
-        btnInventoryText: "الخزانة",
-        labelBoon: "بُون (BOON)",
-        labelIq: "مستوى الذكاء",
-        btnStreamerMode: "وضع البث (TikTok)",
-        titleStageMap: "خريطة المراحل وتحديات الذكاء الكيميائي",
-        badgeStageCount: "20 مرحلة متاحة",
-        subStageMap: "انقر على أي مرحلة مفتوحة للبدء بالحل ودخول غرفة المحاكاة الـ 3D مباشرة!",
-        labelCompletedStages: "المراحل المكتملة",
-        labelEarnedStars: "إجمالي النجوم",
-        labelMapMode: "اختر مرحلة للتحدي الفكري:",
-        btnPlayCurrent: "لعب المرحلة الحالية المفتوحة",
-        tagVrSim: "محاكاة VR تفاعلية 360°",
-        itemTitleVr: "خوذة العبقري #001",
-        btnAuraText: "الهالة",
-        labelTouchHint: "مس الشاشة ولّف المجسم 360 درجة",
-        tagRarity: "قطعة فريدة (UNIQUE #001)",
-        labelSelectObject: "المجسم المعاين:",
-        btnObjHelmet: "الخوذة",
-        btnObjCube: "مكعب الشفرة",
-        btnObjPrism: "المنشور الأثيري",
-        btnObjCoin: "عملة بُون",
-        btnMatGold: "ذهب وأوبسيديان",
-        btnMatCyber: "سايبر نيون",
-        btnMatObsidian: "أسود غامض",
-        btnMatWireframe: "شبكة الـ 3D",
-        titleAtheerName: "المرشد الذكي 3D (\"أثير\")",
-        subAtheerDesc: "توليد حوارات وتلميحات ذكية تلقائياً",
-        labelAtheerSpeaking: "أثير يتحدث إليك:",
-        btnRequestHint: "طلب تلميح ذكي من \"أثير\" (تكلفة: 5 ϐ Boon)",
-        titlePuzzleGen: "مولد الألغاز الهجين (AI Puzzle)",
-        subPuzzleGen: "توليد عكسي + CSP Solvability Engine",
-        btnBackMap: "العودة للخريطة",
-        labelDialLockTitle: "قفل الشفرة الميكانيكي الأثيري:",
-        btnSubmitAnswer: "فتح القفل الأثيري ورصد المكافأة",
-        labelJsonResponse: "استجابة السيرفر (Backend JSON Prompt)",
-        modalTitleInv: "خزانة المقتنيات النادرة (3D Inventory)",
-        btnGoogleLogin: "المتابعة باستخدام Google",
-        btnGuestLogin: "الدخول كـ \"لاعب ضيف\" (تجربة سريعة)",
-        titleAuctionFull: "سوق المزادات الأسبوعي (سوق الجمعة)",
-        subAuctionFull: "التداول بالعملة الممتازة \"بُون\" (ϐ)",
-        labelAuctionEnds: "ينتهي المزاد خلال",
-        labelAuctionItem: "السلعة المعروضة للمزاد",
-        labelSeller: "مالك السلعة الحالي:",
-        labelHighestBid: "أعلى مزايدة حالية (Highest Bid)",
-        labelTaxNote: "شاملة رسم الحرق 5% لحماية اقتصاد اللعبة من التضخم",
-        labelBidAmount: "مزايدتك بالعملة (ϐ Boon):",
-        btnSubmitBid: "تقديم المزايدة الآن",
-        labelBidHistory: "سجل المزايدات الحية (Firestore Sync):",
-        modalVictoryTitle: "مبروك! تم فك القفل الأثيري!",
-        modalVictoryDesc: "أنجزت المرحلة بنجاح وحصلت على المكافآت التالية:",
-        labelRewardBoon: "مكافأة بُون",
-        labelRewardIq: "ارتفاع الذكاء",
-        btnModalMap: "خريطة المراحل",
-        btnModalNext: "المرحلة التالية"
+        badgeVersion: "حلبة القتال 3D",
+        headerSubText: "مقاتلو الذكاء الاصطناعي والتداول المباشر",
+        btnNavArena: "حلبة القتال",
+        btnNavMarket: "سوق التداول",
+        btnNavDuels: "تحدي الرهان",
+        btnNavStore: "المتجر",
+        labelBoon: "عملة بُون (BOON)",
+        labelPower: "القوة القتالية",
+        badgeArenaStatus: "حلبة قتال ثلاثية الأبعاد 360°",
+        fighterNameDisplay: "المقاتل: صقر الأثير (AI Cyber Samurai)",
+        btnAuraToggle: "هالة الطاقة",
+        labelTouchArena: "اسحب لتدوير المقاتل والسلاح 360 درجة",
+        labelFighterClass: "فئة: الأسطوري (LEGENDARY)",
+        labelEquippedGear: "المعدات المجهزة:",
+        btnGearHelmet: "خوذة الساموراي",
+        btnGearSword: "سيف الأثير",
+        btnGearShield: "درع النيون",
+        btnSkinGold: "عنصر الذهب الحارق",
+        btnSkinCyber: "طاقة السايبر نيون",
+        btnSkinDark: "درع الأوبسيديان",
+        titleTrainingMode: "مرحلة التدريب والقتال الحقيقي",
+        subTrainingMode: "اقضِ على الخصم واكسب عملات **بُون (ϐ)**",
+        labelPlayerHp: "مقاتلك (صقر الأثير)",
+        enemyNameDisplay: "الخصم: وحش الأوبسيديان #04",
+        btnAttackNormal: "هجوم عادي بالسيف",
+        btnAttackSpecial: "ضربة الذكاء الكيميائية",
+        btnDefendGuard: "الدفاع واستعادة الطاقة",
+        btnAttackUltimate: "القاضية الفائقة (الذهب)",
+        labelBattleLog: "سجل أحداث المعركة الحية:",
+        titleMarketFull: "سوق تداول الأسلحة والدروع (P2P Marketplace)",
+        subMarketFull: "اعرض بضاعتك بالسعر الذي تريده، أو قدم عروض أسعار منافسة للشراء بـ **بُون (ϐ)**!",
+        labelCommissionNote: "عمولة منصة اللعبة للعمليات:",
+        titleListItem: "عرض سلعة من ممتلكاتك للبيع في المتجر:",
+        labelSelectSellItem: "اختر السلعة من خزانتك:",
+        labelSellPrice: "السعر المطلوب بعملة (ϐ Boon):",
+        btnListSale: "تأكيد العرض في السوق",
+        titleMarketListings: "السلع المعروضة حالياً وتلقي عروض الأسعار (Counter-Offers):",
+        titleWagerArena: "تحدي الرهان والمبارزة (Item Wager Duel)",
+        subWagerArena: "راهن بسلعة ضد الخصم.. الفائز بالقتال يحصل على السلعتين معاً!",
+        labelYourWager: "سلعتك المراهَن عليها:",
+        labelEnemyWager: "سلعة الخصم (المنافس):",
+        btnStartWagerDuel: "بدء مبارزة الرهان الآن (Fight for Both Items)",
+        titleStoreFull: "متجر الأسلحة والدروع الرسمية",
+        subStoreFull: "اشترِ المعدات النادرة بعملة **بُون (ϐ)** أو الشراء المباشر عبر Google Play Billing"
     },
     en: {
-        badgeLivePreview: "Live Preview",
-        btnStagesNav: "Stage Map",
-        btnSolverNav: "3D Puzzle Room",
-        btnAuctionNav: "Auction",
-        btnInventoryText: "Locker",
+        badgeVersion: "3D Fighter Arena",
+        headerSubText: "AI Combat Fighters & P2P Trading",
+        btnNavArena: "Battle Arena",
+        btnNavMarket: "Marketplace",
+        btnNavDuels: "Wager Duels",
+        btnNavStore: "In-App Store",
         labelBoon: "BOON Token",
-        labelIq: "IQ Rank",
-        btnStreamerMode: "Streamer Mode (TikTok)",
-        titleStageMap: "Stage Progression & Alchemy IQ Map",
-        badgeStageCount: "20 Stages Available",
-        subStageMap: "Click on any unlocked stage to start solving in the 3D Alchemy Simulator!",
-        labelCompletedStages: "Completed Stages",
-        labelEarnedStars: "Earned Stars",
-        labelMapMode: "Select a level to play:",
-        btnPlayCurrent: "Play Current Unlocked Stage",
-        tagVrSim: "Interactive 360° VR Simulation",
-        itemTitleVr: "Genius Helmet #001",
-        btnAuraText: "Aura",
-        labelTouchHint: "Touch screen to rotate object 360°",
-        tagRarity: "Unique Piece (UNIQUE #001)",
-        labelSelectObject: "Inspected 3D Asset:",
-        btnObjHelmet: "Helmet",
-        btnObjCube: "Cipher Cube",
-        btnObjPrism: "Aetherial Prism",
-        btnObjCoin: "Boon Coin",
-        btnMatGold: "Gold & Obsidian",
-        btnMatCyber: "Cyber Neon",
-        btnMatObsidian: "Mystic Obsidian",
-        btnMatWireframe: "3D Wireframe",
-        titleAtheerName: "3D AI Companion (\"Atheer\")",
-        subAtheerDesc: "Dynamic AI Dialogues & Smart Hints",
-        labelAtheerSpeaking: "Atheer is speaking:",
-        btnRequestHint: "Request Smart Hint from \"Atheer\" (Cost: 5 ϐ Boon)",
-        titlePuzzleGen: "Hybrid AI Puzzle Engine",
-        subPuzzleGen: "Reverse Logic + CSP Solvability Engine",
-        btnBackMap: "Back to Map",
-        labelDialLockTitle: "Aetherial Mechanical Combination Lock:",
-        btnSubmitAnswer: "Unlock Vault & Claim Reward",
-        labelJsonResponse: "Backend Server Response (JSON Prompt)",
-        modalTitleInv: "3D Rare Items Inventory Locker",
-        btnGoogleLogin: "Continue with Google",
-        btnGuestLogin: "Play as Guest (Quick Start)",
-        titleAuctionFull: "Weekly Auction Marketplace (Friday House)",
-        subAuctionFull: "Trading Premium Currency BOON (ϐ)",
-        labelAuctionEnds: "Auction ends in",
-        labelAuctionItem: "Featured Item on Auction",
-        labelSeller: "Current Owner:",
-        labelHighestBid: "Highest Bid Current",
-        labelTaxNote: "Includes 5% Sink Burn Tax to protect economy from inflation",
-        labelBidAmount: "Your Bid Amount (ϐ Boon):",
-        btnSubmitBid: "Place Bid Now",
-        labelBidHistory: "Live Bid Stream (Firestore Sync):",
-        modalVictoryTitle: "Victory! Aether Vault Unlocked!",
-        modalVictoryDesc: "You completed the stage successfully and earned rewards:",
-        labelRewardBoon: "Boon Reward",
-        labelRewardIq: "IQ Increase",
-        btnModalMap: "Stage Map",
-        btnModalNext: "Next Stage"
+        labelPower: "Combat Power",
+        badgeArenaStatus: "360° 3D Battle Simulator",
+        fighterNameDisplay: "Fighter: Aether Falcon (AI Samurai)",
+        btnAuraToggle: "Energy Aura",
+        labelTouchArena: "Drag to rotate fighter 360°",
+        labelFighterClass: "Class: LEGENDARY",
+        labelEquippedGear: "Equipped Gear:",
+        btnGearHelmet: "Samurai Visor",
+        btnGearSword: "Aether Sword",
+        btnGearShield: "Neon Shield",
+        btnSkinGold: "Blazing Gold Element",
+        btnSkinCyber: "Cyber Neon Energy",
+        btnSkinDark: "Obsidian Armor",
+        titleTrainingMode: "Training & Combat Ground",
+        subTrainingMode: "Defeat rivals to earn Boon (ϐ) tokens",
+        labelPlayerHp: "Your Fighter (Aether Falcon)",
+        enemyNameDisplay: "Rival: Obsidian Beast #04",
+        btnAttackNormal: "Normal Sword Strike",
+        btnAttackSpecial: "AI Elemental Skill",
+        btnDefendGuard: "Guard & Re-charge",
+        btnAttackUltimate: "Ultimate Gold Finisher",
+        labelBattleLog: "Live Battle Log Stream:",
+        titleMarketFull: "P2P Equipment Marketplace & Bids",
+        subMarketFull: "List your gear at custom prices or make counter-offers in Boon (ϐ)!",
+        labelCommissionNote: "Game System Platform Fee:",
+        titleListItem: "List an owned gear item for sale:",
+        labelSelectSellItem: "Select item from inventory:",
+        labelSellPrice: "Selling Price in (ϐ Boon):",
+        btnListSale: "Confirm Listing on Market",
+        titleMarketListings: "Active Market Listings & Counter-Offers:",
+        titleWagerArena: "High-Stakes Item Wager Duel",
+        subWagerArena: "Wager an item in a fight... Winner takes BOTH items!",
+        labelYourWager: "Your Wagered Item:",
+        labelEnemyWager: "Rival Wagered Item:",
+        btnStartWagerDuel: "Start Wager Duel (Fight for Both Items)",
+        titleStoreFull: "Official Equipment Store",
+        subStoreFull: "Purchase rare gear using Boon (ϐ) or Google Play Billing"
     }
 };
 
@@ -850,40 +767,35 @@ function playSound(type) {
     const gain = audioCtx.createGain();
     osc.connect(gain);
     gain.connect(audioCtx.destination);
-
     const now = audioCtx.currentTime;
-    if (type === 'click') {
-        osc.frequency.setValueAtTime(440, now);
-        osc.frequency.exponentialRampToValueAtTime(880, now + 0.05);
-        gain.gain.setValueAtTime(0.15, now);
-        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.05);
-        osc.start(now);
-        osc.stop(now + 0.05);
-    } else if (type === 'dial') {
-        osc.type = 'triangle';
-        osc.frequency.setValueAtTime(300, now);
-        osc.frequency.exponentialRampToValueAtTime(150, now + 0.08);
-        gain.gain.setValueAtTime(0.2, now);
-        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.08);
-        osc.start(now);
-        osc.stop(now + 0.08);
-    } else if (type === 'success') {
+
+    if (type === 'hit') {
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(200, now);
+        osc.frequency.exponentialRampToValueAtTime(50, now + 0.1);
+        gain.gain.setValueAtTime(0.3, now);
+        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.1);
+        osc.start(now); osc.stop(now + 0.1);
+    } else if (type === 'victory') {
         osc.type = 'sine';
-        osc.frequency.setValueAtTime(523.25, now);
-        osc.frequency.setValueAtTime(659.25, now + 0.1);
-        osc.frequency.setValueAtTime(783.99, now + 0.2);
-        gain.gain.setValueAtTime(0.25, now);
-        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.4);
-        osc.start(now);
-        osc.stop(now + 0.4);
+        osc.frequency.setValueAtTime(440, now);
+        osc.frequency.setValueAtTime(554.37, now + 0.1);
+        osc.frequency.setValueAtTime(659.25, now + 0.2);
+        gain.gain.setValueAtTime(0.3, now);
+        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.5);
+        osc.start(now); osc.stop(now + 0.5);
+    } else {
+        osc.frequency.setValueAtTime(500, now);
+        gain.gain.setValueAtTime(0.1, now);
+        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.05);
+        osc.start(now); osc.stop(now + 0.05);
     }
 }
 
-// Toast Notifications
 function showToast(message, type = 'amber') {
     const container = document.getElementById('toast-container');
     const toast = document.createElement('div');
-    const borderCol = type === 'emerald' ? 'border-emerald-500/40 text-emerald-300' : 'border-amber-500/40 text-amber-300';
+    const borderCol = type === 'emerald' ? 'border-emerald-500/40 text-emerald-300' : (type === 'red' ? 'border-red-500/40 text-red-300' : 'border-amber-500/40 text-amber-300');
     toast.className = `glass-panel ${borderCol} p-3 rounded-xl text-xs font-cairo font-bold shadow-2xl flex items-center justify-between toast-animate pointer-events-auto`;
     toast.innerHTML = `
         <div class="flex items-center gap-2">
@@ -896,234 +808,177 @@ function showToast(message, type = 'amber') {
     setTimeout(() => { if (toast.parentNode) toast.remove(); }, 3500);
 }
 
-// Single Page Navigation Router
 function navigateTo(viewId) {
     playSound('click');
-    const views = ['view-stages', 'view-solver', 'view-auth', 'view-auction'];
-    views.forEach(v => {
-        const el = document.getElementById(v);
-        if (el) el.classList.add('hidden');
-    });
-
-    if (viewId === 'stages') {
-        document.getElementById('view-stages').classList.remove('hidden');
-        renderStagesMap();
-    } else if (viewId === 'solver') {
-        document.getElementById('view-solver').classList.remove('hidden');
-    } else if (viewId === 'auth') {
-        document.getElementById('view-auth').classList.remove('hidden');
-    } else if (viewId === 'auction') {
-        document.getElementById('view-auction').classList.remove('hidden');
-    }
+    ['view-arena', 'view-market', 'view-duels', 'view-store'].forEach(v => document.getElementById(v).classList.add('hidden'));
+    document.getElementById(`view-${viewId}`).classList.remove('hidden');
     onWindowResize();
 }
 
-// Render Stage Map
-function renderStagesMap() {
-    const container = document.getElementById('stages-grid-container');
-    container.innerHTML = '';
+// REAL-TIME COMBAT LOGIC ENGINE
+function executeCombatMove(moveType) {
+    if (enemyHp <= 0 || playerHp <= 0) return;
 
-    let completedCount = 0;
-    let totalStars = 0;
+    let playerDamage = 0;
+    let battleText = "";
 
-    stagesList.forEach((stage) => {
-        const isUnlocked = stage.id <= unlockedStageCount;
-        const isCompleted = stage.stars > 0;
-        const isCurrentActive = stage.id === unlockedStageCount;
-
-        if (isCompleted) {
-            completedCount++;
-            totalStars += stage.stars;
-        }
-
-        const card = document.createElement('div');
-        const activeClass = isCurrentActive ? 'active-stage-card border-amber-400 bg-slate-900' : (isUnlocked ? 'bg-slate-900/80 border-emerald-500/30 hover:bg-slate-800' : 'bg-slate-950/60 border-slate-800/80 opacity-60');
-        
-        card.className = `p-4 rounded-2xl border ${activeClass} flex flex-col items-center justify-between gap-2.5 cursor-pointer transition text-center relative overflow-hidden shadow-lg`;
-        
-        const titleText = currentLang === 'ar' ? stage.titleAr : stage.titleEn;
-        
-        card.innerHTML = `
-            ${isCurrentActive ? '<span class="absolute top-1 right-1 w-2.5 h-2.5 rounded-full bg-amber-400 animate-ping"></span>' : ''}
-            <div class="w-10 h-10 rounded-xl ${isUnlocked ? (isCurrentActive ? 'bg-amber-500/20 text-amber-400 border border-amber-400' : 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30') : 'bg-slate-800 text-slate-600'} flex items-center justify-center font-mono font-black text-sm">
-                ${stage.id}
-            </div>
-            <div>
-                <div class="text-xs font-bold font-cairo text-white leading-snug">${titleText}</div>
-                <div class="text-[10px] text-slate-400 font-mono mt-0.5">${stage.iqReq} IQ</div>
-            </div>
-            <div class="text-xs text-amber-400">
-                ${isCompleted ? '<i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>' : (isUnlocked ? '<span class="text-[10px] font-bold text-emerald-400 font-cairo">' + (currentLang === 'ar' ? 'متاحة للعب' : 'Unlocked') + '</span>' : '<i class="fa-solid fa-lock text-slate-600"></i>')}
-            </div>
-        `;
-
-        if (isUnlocked) {
-            card.onclick = () => { loadStageAndPlay(stage.id); };
-        }
-
-        container.appendChild(card);
-    });
-
-    document.getElementById('stat-completed-count').innerText = `${completedCount} / 20`;
-    document.getElementById('stat-stars-count').innerText = `${totalStars} ⭐`;
-}
-
-function playNextUnlockedStage() {
-    loadStageAndPlay(unlockedStageCount);
-}
-
-function loadStageAndPlay(stageId) {
-    currentPlayingStage = stageId;
-    const stage = stagesList.find(s => s.id === stageId);
-    if (!stage) return;
-
-    switch3DObject(stage.obj);
-    currentDialValues = [0, 0, 0];
-    document.getElementById('dial-val-0').innerText = '0';
-    document.getElementById('dial-val-1').innerText = '0';
-    document.getElementById('dial-val-2').innerText = '0';
-
-    const stageTitle = currentLang === 'ar' ? stage.titleAr : stage.titleEn;
-    document.getElementById('puzzle-title-text').innerText = (currentLang === 'ar' ? `المرحلة #${stage.id}: ${stageTitle}` : `Stage #${stage.id}: ${stageTitle}`);
-    document.getElementById('puzzle-desc-text').innerText = (currentLang === 'ar' ? `اضبط حلقات القفل الميكانيكي الثلاثية للوصول للرمز السرّي بذكاء!` : `Adjust the 3 mechanical dial rings to input the secret stage code!`);
-
-    document.getElementById('json-schema-code').innerText = JSON.stringify({
-        stage_id: stage.id,
-        solver_validated: true,
-        difficulty_iq: stage.iqReq,
-        logic: { key_code: stage.code, node_depth: 3 },
-        boon_reward: 25
-    }, null, 2);
-
-    navigateTo('solver');
-    showToast((currentLang === 'ar' ? `بدأت المرحلة #${stage.id}!` : `Started Stage #${stage.id}!`), 'emerald');
-}
-
-async function callGeminiAiCompanion(promptText) {
-    const apiKey = "";
-    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${apiKey}`;
-    const systemPrompt = "You are Atheer, the brilliant 3D AI Alchemy Companion in Mind Alchemy game. Respond concisely in 2 sentences max in " + (currentLang === 'ar' ? 'Arabic' : 'English');
-
-    try {
-        const response = await fetch(apiUrl, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                contents: [{ parts: [{ text: promptText }] }],
-                systemInstruction: { parts: [{ text: systemPrompt }] }
-            })
-        });
-        const result = await response.json();
-        const text = result.candidates?.[0]?.content?.parts?.[0]?.text;
-        return text || (currentLang === 'ar' ? "تأمل الشفرة الرقمية وقارن أبعاد المجسم!" : "Observe the code numbers and balance the geometry!");
-    } catch (e) {
-        const stage = stagesList.find(s => s.id === currentPlayingStage);
-        return currentLang === 'ar' ? `تلميح أثير: الرمز السرّي لهذه المرحلة يتكون من 3 أرقام تبدأ برقم قريب من ${stage?.code?.[0] || '3'}!` : `Atheer Hint: The secret code starts near ${stage?.code?.[0] || '3'}!`;
-    }
-}
-
-async function requestAiHint() {
-    if (userBoonBalance < 5) {
-        showToast(currentLang === 'ar' ? "رصيدك غير كافٍ من عملة بُون!" : "Insufficient Boon token balance!", 'amber');
-        return;
+    if (moveType === 'attack') {
+        playerDamage = Math.floor(Math.random() * 20) + 15;
+        battleText = currentLang === 'ar' ? `⚔️ ضربة سيف خاطفة! ألحقت بالخصم ${playerDamage} ضرر!` : `⚔️ Quick Sword Strike! Dealt ${playerDamage} DMG!`;
+    } else if (moveType === 'special') {
+        playerDamage = Math.floor(Math.random() * 30) + 25;
+        battleText = currentLang === 'ar' ? `⚡ صاعقة الذكاء الكيميائية! ألحقت ${playerDamage} ضرر بالخصم!` : `⚡ AI Elemental Blast! Dealt ${playerDamage} DMG!`;
+    } else if (moveType === 'defend') {
+        playerHp = Math.min(100, playerHp + 15);
+        battleText = currentLang === 'ar' ? `🛡️ استعادة طاقة وقوة درع حماية (+15 HP)` : `🛡️ Guard active & Shield restored (+15 HP)`;
+    } else if (moveType === 'ultimate') {
+        playerDamage = Math.floor(Math.random() * 45) + 35;
+        battleText = currentLang === 'ar' ? `🔥 القاضية الفائقة! ضربة حارقة بقدرة ${playerDamage} ضرر!` : `🔥 Ultimate Gold Finisher! Unveiled ${playerDamage} DMG!`;
     }
 
-    userBoonBalance -= 5;
-    updateBalanceUI();
-    playSound('click');
+    playSound('hit');
+    enemyHp = Math.max(0, enemyHp - playerDamage);
+    document.getElementById('enemy-hp-bar').style.width = `${enemyHp}%`;
+    document.getElementById('enemy-hp-text').innerText = `${enemyHp} / 100 HP`;
 
-    const dialogueBox = document.getElementById('atheer-dialogue-text');
-    dialogueBox.innerText = currentLang === 'ar' ? "أثير يفكر بذكاء..." : "Atheer is thinking...";
+    appendBattleLog(battleText);
 
-    const stage = stagesList.find(s => s.id === currentPlayingStage);
-    const hintText = await callGeminiAiCompanion(`Give a helpful smart hint to solve stage ${currentPlayingStage} with secret code ${stage?.code}`);
-    dialogueBox.innerText = hintText;
-}
+    // Enemy Retaliation Attack
+    if (enemyHp > 0 && moveType !== 'defend') {
+        setTimeout(() => {
+            const enemyDamage = Math.floor(Math.random() * 18) + 10;
+            playerHp = Math.max(0, playerHp - enemyDamage);
+            document.getElementById('player-hp-bar').style.width = `${playerHp}%`;
+            document.getElementById('player-hp-text').innerText = `${playerHp} / 100 HP`;
+            appendBattleLog(currentLang === 'ar' ? `👹 هجم الخصم المرتد وألحق بك ${enemyDamage} ضرر!` : `👹 Enemy retaliated and dealt ${enemyDamage} DMG!`);
 
-function rotateDial(ringIndex, delta) {
-    playSound('dial');
-    currentDialValues[ringIndex] = (currentDialValues[ringIndex] + delta + 10) % 10;
-    document.getElementById(`dial-val-${ringIndex}`).innerText = currentDialValues[ringIndex];
-}
+            if (playerHp <= 0) {
+                showToast(currentLang === 'ar' ? "سقط مقاتلك في التدريب! حاول مرة أخرى." : "Your fighter collapsed! Try again.", 'red');
+                resetBattle();
+            }
+        }, 400);
+    }
 
-function verifyPuzzleSolution() {
-    const playerAttempt = currentDialValues.join('');
-    const stage = stagesList.find(s => s.id === currentPlayingStage);
-
-    if (playerAttempt === stage.code) {
-        playSound('success');
-        userBoonBalance += 25;
-        userIqScore += 15;
-        stage.stars = 3;
-
-        if (currentPlayingStage === unlockedStageCount && unlockedStageCount < 20) {
-            unlockedStageCount++;
-        }
-
+    // Check Player Victory
+    if (enemyHp <= 0) {
+        playSound('victory');
+        winStreak++;
+        userBoonBalance += 35;
+        userPowerLevel += 25;
         updateBalanceUI();
-        document.getElementById('victory-modal').classList.remove('hidden');
-    } else {
-        showToast(currentLang === 'ar' ? "رمز الشفرة غير صحيح! حاول مرة أخرى." : "Incorrect combination! Try again.", 'amber');
+        document.getElementById('stat-win-streak').innerText = currentLang === 'ar' ? `${winStreak} انتصارات متتالية` : `${winStreak} Win Streak`;
+        showToast(currentLang === 'ar' ? "انتصار ساحق! حصلت على +35 ϐ Boon و +25 PWR!" : "Victory! Earned +35 Boon (ϐ) and +25 PWR!", 'emerald');
+        setTimeout(resetBattle, 2500);
     }
 }
 
-function closeVictoryModal() {
-    document.getElementById('victory-modal').classList.add('hidden');
+function resetBattle() {
+    playerHp = 100;
+    enemyHp = 100;
+    document.getElementById('player-hp-bar').style.width = "100%";
+    document.getElementById('enemy-hp-bar').style.width = "100%";
+    document.getElementById('player-hp-text').innerText = "100 / 100 HP";
+    document.getElementById('enemy-hp-text').innerText = "100 / 100 HP";
 }
 
-// Bidding System
-function placeBid() {
-    const input = document.getElementById('bid-input-amount');
-    const val = parseInt(input.value);
+function appendBattleLog(msg) {
+    const log = document.getElementById('battle-log-text');
+    const entry = document.createElement('div');
+    entry.innerText = msg;
+    log.insertBefore(entry, log.firstChild);
+}
 
-    if (isNaN(val) || val <= currentBid) {
-        showToast(currentLang === 'ar' ? `يجب أن تكون المزايدة أعلى من (${currentBid} ϐ)` : `Bid must be higher than (${currentBid} ϐ)`, 'amber');
+// MARKETPLACE & P2P COUNTER-OFFER TRADING
+function listItemForSale() {
+    const item = document.getElementById('sell-item-select').value;
+    const price = parseInt(document.getElementById('sell-price-input').value);
+
+    if (isNaN(price) || price <= 0) {
+        showToast(currentLang === 'ar' ? "يرجى كتابة سعر صحيح للمزايدة" : "Invalid price", 'amber');
         return;
     }
 
-    if (val > userBoonBalance) {
-        showToast(currentLang === 'ar' ? "رصيدك لا يكفي للمزايدة!" : "Insufficient Boon balance!", 'amber');
-        return;
-    }
-
-    currentBid = val;
-    document.getElementById('auction-current-bid').innerText = currentBid;
-    input.value = currentBid + 20;
-
-    const log = document.getElementById('bidding-log-container');
-    const newEntry = document.createElement('div');
-    newEntry.className = "text-xs bg-amber-500/10 border border-amber-500/30 p-2 rounded-lg flex items-center justify-between font-cairo";
-    newEntry.innerHTML = `
-        <span class="text-amber-400 font-mono font-bold">${currentUser.name}</span>
-        <span class="text-slate-400 text-[10px]">${currentLang === 'ar' ? 'الآن' : 'Just now'}</span>
-        <span class="text-amber-300 font-mono font-extrabold">${currentBid} ϐ</span>
+    const container = document.getElementById('market-listings-container');
+    const card = document.createElement('div');
+    card.className = "bg-slate-950 p-4 rounded-2xl border border-emerald-500/30 space-y-3";
+    card.innerHTML = `
+        <div class="flex items-start justify-between font-cairo">
+            <div>
+                <span class="text-[10px] bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 px-2 py-0.5 rounded-full font-bold">عرضك الجديد</span>
+                <h4 class="font-bold text-white text-base mt-1">${item}</h4>
+                <p class="text-xs text-slate-400">البائع: <span class="text-amber-400 font-mono font-bold">أنت (أبو إياد)</span></p>
+            </div>
+            <div class="text-left ltr:text-right">
+                <div class="text-[10px] text-slate-400">السعر المطلوب</div>
+                <div class="font-mono font-extrabold text-amber-400 text-lg">${price} ϐ</div>
+            </div>
+        </div>
+        <div class="text-[10px] text-slate-500 font-cairo">بانتظار المشترين وتلقي عروض الأسعار...</div>
     `;
-    log.insertBefore(newEntry, log.firstChild);
-    showToast(currentLang === 'ar' ? "تمت المزايدة بنجاح!" : "Bid placed successfully!", 'emerald');
+    container.insertBefore(card, container.firstChild);
+    showToast(currentLang === 'ar' ? "تمت إضافة السلعة بنجاح في سوق التداول!" : "Item listed on marketplace!", 'emerald');
 }
 
-// Auth Simulation
-function signInWithGoogle() {
-    currentUser = { name: 'أبو إياد (Google)', email: 'isehaq@gmail.com', isGuest: false };
-    document.getElementById('top-user-name').innerText = currentUser.name;
-    showToast(currentLang === 'ar' ? "تم الدخول بحساب Google بنجاح!" : "Signed in with Google successfully!", 'emerald');
-    navigateTo('stages');
+function buyMarketItem(itemName, price, sellerId) {
+    if (userBoonBalance < price) {
+        showToast(currentLang === 'ar' ? "رصيدك غير كافٍ من عملة بُون للشراء!" : "Insufficient Boon token balance!", 'amber');
+        return;
+    }
+
+    const commission = Math.floor(price * 0.05); // 5% System Commission Fee
+    userBoonBalance -= price;
+    updateBalanceUI();
+    playSound('victory');
+    showToast(currentLang === 'ar' ? `تم شراء "${itemName}" خصم (${price} ϐ) والعمولة (${commission} ϐ)` : `Purchased "${itemName}" for (${price} ϐ)!`, 'emerald');
 }
 
-function loginAsGuest() {
-    currentUser = { name: 'لاعب ضيف', email: 'guest@mindalchemy.io', isGuest: true };
-    document.getElementById('top-user-name').innerText = currentUser.name;
-    showToast(currentLang === 'ar' ? "تم الدخول كـ لاعب ضيف" : "Logged in as Guest", 'amber');
-    navigateTo('stages');
+function openCounterOfferModal(itemName, currentPrice) {
+    selectedTargetItem = itemName;
+    document.getElementById('modal-target-item-name').innerText = (currentLang === 'ar' ? `السلعة: ${itemName}` : `Item: ${itemName}`);
+    document.getElementById('counter-offer-price-input').value = Math.floor(currentPrice * 0.85);
+    document.getElementById('counter-offer-modal').classList.remove('hidden');
 }
 
-// UI Balance Updates
+function closeCounterOfferModal() {
+    document.getElementById('counter-offer-modal').classList.add('hidden');
+}
+
+function submitCounterOffer() {
+    const offerPrice = parseInt(document.getElementById('counter-offer-price-input').value);
+    if (isNaN(offerPrice) || offerPrice <= 0) return;
+    closeCounterOfferModal();
+    showToast(currentLang === 'ar' ? `تم تقديم عرضك بـ (${offerPrice} ϐ) للبائع بنجاح!` : `Counter offer (${offerPrice} ϐ) submitted to seller!`, 'emerald');
+}
+
+// WAGER DUELS SYSTEM (تحدي الرهان)
+function startWagerFight() {
+    const playerItem = document.getElementById('wager-player-item-select').value;
+    navigateTo('arena');
+    showToast(currentLang === 'ar' ? `بدأت مبارزة الرهان! الفائز سيكسب كلا السلعتين!` : `Wager Fight Started! Fight to win both items!`, 'red');
+    resetBattle();
+}
+
+// IN-APP STORE PURCHASES
+function buyStoreItem(itemName, cost, currencyType) {
+    if (currencyType === 'boon') {
+        if (userBoonBalance < cost) {
+            showToast(currentLang === 'ar' ? "رصيدك غير كافٍ من عملة بُون!" : "Insufficient Boon balance!", 'amber');
+            return;
+        }
+        userBoonBalance -= cost;
+        updateBalanceUI();
+        playSound('victory');
+        showToast(currentLang === 'ar' ? `تم شراء "${itemName}" بنجاح!` : `Purchased "${itemName}"!`, 'emerald');
+    } else {
+        showToast(currentLang === 'ar' ? `جاري الاتصال بـ Google Play للشراء ($${cost})...` : `Connecting to Google Play ($${cost})...`, 'emerald');
+    }
+}
+
 function updateBalanceUI() {
     document.getElementById('header-boon-balance').innerText = `${userBoonBalance} ϐ`;
-    document.getElementById('header-iq-score').innerText = `${userIqScore} IQ`;
+    document.getElementById('header-power-level').innerText = `${userPowerLevel} PWR`;
 }
 
-// Language Switcher
 function toggleLanguage() {
     currentLang = currentLang === 'ar' ? 'en' : 'ar';
     document.documentElement.dir = currentLang === 'ar' ? 'rtl' : 'ltr';
@@ -1135,32 +990,13 @@ function toggleLanguage() {
         const el = document.getElementById(key);
         if (el) el.innerText = dict[key];
     }
-    renderStagesMap();
 }
 
-function toggleInventoryModal() {
-    playSound('click');
-    document.getElementById('inventory-modal').classList.toggle('hidden');
-}
-
-function toggleStreamerMode() {
-    playSound('click');
-    const main = document.getElementById('view-solver');
-    const chat = document.getElementById('streamer-live-chat');
-    if (chat.classList.contains('hidden')) {
-        chat.classList.remove('hidden');
-        showToast(currentLang === 'ar' ? "تم تفعيل وضع البث العمودي!" : "Activated TikTok Streamer Mode!", 'emerald');
-    } else {
-        chat.classList.add('hidden');
-    }
-    onWindowResize();
-}
-
+// 3D GRAPHICS ENGINE (THREE.JS PROCEDURAL FIGHTER & GEAR VISUALIZER)
 window.onload = function() {
     init3DScene();
     animate3D();
     setupTouchAndMouseInteractions();
-    renderStagesMap();
 };
 
 function init3DScene() {
@@ -1170,7 +1006,7 @@ function init3DScene() {
     const height = container.clientHeight || 380;
 
     scene = new THREE.Scene();
-    scene.background = new THREE.Color(0x050811);
+    scene.background = new THREE.Color(0x05070e);
 
     camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 1000);
     camera.position.set(0, 0, 6.5);
@@ -1183,34 +1019,33 @@ function init3DScene() {
     const ambientLight = new THREE.AmbientLight(0xffffff, 0.9);
     scene.add(ambientLight);
 
-    const goldSpotLight = new THREE.SpotLight(0xfbbf24, 3);
-    goldSpotLight.position.set(5, 8, 5);
-    scene.add(goldSpotLight);
+    const redSpotLight = new THREE.SpotLight(0xef4444, 3);
+    redSpotLight.position.set(5, 8, 5);
+    scene.add(redSpotLight);
 
-    buildProceduralVRHelmet();
+    buildProceduralSamuraiHelmet();
     buildAuraParticles();
 
     window.addEventListener('resize', onWindowResize);
 }
 
-function buildProceduralVRHelmet() {
-    const helmetGroup = new THREE.Group();
+function buildProceduralSamuraiHelmet() {
+    const group = new THREE.Group();
 
-    const baseGeo = new THREE.SphereGeometry(1.2, 32, 24);
-    baseGeo.scale(1, 1.05, 1);
-    const baseMat = new THREE.MeshStandardMaterial({ color: 0x0f172a, roughness: 0.2, metalness: 0.9 });
-    const baseMesh = new THREE.Mesh(baseGeo, baseMat);
-    helmetGroup.add(baseMesh);
+    const headGeo = new THREE.SphereGeometry(1.2, 32, 24);
+    const headMat = new THREE.MeshStandardMaterial({ color: 0x0c1222, roughness: 0.2, metalness: 0.9 });
+    const headMesh = new THREE.Mesh(headGeo, headMat);
+    group.add(headMesh);
 
-    const visorGeo = new THREE.CylinderGeometry(1.15, 1.1, 0.65, 32, 1, false, -Math.PI/3, (2*Math.PI)/3);
-    const visorMat = new THREE.MeshStandardMaterial({ color: 0xfbbf24, roughness: 0.1, metalness: 0.95 });
-    const visorMesh = new THREE.Mesh(visorGeo, visorMat);
-    visorMesh.position.set(0, 0.05, 0.2);
-    visorMesh.rotation.x = 0.1;
-    helmetGroup.add(visorMesh);
+    const crestGeo = new THREE.ConeGeometry(0.8, 1.2, 4);
+    const crestMat = new THREE.MeshStandardMaterial({ color: 0xfbbf24, roughness: 0.1, metalness: 0.95 });
+    const crestMesh = new THREE.Mesh(crestGeo, crestMat);
+    crestMesh.position.set(0, 1.4, 0.2);
+    crestMesh.rotation.x = -0.3;
+    group.add(crestMesh);
 
-    helmetMesh = helmetGroup;
-    scene.add(helmetMesh);
+    fighterMesh = group;
+    scene.add(fighterMesh);
 }
 
 function buildAuraParticles() {
@@ -1225,40 +1060,33 @@ function buildAuraParticles() {
     }
 
     geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-    const material = new THREE.PointsMaterial({ color: 0xfbbf24, size: 0.08, transparent: true, opacity: 0.8 });
+    const material = new THREE.PointsMaterial({ color: 0xef4444, size: 0.08, transparent: true, opacity: 0.8 });
     auraParticles = new THREE.Points(geometry, material);
     scene.add(auraParticles);
 }
 
 function switch3DObject(type) {
     if (!scene) return;
-    if (helmetMesh) scene.remove(helmetMesh);
+    if (fighterMesh) scene.remove(fighterMesh);
 
-    currentActiveObject = type;
-
-    if (type === 'helmet') buildProceduralVRHelmet();
-    else if (type === 'cube') {
-        const geo = new THREE.BoxGeometry(1.5, 1.5, 1.5);
-        const mat = new THREE.MeshStandardMaterial({ color: 0x38bdf8, roughness: 0.2, metalness: 0.8 });
-        helmetMesh = new THREE.Mesh(geo, mat);
-        scene.add(helmetMesh);
-    } else if (type === 'prism') {
-        const geo = new THREE.OctahedronGeometry(1.4, 0);
-        const mat = new THREE.MeshStandardMaterial({ color: 0xc084fc, roughness: 0.1, metalness: 0.9 });
-        helmetMesh = new THREE.Mesh(geo, mat);
-        scene.add(helmetMesh);
-    } else if (type === 'coin') {
+    if (type === 'helmet') buildProceduralSamuraiHelmet();
+    else if (type === 'sword') {
+        const geo = new THREE.CylinderGeometry(0.1, 0.1, 3.2, 16);
+        const mat = new THREE.MeshStandardMaterial({ color: 0x38bdf8, roughness: 0.1, metalness: 0.95 });
+        fighterMesh = new THREE.Mesh(geo, mat);
+        scene.add(fighterMesh);
+    } else if (type === 'shield') {
         const geo = new THREE.CylinderGeometry(1.4, 1.4, 0.2, 32);
         geo.rotateX(Math.PI / 2);
-        const mat = new THREE.MeshStandardMaterial({ color: 0xfbbf24, roughness: 0.2, metalness: 0.95 });
-        helmetMesh = new THREE.Mesh(geo, mat);
-        scene.add(helmetMesh);
+        const mat = new THREE.MeshStandardMaterial({ color: 0xc084fc, roughness: 0.2, metalness: 0.8 });
+        fighterMesh = new THREE.Mesh(geo, mat);
+        scene.add(fighterMesh);
     }
 }
 
 function animate3D() {
     requestAnimationFrame(animate3D);
-    if (!isDragging && helmetMesh) helmetMesh.rotation.y += 0.005;
+    if (!isDragging && fighterMesh) fighterMesh.rotation.y += 0.005;
     if (auraParticles && currentAuraActive) auraParticles.rotation.y -= 0.003;
     renderer.render(scene, camera);
 }
@@ -1271,9 +1099,9 @@ function setupTouchAndMouseInteractions() {
     });
     window.addEventListener('mouseup', () => { isDragging = false; });
     container.addEventListener('mousemove', (e) => {
-        if (!isDragging || !helmetMesh) return;
-        helmetMesh.rotation.y += (e.clientX - previousMousePosition.x) * 0.008;
-        helmetMesh.rotation.x += (e.clientY - previousMousePosition.y) * 0.008;
+        if (!isDragging || !fighterMesh) return;
+        fighterMesh.rotation.y += (e.clientX - previousMousePosition.x) * 0.008;
+        fighterMesh.rotation.x += (e.clientY - previousMousePosition.y) * 0.008;
         previousMousePosition = { x: e.clientX, y: e.clientY };
     });
 
@@ -1285,9 +1113,9 @@ function setupTouchAndMouseInteractions() {
     });
     window.addEventListener('touchend', () => { isDragging = false; });
     container.addEventListener('touchmove', (e) => {
-        if (!isDragging || e.touches.length !== 1 || !helmetMesh) return;
-        helmetMesh.rotation.y += (e.touches[0].clientX - previousMousePosition.x) * 0.008;
-        helmetMesh.rotation.x += (e.touches[0].clientY - previousMousePosition.y) * 0.008;
+        if (!isDragging || e.touches.length !== 1 || !fighterMesh) return;
+        fighterMesh.rotation.y += (e.touches[0].clientX - previousMousePosition.x) * 0.008;
+        fighterMesh.rotation.x += (e.touches[0].clientY - previousMousePosition.y) * 0.008;
         previousMousePosition = { x: e.touches[0].clientX, y: e.touches[0].clientY };
     });
 }
@@ -1302,20 +1130,13 @@ function onWindowResize() {
     renderer.setSize(width, height);
 }
 
-function resetCamera() { if (helmetMesh) helmetMesh.rotation.set(0, 0, 0); }
+function resetCamera() { if (fighterMesh) fighterMesh.rotation.set(0, 0, 0); }
 function toggleAuraEffect() { if (auraParticles) auraParticles.visible = !auraParticles.visible; }
-function toggleWireframe() {
-    wireframeActive = !wireframeActive;
-    if (helmetMesh) {
-        if (helmetMesh.material) helmetMesh.material.wireframe = wireframeActive;
-        helmetMesh.children.forEach(c => { if (c.material) c.material.wireframe = wireframeActive; });
-    }
-}
 function setMaterialStyle(style) {
-    if (!helmetMesh) return;
+    if (!fighterMesh) return;
     const col = style === 'gold' ? 0xfbbf24 : (style === 'cyber' ? 0x38bdf8 : 0xc084fc);
-    if (helmetMesh.material) helmetMesh.material.color.setHex(col);
-    helmetMesh.children.forEach(c => { if (c.material) c.material.color.setHex(col); });
+    if (fighterMesh.material) fighterMesh.material.color.setHex(col);
+    fighterMesh.children.forEach(c => { if (c.material) c.material.color.setHex(col); });
 }
 </script>
 
