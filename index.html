@@ -1,0 +1,767 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Mind Alchemy - لوحة المعاينة التفاعلية والتداول 3D</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Cairo, Tajawal, Fira Code -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&family=Tajawal:wght@400;500;700;800&family=Fira+Code:wght@400;600&display=swap" rel="stylesheet">
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <!-- Three.js 3D Engine Library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        darkBg: '#050811',
+                        cardBg: '#0f172a',
+                        cardBorder: '#1e293b',
+                        boonGold: '#fbbf24',
+                        accentGreen: '#deff9a',
+                        accentCyan: '#38bdf8',
+                        accentPurple: '#c084fc',
+                    },
+                    fontFamily: {
+                        cairo: ['Cairo', 'sans-serif'],
+                        tajawal: ['Tajawal', 'sans-serif'],
+                        mono: ['Fira Code', 'monospace']
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            background-color: #050811;
+            color: #f8fafc;
+            font-family: 'Tajawal', sans-serif;
+            overflow-x: hidden;
+            touch-action: manipulation;
+        }
+
+        .gold-glow {
+            box-shadow: 0 0 25px rgba(251, 191, 36, 0.25);
+        }
+
+        .green-glow {
+            box-shadow: 0 0 20px rgba(222, 255, 154, 0.2);
+        }
+
+        .cyan-glow {
+            box-shadow: 0 0 20px rgba(56, 189, 248, 0.2);
+        }
+
+        .glass-panel {
+            background: rgba(15, 23, 42, 0.85);
+            backdrop-filter: blur(14px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        /* Custom Mobile Scrollbar */
+        ::-webkit-scrollbar {
+            width: 5px;
+            height: 5px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #050811;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #1e293b;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #fbbf24;
+        }
+
+        /* Canvas Wrapper */
+        #canvas-container {
+            width: 100%;
+            height: 100%;
+            min-height: 380px;
+            position: relative;
+            touch-action: none;
+        }
+
+        @keyframes pulseGlow {
+            0%, 100% { opacity: 0.8; transform: scale(1); }
+            50% { opacity: 1; transform: scale(1.03); }
+        }
+        .animate-pulse-glow {
+            animation: pulseGlow 3s infinite ease-in-out;
+        }
+    </style>
+</head>
+<body class="min-h-screen pb-12">
+
+<!-- Header Bar -->
+<header class="sticky top-0 z-50 glass-panel border-b border-slate-800 px-4 py-3">
+    <div class="max-w-7xl mx-auto flex items-center justify-between">
+        <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-amber-500 to-amber-300 flex items-center justify-center font-black text-slate-950 font-cairo text-2xl shadow-lg shadow-amber-500/20">
+                ϐ
+            </div>
+            <div>
+                <h1 class="font-cairo font-extrabold text-base sm:text-lg text-white leading-tight">
+                    Mind Alchemy <span class="text-boonGold text-[11px] font-semibold px-2 py-0.5 rounded-full bg-amber-500/10 border border-amber-500/30">المعاينة الحية</span>
+                </h1>
+                <p class="text-[11px] text-slate-400 hidden sm:block">متزامن مع Firebase Cloud: Mind-Alchemy-Core</p>
+            </div>
+        </div>
+
+        <!-- Wallet Controls Header -->
+        <div class="flex items-center gap-2 sm:gap-3">
+            <!-- Boon Currency Balance -->
+            <div class="flex items-center gap-2 bg-slate-900/90 border border-amber-500/40 px-3 py-1.5 rounded-xl gold-glow">
+                <div class="w-6 h-6 rounded-full bg-amber-500/20 border border-amber-400 flex items-center justify-center text-amber-400 font-bold text-xs">
+                    ϐ
+                </div>
+                <div class="text-right">
+                    <div class="text-[9px] text-slate-400 font-medium leading-none">بُون (BOON)</div>
+                    <div id="header-boon-balance" class="font-mono font-bold text-amber-400 text-xs sm:text-sm leading-tight">500 ϐ</div>
+                </div>
+            </div>
+
+            <!-- IQ Rank -->
+            <div class="flex items-center gap-2 bg-slate-900/90 border border-cyan-500/30 px-2.5 py-1.5 rounded-xl">
+                <i class="fa-solid fa-brain text-cyan-400 text-xs"></i>
+                <div class="text-right">
+                    <div class="text-[9px] text-slate-400 font-medium leading-none">مستوى الذكاء</div>
+                    <div id="header-iq-score" class="font-mono font-bold text-cyan-300 text-xs sm:text-sm leading-tight">1200 IQ</div>
+                </div>
+            </div>
+
+            <!-- TikTok Streamer Mode Toggle Button -->
+            <button id="streamer-mode-btn" onclick="toggleStreamerMode()" class="bg-purple-600/20 hover:bg-purple-600/40 text-purple-300 border border-purple-500/40 px-2.5 py-1.5 rounded-xl text-xs font-cairo font-bold transition flex items-center gap-1.5">
+                <i class="fa-brands fa-tiktok text-xs"></i>
+                <span class="hidden md:inline">وضع البث (TikTok)</span>
+            </button>
+        </div>
+    </div>
+</header>
+
+<main class="max-w-7xl mx-auto px-3 sm:px-4 mt-4 sm:mt-6 grid grid-cols-1 lg:grid-cols-12 gap-5 sm:gap-6">
+
+    <!-- LEFT COLUMN: 3D Inspector Canvas & Friday Auction House (7 Cols) -->
+    <div class="lg:col-span-7 space-y-5 sm:space-y-6">
+        
+        <!-- 3D Interactive Viewer Card -->
+        <div class="bg-cardBg border border-cardBorder rounded-2xl overflow-hidden shadow-2xl relative">
+            
+            <!-- Card Header Badge & Mode Select -->
+            <div class="p-3.5 border-b border-cardBorder flex items-center justify-between bg-slate-950/60">
+                <div class="flex items-center gap-2">
+                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold font-cairo bg-amber-500/10 text-amber-400 border border-amber-500/30">
+                        <i class="fa-solid fa-vr-cardboard text-xs"></i>
+                        محاكاة VR تفاعلية 360°
+                    </span>
+                    <h2 class="font-cairo font-bold text-slate-200 text-xs sm:text-sm">خوذة العبقري #001</h2>
+                </div>
+                
+                <div class="flex items-center gap-1.5">
+                    <button onclick="resetCamera()" class="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs transition" title="إعادة ضبط الكاميرا">
+                        <i class="fa-solid fa-rotate-right"></i>
+                    </button>
+                    <button id="toggle-aura-btn" onclick="toggleAuraEffect()" class="px-2.5 py-1 rounded-lg bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40 text-xs font-cairo font-bold transition">
+                        <i class="fa-solid fa-wand-magic-sparkles text-xs ml-1"></i> الهالة
+                    </button>
+                </div>
+            </div>
+
+            <!-- 3D Canvas Container -->
+            <div id="canvas-wrapper" class="relative bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950">
+                <div id="canvas-container"></div>
+                
+                <!-- 3D Canvas Overlay Controls / Touch Instructions -->
+                <div class="absolute bottom-3 right-3 bg-slate-950/85 backdrop-blur border border-slate-800 px-3 py-1.5 rounded-xl text-[11px] text-slate-300 flex items-center gap-2 pointer-events-none">
+                    <i class="fa-solid fa-hand-pointer text-amber-400 animate-bounce"></i>
+                    <span>مس الشاشة ولّف الخوذة 360 درجة</span>
+                </div>
+
+                <!-- Live Item Rarity Tag Overlay -->
+                <div class="absolute top-3 right-3 bg-gradient-to-r from-amber-600/90 to-amber-500/90 text-slate-950 font-cairo font-extrabold text-xs px-3 py-1 rounded-lg shadow-lg flex items-center gap-1.5">
+                    <i class="fa-solid fa-crown text-xs"></i>
+                    <span>قطعة فريدة (UNIQUE #001)</span>
+                </div>
+            </div>
+
+            <!-- Interactive 3D Controls Footer -->
+            <div class="p-3 bg-slate-950/90 border-t border-cardBorder grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs font-cairo font-bold">
+                <button onclick="setMaterialStyle('gold')" class="p-2 rounded-xl bg-slate-900 hover:bg-slate-800 border border-amber-500/30 text-amber-300 transition flex items-center justify-center gap-1.5">
+                    <span class="w-2.5 h-2.5 rounded-full bg-amber-400 inline-block"></span>
+                    ذهب وأوبسيديان
+                </button>
+                <button onclick="setMaterialStyle('cyber')" class="p-2 rounded-xl bg-slate-900 hover:bg-slate-800 border border-cyan-500/30 text-cyan-300 transition flex items-center justify-center gap-1.5">
+                    <span class="w-2.5 h-2.5 rounded-full bg-cyan-400 inline-block"></span>
+                    سايبر نيون
+                </button>
+                <button onclick="setMaterialStyle('obsidian')" class="p-2 rounded-xl bg-slate-900 hover:bg-slate-800 border border-purple-500/30 text-purple-300 transition flex items-center justify-center gap-1.5">
+                    <span class="w-2.5 h-2.5 rounded-full bg-purple-400 inline-block"></span>
+                    أسود غامض
+                </button>
+                <button onclick="toggleWireframe()" class="p-2 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-700 text-slate-300 transition flex items-center justify-center gap-1.5">
+                    <i class="fa-solid fa-draw-polygon text-xs"></i>
+                    شبكة الـ 3D
+                </button>
+            </div>
+        </div>
+
+        <!-- Weekly Auction House Card (سوق المزادات الأسبوعي) -->
+        <div class="bg-cardBg border border-cardBorder rounded-2xl p-4 sm:p-5 shadow-xl relative overflow-hidden">
+            <div class="flex items-center justify-between border-b border-slate-800 pb-3 mb-4">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 text-base">
+                        <i class="fa-solid fa-gavel"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-cairo font-bold text-base sm:text-lg text-white">سوق المزادات الأسبوعي (سوق الجمعة)</h3>
+                        <p class="text-xs text-slate-400">التداول بالعملة الممتازة "بُون" (ϐ)</p>
+                    </div>
+                </div>
+                
+                <div class="text-left">
+                    <div class="text-[10px] text-slate-400 font-medium">ينتهي المزاد خلال</div>
+                    <div class="font-mono text-xs sm:text-sm font-bold text-amber-400" id="auction-timer">14:22:09</div>
+                </div>
+            </div>
+
+            <!-- Current Auction Item Details -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
+                <div class="bg-slate-950 p-3.5 rounded-xl border border-slate-800/80">
+                    <div class="text-xs text-slate-400 mb-1">السلعة المعروضة للمزاد</div>
+                    <div class="font-cairo font-bold text-white text-sm sm:text-base">خوذة العبقري الفريدة #001</div>
+                    <div class="text-xs text-slate-400 mt-2 flex items-center gap-2">
+                        <span>مالك السلعة الحالي:</span>
+                        <span class="text-cyan-400 font-mono font-semibold">user_001 (أبو إياد)</span>
+                    </div>
+                </div>
+
+                <div class="bg-slate-950 p-3.5 rounded-xl border border-slate-800/80 flex flex-col justify-between">
+                    <div>
+                        <div class="text-xs text-slate-400 mb-1">أعلى مزايدة حالية (Highest Bid)</div>
+                        <div class="flex items-baseline gap-2">
+                            <span id="auction-current-bid" class="font-mono font-extrabold text-2xl text-amber-400">300</span>
+                            <span class="text-amber-400 font-bold text-xs">ϐ Boon</span>
+                        </div>
+                    </div>
+                    <div class="text-[10px] text-slate-500">شاملة رسم الحرق 5% لحماية اقتصاد اللعبة من التضخم</div>
+                </div>
+            </div>
+
+            <!-- Bidding Action Box -->
+            <div class="bg-slate-900/90 p-3.5 rounded-xl border border-amber-500/20 flex flex-col sm:flex-row items-center gap-3">
+                <div class="flex-1 w-full">
+                    <label class="block text-xs text-slate-400 mb-1 font-cairo">مزايدتك بالعملة (ϐ Boon):</label>
+                    <div class="relative">
+                        <input id="bid-input-amount" type="number" min="310" value="350" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-amber-400 font-mono font-bold focus:outline-none focus:border-amber-500 text-sm">
+                        <span class="absolute left-3 top-2.5 text-xs text-amber-500 font-bold">ϐ</span>
+                    </div>
+                </div>
+                <button onclick="placeBid()" class="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-cairo font-extrabold text-xs sm:text-sm shadow-lg shadow-amber-500/20 transition flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-gavel"></i>
+                    تقديم المزايدة الآن
+                </button>
+            </div>
+            
+            <!-- Live Bidding History Log -->
+            <div class="mt-4">
+                <div class="text-xs font-cairo font-bold text-slate-400 mb-2">سجل المزايدات الحية (Firestore Sync):</div>
+                <div id="bidding-log-container" class="space-y-1.5 max-h-28 overflow-y-auto pr-1">
+                    <div class="text-xs bg-slate-950/60 p-2 rounded-lg flex items-center justify-between border border-slate-800/50">
+                        <span class="text-cyan-400 font-mono">user_001 (أبو إياد)</span>
+                        <span class="text-slate-400 text-[10px]">منذ دقيقتين</span>
+                        <span class="text-amber-400 font-mono font-bold">300 ϐ</span>
+                    </div>
+                    <div class="text-xs bg-slate-950/60 p-2 rounded-lg flex items-center justify-between border border-slate-800/50">
+                        <span class="text-purple-400 font-mono">player_772</span>
+                        <span class="text-slate-400 text-[10px]">منذ 10 دقائق</span>
+                        <span class="text-slate-300 font-mono">270 ϐ</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- RIGHT COLUMN: AI Companion "Atheer" & Hybrid Puzzle System (5 Cols) -->
+    <div class="lg:col-span-5 space-y-5 sm:space-y-6">
+
+        <!-- AI Companion Avatar Card (المرشد الذكي أثير) -->
+        <div class="bg-cardBg border border-cardBorder rounded-2xl p-4 sm:p-5 shadow-xl relative">
+            <div class="flex items-center gap-3 border-b border-slate-800 pb-3 mb-4">
+                <div class="relative">
+                    <div class="w-12 h-12 rounded-full bg-gradient-to-tr from-cyan-500 to-indigo-500 p-0.5">
+                        <div class="w-full h-full bg-slate-950 rounded-full flex items-center justify-center overflow-hidden">
+                            <i class="fa-solid fa-robot text-cyan-400 text-xl"></i>
+                        </div>
+                    </div>
+                    <span class="w-3.5 h-3.5 bg-emerald-500 border-2 border-slate-950 rounded-full absolute bottom-0 right-0 animate-pulse"></span>
+                </div>
+                <div>
+                    <h3 class="font-cairo font-bold text-white text-base flex items-center gap-2">
+                        المرشد الذكي 3D ("أثير")
+                        <span class="text-[9px] bg-cyan-500/10 text-cyan-400 border border-cyan-500/30 px-2 py-0.5 rounded-full font-mono">AI COMPANION</span>
+                    </h3>
+                    <p class="text-xs text-slate-400">تتبع العين وتعابير الوجه التفاعلية</p>
+                </div>
+            </div>
+
+            <!-- Dialogue Box from Atheer -->
+            <div class="bg-slate-950 p-3.5 rounded-xl border border-cyan-500/30 relative mb-4">
+                <div class="text-xs text-cyan-400 font-cairo font-bold mb-1 flex items-center justify-between">
+                    <span><i class="fa-solid fa-comment-dots ml-1"></i> أثير يتحدث إليك:</span>
+                    <span class="text-[10px] text-slate-500">GPT-4o API Connected</span>
+                </div>
+                <p id="atheer-dialogue-text" class="text-xs sm:text-sm text-slate-200 leading-relaxed font-tajawal">
+                    "مرحباً بك يا صديقي العبقري! لقد قمتُ بتأكيد رصيدك السحابي من عملة **بُون (ϐ)** ورأيت خوذتك الفريدة. هل أنت مستعد لتحدي اليوم الفكري؟"
+                </p>
+            </div>
+
+            <!-- Interactive AI Hint Request Button -->
+            <button onclick="requestAiHint()" class="w-full py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 border border-cyan-500/40 text-cyan-300 font-cairo font-bold text-xs transition flex items-center justify-center gap-2">
+                <i class="fa-solid fa-lightbulb text-amber-400"></i>
+                طلب تلميح ذكي من "أثير" (تكلفة: 5 ϐ Boon)
+            </button>
+        </div>
+
+        <!-- Hybrid Puzzle Generator Simulation (خوارزمية الألغاز) -->
+        <div class="bg-cardBg border border-cardBorder rounded-2xl p-4 sm:p-5 shadow-xl">
+            <div class="flex items-center justify-between border-b border-slate-800 pb-3 mb-4">
+                <div class="flex items-center gap-2.5">
+                    <div class="w-9 h-9 rounded-lg bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400 text-sm">
+                        <i class="fa-solid fa-brain"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-cairo font-bold text-white text-sm sm:text-base">مولد الألغاز الهجين (AI Puzzle)</h3>
+                        <p class="text-[10px] text-slate-400">توليد عكسي + CSP Solvability Engine</p>
+                    </div>
+                </div>
+
+                <button onclick="generateNewPuzzle()" class="px-2.5 py-1.5 rounded-lg bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/40 text-xs font-cairo font-bold transition flex items-center gap-1.5">
+                    <i class="fa-solid fa-arrows-rotate text-xs"></i>
+                    توليد لغز
+                </button>
+            </div>
+
+            <!-- Current Active Puzzle Box -->
+            <div class="space-y-3">
+                <div class="bg-slate-950 p-3.5 rounded-xl border border-slate-800">
+                    <div id="puzzle-title-text" class="font-cairo font-bold text-emerald-400 text-xs sm:text-sm mb-1">
+                        اللغز #1024: سر قفل الخزينة الأثيرية
+                    </div>
+                    <p id="puzzle-desc-text" class="text-xs text-slate-300 leading-relaxed">
+                        تقف أمام قفل كيميائي يتطلب رمزاً ثنائياً مشتقاً من مجموع أضلاع الأشكال ثلاثية الأبعاد المعروضة أمامك.
+                    </p>
+                </div>
+
+                <!-- Input Answer / Solution Box -->
+                <div class="bg-slate-900 p-2.5 rounded-xl border border-slate-800 flex items-center gap-2">
+                    <input id="puzzle-answer-input" type="text" placeholder="أدخل الرقم السري للحل..." class="flex-1 bg-slate-950 border border-slate-700 rounded-lg px-3 py-1.5 text-xs text-white focus:outline-none focus:border-emerald-400 font-mono">
+                    <button onclick="verifyPuzzleSolution()" class="px-3.5 py-1.5 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-cairo font-bold text-xs rounded-lg transition">
+                        إرسال
+                    </button>
+                </div>
+
+                <!-- Live JSON Schema Toggle View -->
+                <details class="group bg-slate-950 rounded-xl border border-slate-800/80">
+                    <summary class="p-2.5 text-xs font-mono text-slate-400 cursor-pointer flex items-center justify-between select-none">
+                        <span><i class="fa-solid fa-code text-cyan-400 ml-1"></i> استجابة السيرفر (Backend JSON Prompt)</span>
+                        <i class="fa-solid fa-chevron-down text-xs group-open:rotate-180 transition"></i>
+                    </summary>
+                    <pre class="p-3 pt-0 text-[10px] font-mono text-slate-300 overflow-x-auto text-left" dir="ltr"><code id="json-schema-code">{
+  "stage_id": 1024,
+  "solver_validated": true,
+  "difficulty_iq": 1200,
+  "logic": { "key_code": "739", "node_depth": 3 },
+  "boon_reward": 25
+}</code></pre>
+                </details>
+            </div>
+        </div>
+
+        <!-- Firebase Status Card -->
+        <div class="bg-slate-950/90 border border-slate-800 rounded-xl p-3 flex items-center justify-between text-xs">
+            <div class="flex items-center gap-2">
+                <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping"></span>
+                <span class="text-slate-300 font-mono text-[11px]">Firestore Cloud Status: Connected</span>
+            </div>
+            <span class="text-slate-500 text-[10px]">Project: Mind-Alchemy-Core</span>
+        </div>
+
+    </div>
+
+</main>
+
+<script>
+// --- Global State Variables ---
+let userBoonBalance = 500;
+let userIqScore = 1200;
+let currentBid = 300;
+let puzzleSolution = "739";
+
+// Three.js Core Variables
+let scene, camera, renderer, helmetMesh, auraParticles;
+let isDragging = false;
+let previousMousePosition = { x: 0, y: 0 };
+let currentAuraActive = true;
+let wireframeActive = false;
+
+// Initialize on Window Load
+window.onload = function() {
+    init3DScene();
+    animate3D();
+    setupTouchAndMouseInteractions();
+};
+
+function init3DScene() {
+    const container = document.getElementById('canvas-container');
+    const width = container.clientWidth;
+    const height = container.clientHeight || 380;
+
+    // 1. Scene Setup
+    scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x050811);
+
+    // 2. Camera Setup
+    camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 1000);
+    camera.position.set(0, 0, 7.5);
+
+    // 3. Renderer Setup
+    renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+    renderer.setSize(width, height);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.shadowMap.enabled = true;
+    container.appendChild(renderer.domElement);
+
+    // 4. Lighting Setup
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.7);
+    scene.add(ambientLight);
+
+    // Gold Spotlight
+    const goldSpotLight = new THREE.SpotLight(0xfbbf24, 2.5);
+    goldSpotLight.position.set(5, 8, 5);
+    goldSpotLight.castShadow = true;
+    scene.add(goldSpotLight);
+
+    // Cyan Rim Light
+    const cyanLight = new THREE.PointLight(0x38bdf8, 2, 10);
+    cyanLight.position.set(-5, -3, -2);
+    scene.add(cyanLight);
+
+    // 5. Build Procedural 3D VR Helmet Model
+    buildProceduralVRHelmet();
+
+    // 6. Build Glowing Particles Aura
+    buildAuraParticles();
+
+    // Window Resize Handler
+    window.addEventListener('resize', onWindowResize);
+}
+
+function buildProceduralVRHelmet() {
+    const helmetGroup = new THREE.Group();
+
+    // Main Headpiece Shell (Obsidian / Dark Metallic Base)
+    const baseGeo = new THREE.SphereGeometry(1.5, 32, 24);
+    baseGeo.scale(1, 1.1, 1.05);
+    const baseMat = new THREE.MeshStandardMaterial({
+        color: 0x0f172a,
+        roughness: 0.2,
+        metalness: 0.9,
+    });
+    const baseMesh = new THREE.Mesh(baseGeo, baseMat);
+    helmetGroup.add(baseMesh);
+
+    // Front Visor (Golden Curved Screen)
+    const visorGeo = new THREE.CylinderGeometry(1.4, 1.35, 0.8, 32, 1, false, -Math.PI/3, (2*Math.PI)/3);
+    const visorMat = new THREE.MeshStandardMaterial({
+        color: 0xfbbf24,
+        roughness: 0.1,
+        metalness: 0.95,
+        emissive: 0xb45309,
+        emissiveIntensity: 0.2
+    });
+    const visorMesh = new THREE.Mesh(visorGeo, visorMat);
+    visorMesh.position.set(0, 0.1, 0.25);
+    visorMesh.rotation.x = 0.1;
+    helmetGroup.add(visorMesh);
+
+    // Side Ear Nodes / Cyber Plates
+    const plateGeo = new THREE.CylinderGeometry(0.5, 0.5, 0.3, 16);
+    plateGeo.rotateZ(Math.PI / 2);
+    const plateMat = new THREE.MeshStandardMaterial({
+        color: 0xfbbf24,
+        roughness: 0.3,
+        metalness: 0.8
+    });
+    
+    const leftPlate = new THREE.Mesh(plateGeo, plateMat);
+    leftPlate.position.set(-1.45, 0.1, 0);
+    helmetGroup.add(leftPlate);
+
+    const rightPlate = new THREE.Mesh(plateGeo, plateMat);
+    rightPlate.position.set(1.45, 0.1, 0);
+    helmetGroup.add(rightPlate);
+
+    // Top Crest Armor Strip
+    const crestGeo = new THREE.BoxGeometry(0.4, 0.2, 2.2);
+    const crestMat = new THREE.MeshStandardMaterial({ color: 0x38bdf8, roughness: 0.2, metalness: 0.8 });
+    const crestMesh = new THREE.Mesh(crestGeo, crestMat);
+    crestMesh.position.set(0, 1.6, -0.1);
+    helmetGroup.add(crestMesh);
+
+    helmetMesh = helmetGroup;
+    scene.add(helmetMesh);
+}
+
+function buildAuraParticles() {
+    const particleCount = 120;
+    const geometry = new THREE.BufferGeometry();
+    const positions = new Float32Array(particleCount * 3);
+
+    for (let i = 0; i < particleCount * 3; i += 3) {
+        positions[i] = (Math.random() - 0.5) * 5;
+        positions[i + 1] = (Math.random() - 0.5) * 5;
+        positions[i + 2] = (Math.random() - 0.5) * 5;
+    }
+
+    geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+
+    const material = new THREE.PointsMaterial({
+        color: 0xfbbf24,
+        size: 0.08,
+        transparent: true,
+        opacity: 0.8
+    });
+
+    auraParticles = new THREE.Points(geometry, material);
+    scene.add(auraParticles);
+}
+
+function animate3D() {
+    requestAnimationFrame(animate3D);
+
+    // Auto slow rotation when user is not touching
+    if (!isDragging && helmetMesh) {
+        helmetMesh.rotation.y += 0.005;
+    }
+
+    // Rotate Aura Particles
+    if (auraParticles && currentAuraActive) {
+        auraParticles.rotation.y -= 0.003;
+        auraParticles.rotation.x += 0.001;
+    }
+
+    renderer.render(scene, camera);
+}
+
+function setupTouchAndMouseInteractions() {
+    const container = document.getElementById('canvas-container');
+
+    // Mouse Events
+    container.addEventListener('mousedown', (e) => {
+        isDragging = true;
+        previousMousePosition = { x: e.clientX, y: e.clientY };
+    });
+
+    window.addEventListener('mouseup', () => { isDragging = false; });
+
+    container.addEventListener('mousemove', (e) => {
+        if (!isDragging) return;
+        const deltaX = e.clientX - previousMousePosition.x;
+        const deltaY = e.clientY - previousMousePosition.y;
+
+        if (helmetMesh) {
+            helmetMesh.rotation.y += deltaX * 0.008;
+            helmetMesh.rotation.x += deltaY * 0.008;
+        }
+
+        previousMousePosition = { x: e.clientX, y: e.clientY };
+    });
+
+    // Touch Events for Mobile Screen Inspection
+    container.addEventListener('touchstart', (e) => {
+        if (e.touches.length === 1) {
+            isDragging = true;
+            previousMousePosition = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+        }
+    });
+
+    window.addEventListener('touchend', () => { isDragging = false; });
+
+    container.addEventListener('touchmove', (e) => {
+        if (!isDragging || e.touches.length !== 1) return;
+        const deltaX = e.touches[0].clientX - previousMousePosition.x;
+        const deltaY = e.touches[0].clientY - previousMousePosition.y;
+
+        if (helmetMesh) {
+            helmetMesh.rotation.y += deltaX * 0.008;
+            helmetMesh.rotation.x += deltaY * 0.008;
+        }
+
+        previousMousePosition = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+    });
+}
+
+function onWindowResize() {
+    const container = document.getElementById('canvas-container');
+    if (!container) return;
+    const width = container.clientWidth;
+    const height = container.clientHeight || 380;
+
+    camera.aspect = width / height;
+    camera.updateProjectionMatrix();
+    renderer.setSize(width, height);
+}
+
+function resetCamera() {
+    if (helmetMesh) {
+        helmetMesh.rotation.set(0, 0, 0);
+    }
+}
+
+function toggleAuraEffect() {
+    currentAuraActive = !currentAuraActive;
+    if (auraParticles) {
+        auraParticles.visible = currentAuraActive;
+    }
+}
+
+function toggleWireframe() {
+    wireframeActive = !wireframeActive;
+    if (helmetMesh) {
+        helmetMesh.children.forEach(child => {
+            if (child.material) child.material.wireframe = wireframeActive;
+        });
+    }
+}
+
+function setMaterialStyle(style) {
+    if (!helmetMesh) return;
+    const visor = helmetMesh.children[1];
+    const base = helmetMesh.children[0];
+
+    if (style === 'gold') {
+        visor.material.color.setHex(0xfbbf24);
+        base.material.color.setHex(0x0f172a);
+    } else if (style === 'cyber') {
+        visor.material.color.setHex(0x38bdf8);
+        base.material.color.setHex(0x1e1b4b);
+    } else if (style === 'obsidian') {
+        visor.material.color.setHex(0xc084fc);
+        base.material.color.setHex(0x050811);
+    }
+}
+
+function placeBid() {
+    const input = document.getElementById('bid-input-amount');
+    const bidValue = parseInt(input.value);
+
+    if (isNaN(bidValue) || bidValue <= currentBid) {
+        alert("يجب أن تكون المزايدة أعلى من السعر الحالي (" + currentBid + " ϐ)!");
+        return;
+    }
+
+    if (bidValue > userBoonBalance) {
+        alert("رصيدك الحالي من عملة 'بُون' لا يكفي لهذه المزايدة!");
+        return;
+    }
+
+    currentBid = bidValue;
+    document.getElementById('auction-current-bid').innerText = currentBid;
+    input.value = currentBid + 20;
+
+    // Add entry to bidding log
+    const logContainer = document.getElementById('bidding-log-container');
+    const newLog = document.createElement('div');
+    newLog.className = "text-xs bg-amber-500/10 border border-amber-500/30 p-2 rounded-lg flex items-center justify-between font-cairo";
+    newLog.innerHTML = `
+        <span class="text-amber-400 font-mono font-bold">user_001 (أنت)</span>
+        <span class="text-slate-400 text-[10px]">الآن</span>
+        <span class="text-amber-300 font-mono font-extrabold">${currentBid} ϐ</span>
+    `;
+    logContainer.insertBefore(newLog, logContainer.firstChild);
+
+    // Update Atheer dialogue
+    document.getElementById('atheer-dialogue-text').innerText = `"مزايدة رائعة بقيمة ${currentBid} ϐ! أنت الآن المزايد الأعلى لخوذة العبقري #001!"`;
+}
+
+function requestAiHint() {
+    if (userBoonBalance < 5) {
+        alert("لا تملك رصيد كافٍ من عملة 'بُون' لطلب التلميح!");
+        return;
+    }
+
+    userBoonBalance -= 5;
+    updateBalanceUI();
+
+    const hints = [
+        "تلميح أثير: قم بجمع عدد الأضلاع بالشكل الأول وضاعف القيمة للوصول للرقم السرّي!",
+        "تلميح أثير: الرقم الأخير هو رقم فردي أكبر من 5 وأقل من 10.",
+        "تلميح أثير: الحل القريب يتكون من ثلاثة أرقام يبدأ بالرقم 7!"
+    ];
+    const randomHint = hints[Math.floor(Math.random() * hints.length)];
+    document.getElementById('atheer-dialogue-text').innerText = randomHint;
+}
+
+function generateNewPuzzle() {
+    const randomId = Math.floor(Math.random() * 9000) + 1000;
+    const newSolutions = ["379", "512", "884", "920"];
+    puzzleSolution = newSolutions[Math.floor(Math.random() * newSolutions.length)];
+
+    document.getElementById('puzzle-title-text').innerText = `اللغز #${randomId}: متاهة الرموز الرقمية`;
+    document.getElementById('puzzle-desc-text').innerText = `قامت خوارزمية CSP بتوليد لغز رياضي جديد بدرجة تعقيد تتماشى مع مستوى ذكائك (${userIqScore} IQ).`;
+    
+    document.getElementById('json-schema-code').innerText = JSON.stringify({
+        "stage_id": randomId,
+        "solver_validated": true,
+        "difficulty_iq": userIqScore,
+        "logic": { "key_code": puzzleSolution, "node_depth": 4 },
+        "boon_reward": 30
+    }, null, 2);
+
+    document.getElementById('atheer-dialogue-text').innerText = `"تم توليد لغز جديد تلقائياً! حاول فك الشفرة للحصول على مكافأة عملة 'بُون'."`;
+}
+
+function verifyPuzzleSolution() {
+    const input = document.getElementById('puzzle-answer-input');
+    if (input.value.trim() === puzzleSolution) {
+        userBoonBalance += 25;
+        userIqScore += 15;
+        updateBalanceUI();
+        alert("إجابة صحيحة! حصلت على +25 ϐ Boon و +15 IQ Score!");
+        input.value = "";
+        generateNewPuzzle();
+    } else {
+        alert("إجابة خاطئة! حاول مرة أخرى أو اطلب تلميحاً من أثير.");
+    }
+}
+
+function updateBalanceUI() {
+    document.getElementById('header-boon-balance').innerText = `${userBoonBalance} ϐ`;
+    document.getElementById('header-iq-score').innerText = `${userIqScore} IQ`;
+}
+
+function toggleStreamerMode() {
+    const main = document.querySelector('main');
+    if (main.classList.contains('max-w-md')) {
+        main.classList.remove('max-w-md');
+        main.classList.add('max-w-7xl');
+        alert("تم العودة للوضع العادي.");
+    } else {
+        main.classList.remove('max-w-7xl');
+        main.classList.add('max-w-md');
+        alert("تم تفعيل وضع الشاشة العمودية (TikTok Streamer Mode 9:16)!");
+    }
+    onWindowResize();
+}
+</script>
+
+</body>
+</html>
