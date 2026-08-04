@@ -1,0 +1,7 @@
+fastapi
+uvicorn
+google-generativeai
+google-cloud-storage
+requests
+moviepy
+pydantic
