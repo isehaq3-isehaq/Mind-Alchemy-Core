@@ -1,1 +1,1 @@
-# Mind-Alchemy-Core
+# EduVideo-Studio
